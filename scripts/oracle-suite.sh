@@ -16,8 +16,12 @@ reference_pid=$!
 bin/goteddycloud -base_path .cache/ci-candidate-runtime -http 127.0.0.1:18081 -httpsecure 127.0.0.1:19443 -box 127.0.0.1:19444 > .cache/ci-candidate.log 2>&1 &
 candidate_pid=$!
 cleanup() {
+ result=$?
  kill -TERM "$candidate_pid" "$reference_pid" 2>/dev/null || true
  wait "$candidate_pid" "$reference_pid" 2>/dev/null || true
+ if [[ "$result" != 0 ]]; then
+  tail -n 100 .cache/ci-reference.log .cache/ci-candidate.log >&2
+ fi
 }
 trap cleanup EXIT
 for port in 18080 18081; do

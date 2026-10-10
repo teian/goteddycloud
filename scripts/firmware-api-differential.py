@@ -4,9 +4,30 @@ import base64,hashlib,http.client,json,subprocess
 from pathlib import Path
 ports=[18080,18081];roots=[Path('.cache/oracle-runtime').resolve(),Path('.cache/ci-candidate-runtime').resolve()]
 for root in roots:assert (root/'.synthetic-fixture').is_file()
+
+class UploadConnection(http.client.HTTPConnection):
+ # The pinned C multipart parser loops in PARSE_HEADER when its first read
+ # contains only a partial boundary. Coalesce headers and the already bounded
+ # fixture body in one send so this content comparison avoids that upstream bug.
+ # This is not a test of the reference parser's fragmentation handling.
+ def request(self,*args,**kwargs):
+  self.pending=[]
+  try:
+   super().request(*args,**kwargs)
+   packet=b''.join(self.pending)
+  finally:self.pending=None
+  super().send(packet)
+ def send(self,data):
+  if getattr(self,'pending',None) is None:return super().send(data)
+  self.pending.append(data)
+
 def req(port,method,path,data=None,kind=None):
- c=http.client.HTTPConnection('127.0.0.1',port,timeout=30);c.request(method,path,data,{'Content-Type':kind} if kind else {})
- r=c.getresponse();result=(r.status,r.getheader('Content-Type'),r.read());c.close();return result
+ c=UploadConnection('127.0.0.1',port,timeout=30)
+ try:
+  c.request(method,path,data,{'Content-Type':kind} if kind else {})
+  r=c.getresponse();return r.status,r.getheader('Content-Type'),r.read()
+ except TimeoutError as error:raise TimeoutError(f'{method} {path} on port {port} timed out') from error
+ finally:c.close()
 def check(name,method,path,data=None,kind=None):
  results=[req(port,method,path,data,kind) for port in ports];assert results[0]==results[1],(name,results);assert results[0][0]==200,(name,results);print('PASS firmware API '+name,flush=True);return results[0]
 def multipart(name,data):
