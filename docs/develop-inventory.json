@@ -1,0 +1,1536 @@
+{
+  "base": "78c3b38e36f665d3a5fffe907f73a02725176377",
+  "target": "8b39ac9c9cbc312ea1fa948f66b0dc014fd096c1",
+  "frontend": "636a8d65043f6c6e322f76bcb11e958725159e96",
+  "commits": [
+    {
+      "commit": "b2181951c99c3b622c25c134dd15e2f9571cd5a9",
+      "subject": "ci: re-enable AddressSanitizer on aarch64 via native arm64 runners",
+      "files": [
+        ".github/workflows/publish_docker_matrix_all.yml",
+        ".github/workflows/publish_docker_matrix_base.yml",
+        "Makefile"
+      ]
+    },
+    {
+      "commit": "791893a4d1e23113b803648bf4e5086b1af5e99d",
+      "subject": "feat: track listened status for library files",
+      "files": [
+        "include/handler_api.h",
+        "include/libraryMeta.h",
+        "include/settings.h",
+        "src/handler_api.c",
+        "src/handler_cloud.c",
+        "src/libraryMeta.c",
+        "src/server.c",
+        "src/settings.c"
+      ]
+    },
+    {
+      "commit": "3d4dfaa13fa57616d08be3509ae2a9f09c53bc76",
+      "subject": "Merge pull request #461 from aflores-qb/fix/311-enable-asan-aarch64-native-runner",
+      "files": []
+    },
+    {
+      "commit": "5d8c83918579651366d08bbf28aab793dffa256e",
+      "subject": "Add optional web UI login with cookie sessions and rate limiting.",
+      "files": [
+        "README.md",
+        "docker/docker-compose.traefik.example.yaml",
+        "docker/docker-compose.yaml",
+        "include/handler_api.h",
+        "include/handler_web_auth.h",
+        "include/net_config.h",
+        "include/rand.h",
+        "include/settings.h",
+        "src/cyclone/cyclone_tcp/http/http_server.c",
+        "src/handler_api.c",
+        "src/handler_web_auth.c",
+        "src/server.c",
+        "src/settings.c"
+      ]
+    },
+    {
+      "commit": "2bff557fafeb5477617e314048bfd1d4a75b5b39",
+      "subject": "fix: improve git pull command in commit step to avoid submodule issues",
+      "files": [
+        ".github/workflows/build_commit_web.yml"
+      ]
+    },
+    {
+      "commit": "b54169981c86de2916e9b7b6baa3d39b156c49bb",
+      "subject": "Update frontend (make web)",
+      "files": [
+        "contrib/data/www/web/assets/index-vtJo0pPm.js",
+        "contrib/data/www/web/assets/index-zUap2i4c.js",
+        "contrib/data/www/web/index.html",
+        "contrib/data/www/web/translations/de.json",
+        "contrib/data/www/web/translations/en.json",
+        "contrib/data/www/web/translations/es.json",
+        "contrib/data/www/web/translations/fr.json",
+        "contrib/data/www/web/translations/it.json",
+        "contrib/data/www/web/translations/pl.json",
+        "contrib/data/www/web/web_version.json",
+        "teddycloud_web"
+      ]
+    },
+    {
+      "commit": "e05598e54623628b6724e4ebaa192b9b72170915",
+      "subject": "fix(http_server): keep serving stream files past the first EOF",
+      "files": [
+        "src/cyclone/cyclone_tcp/http/http_server.c"
+      ]
+    },
+    {
+      "commit": "69e843da445a9dc42bc34390468b44f9e1a145a8",
+      "subject": "perf(stream): skip encoding for range requests that force a box restart",
+      "files": [
+        "src/handler_cloud.c"
+      ]
+    },
+    {
+      "commit": "806989748caf68808a99a498cbebd78a42f2bdd9",
+      "subject": "fix: export selected TAF tracks as Ogg or Zip",
+      "files": [
+        "src/handler_api.c"
+      ]
+    },
+    {
+      "commit": "450b53cbf3515fa7543c6781241e1df8b46e92c6",
+      "subject": "fix: address web login review feedback",
+      "files": [
+        "README.md",
+        "src/server.c"
+      ]
+    },
+    {
+      "commit": "813e802c21b2c969dfc3ef74e6fb0066b2da729f",
+      "subject": "fix: install zip in runtime images for multi-track TAF export",
+      "files": [
+        "DockerfileAlpine",
+        "DockerfileDebian",
+        "DockerfileUbuntu"
+      ]
+    },
+    {
+      "commit": "f46bc8f043631b2798030ef71a041c92e4b09449",
+      "subject": "fix: replace mkdtemp with portable temp dir helper for TAF track export",
+      "files": [
+        "src/handler_api.c"
+      ]
+    },
+    {
+      "commit": "8d81e1073f8862729ad6a3da8b8905326e24bbfe",
+      "subject": "docs: describe web radio streaming and its tuning settings",
+      "files": [
+        "docs/webradio-streaming.md"
+      ]
+    },
+    {
+      "commit": "ff1b20fc4682402f91730fa80550f5f3d8c47455",
+      "subject": "Merge pull request #478 from alexander-wenzel-dev/fix/stream-sticky-eof",
+      "files": []
+    },
+    {
+      "commit": "398a404812da5cbabc989ea16ac599b4b6246b27",
+      "subject": "Merge pull request #479 from alexander-wenzel-dev/perf/stream-skip-encoder-on-restart",
+      "files": []
+    },
+    {
+      "commit": "5257f2362eeedebbc23afaffa7d76ac91f927dc7",
+      "subject": "feat(os_ext): add osSpawnvp for shell-less external process invocation",
+      "files": [
+        "include/os_ext.h",
+        "src/os_ext.c"
+      ]
+    },
+    {
+      "commit": "c722f85681e400957b205ebc8fda53cc123b6df0",
+      "subject": "test: add tests/c unit test runner and consolidate server-lifecycle harness",
+      "files": [
+        "CONTRIBUTING.md",
+        "Makefile",
+        "tests/c/test_os_ext.c",
+        "tests/c/test_runner.c",
+        "tests/c/tests.h",
+        "tests/py/requests.py",
+        "tests/py/test_tonies_custom_json_api.py",
+        "tests/py/with_server.sh",
+        "tests/requests.py",
+        "tests/test_tonies_custom_json_api.py"
+      ]
+    },
+    {
+      "commit": "54e8a27601782b827bd9e738b1c3bc23d44a5eaf",
+      "subject": "feat(docs): add architecture and settings documentation",
+      "files": [
+        ".claude/settings.json",
+        "docs/README.md",
+        "docs/architecture.md"
+      ]
+    },
+    {
+      "commit": "977be11b312254ff4e4051f8e541b29535155d5f",
+      "subject": "Merge pull request #467 from pladux/feature/listened",
+      "files": []
+    },
+    {
+      "commit": "453763a28aa75c7b9e73aefb702e4dbda6cb365c",
+      "subject": "feat(settings): update permissions to allow GitHub CLI comments and reviews",
+      "files": [
+        ".claude/settings.json"
+      ]
+    },
+    {
+      "commit": "0b6673f3341b5dab113f4d21c1b2595541519d68",
+      "subject": "Fix CC3235 (Toniebox 1) misclassified as box generation TB2",
+      "files": [
+        "src/server.c"
+      ]
+    },
+    {
+      "commit": "a745789d987afe7542ea566d67d0e4989bb2efae",
+      "subject": "docs: clarify instructions for modifying vendored submodule files",
+      "files": [
+        "CONTRIBUTING.md"
+      ]
+    },
+    {
+      "commit": "2aacb492c38e81649fa9e317ead860848f145018",
+      "subject": "feat(docs): add issue triage documentation for open issues and PR status",
+      "files": [
+        "docs/github/issue-triage.md"
+      ]
+    },
+    {
+      "commit": "8bdc5d8c158310c5660d85b7cb28da797c314fef",
+      "subject": "docs: update PR status section to include frontend repo and detailed approval status",
+      "files": [
+        "docs/github/issue-triage.md"
+      ]
+    },
+    {
+      "commit": "55fa44404880f493eb0278aa93783f8ca8b64e1b",
+      "subject": "docs: update issue triage documentation to reflect merged PR #317 and correct PR count for teddycloud_web",
+      "files": [
+        "docs/github/issue-triage.md"
+      ]
+    },
+    {
+      "commit": "fdf9112bbfc5394af7a71ed6a92b53828c058afe",
+      "subject": "Merge pull request #482 from ditschi/feature/web-ui-auth",
+      "files": []
+    },
+    {
+      "commit": "d461ca6546fb1d86e6f0e02c5032befe555543c8",
+      "subject": "fix(cert): free the CA DER after signing an RSA certificate",
+      "files": [
+        "include/cert.h",
+        "src/cert.c"
+      ]
+    },
+    {
+      "commit": "6e3094785eafebe88b076f4d21557d97e232a0a1",
+      "subject": "fix(server): clear authenticated on every pooled connection reuse",
+      "files": [
+        "Makefile",
+        "src/server.c",
+        "tests/py/run_auth_pool_reuse.sh",
+        "tests/py/test_auth_pool_reuse.py"
+      ]
+    },
+    {
+      "commit": "bdd581203bd9d61252a1c405a60c757b64617170",
+      "subject": "Merge pull request #477 from emka/fix/auth-pool-reuse-bypass",
+      "files": []
+    },
+    {
+      "commit": "9d3553975788f3e247fbd4de89ca9093e5115b49",
+      "subject": "Update frontend (make web)",
+      "files": [
+        "contrib/data/www/web/assets/IO-DWITrE88.js",
+        "contrib/data/www/web/assets/IO-uB_rPCwC.js",
+        "contrib/data/www/web/assets/index-BnloExRj.css",
+        "contrib/data/www/web/assets/index-CTPesxOB.css",
+        "contrib/data/www/web/assets/index-mm0R3mSD.js",
+        "contrib/data/www/web/assets/index-vtJo0pPm.js",
+        "contrib/data/www/web/index.html",
+        "contrib/data/www/web/manifest.json",
+        "contrib/data/www/web/translations/de.json",
+        "contrib/data/www/web/translations/en.json",
+        "contrib/data/www/web/translations/es.json",
+        "contrib/data/www/web/translations/fr.json",
+        "contrib/data/www/web/translations/it.json",
+        "contrib/data/www/web/translations/pl.json",
+        "contrib/data/www/web/web_version.json",
+        "teddycloud_web"
+      ]
+    },
+    {
+      "commit": "a13dba7aae2b9a994ac2639f55889079b3c750e4",
+      "subject": "fix(server): stop logging web UI bearer tokens as parse failures",
+      "files": [
+        "include/net_config.h",
+        "src/server.c"
+      ]
+    },
+    {
+      "commit": "e3e2716c3f5e0aa99d8849d2c16ebb21b4fc0420",
+      "subject": "fix: allow base URL redirect to web UI when web login is enabled",
+      "files": [
+        "src/handler_web_auth.c"
+      ]
+    },
+    {
+      "commit": "a6b8d97e6ffc54d3046e06aa2e355ad5a9bebe33",
+      "subject": "Merge pull request #486 from ditschi/fix/485-bearer-auth-warn",
+      "files": []
+    },
+    {
+      "commit": "78de4225e1c9670bb71b21eb37050932784b09e8",
+      "subject": "Merge pull request #487 from ditschi/fix/web-auth-root-redirect",
+      "files": []
+    },
+    {
+      "commit": "3e66ae7deaf4f1598e3650902e5429ad73f1da9a",
+      "subject": "Update frontend (make web)",
+      "files": [
+        "contrib/data/www/web/assets/index-DG8Ez11R.js",
+        "contrib/data/www/web/assets/index-mm0R3mSD.js",
+        "contrib/data/www/web/index.html",
+        "contrib/data/www/web/web_version.json",
+        "teddycloud_web"
+      ]
+    },
+    {
+      "commit": "a992b565f281ec0630fc778b2190479281c0801c",
+      "subject": "Update frontend (make web)",
+      "files": [
+        "contrib/data/www/web/assets/index-CiVgNKss.js",
+        "contrib/data/www/web/assets/index-DG8Ez11R.js",
+        "contrib/data/www/web/index.html",
+        "contrib/data/www/web/web_version.json",
+        "teddycloud_web"
+      ]
+    },
+    {
+      "commit": "af5c1143647c25a9e8437151c0c15dfe6da72bf1",
+      "subject": "feat: remove legacy admin GUI",
+      "files": [
+        "Makefile",
+        "contrib/data/www/legacy.html",
+        "contrib/data/www/library/babel.js",
+        "contrib/data/www/library/esptool.js",
+        "contrib/data/www/library/react-dom.development.js",
+        "contrib/data/www/library/react.development.js",
+        "dev-sandbox/config/config.ini",
+        "docs/architecture.md",
+        "include/settings.h",
+        "src/handler_web_auth.c",
+        "src/server.c",
+        "src/settings.c",
+        "tests/py/test_web_legacy_gone.py"
+      ]
+    },
+    {
+      "commit": "ebe112545235f3dc9374dcbefe59098be70d474c",
+      "subject": "Add handleCorsOptions function for CORS support",
+      "files": [
+        "src/server.c"
+      ]
+    },
+    {
+      "commit": "776bafeb4f664eb7cdf754750f91e2d58cf47128",
+      "subject": "Refactor handleCorsOptions call for clarity",
+      "files": [
+        "src/server.c"
+      ]
+    },
+    {
+      "commit": "645c3353c0dd1f1b831a5678991a523f1fc39bd9",
+      "subject": "Refactor HTTP response handling in server.c",
+      "files": [
+        "src/server.c"
+      ]
+    },
+    {
+      "commit": "382c2f697da929d7fb62489c022c459ab7f527eb",
+      "subject": "Update server.c",
+      "files": [
+        "src/server.c"
+      ]
+    },
+    {
+      "commit": "8579c93e3242aab1db49130309d4ce281731cff6",
+      "subject": "Merge remote-tracking branch 'upstream/develop' into feature/taf-track-download",
+      "files": []
+    },
+    {
+      "commit": "e0f93150a206b513e48cd7508452ce7a54580db0",
+      "subject": "refactor: reuse existing helpers for TAF track export",
+      "files": [
+        "include/fs_ext.h",
+        "src/fs_ext.c",
+        "src/handler_api.c"
+      ]
+    },
+    {
+      "commit": "2f1714767bc899f9bb2ee5369ef94baa6ed6d203",
+      "subject": "Merge pull request #484 from ditschi/feature/taf-track-download",
+      "files": []
+    },
+    {
+      "commit": "fb92b7201f9d3b96703e761e98d3135ee421abb1",
+      "subject": "Merge pull request #490 from henryk86/develop",
+      "files": []
+    },
+    {
+      "commit": "71a1991be42b832191425d9767e8035f1adc353b",
+      "subject": "Merge pull request #491 from ian0318git/feature/489-sunset-legacy-admin-gui",
+      "files": []
+    },
+    {
+      "commit": "e393e818b1018bdbb3f4a3dfdf1b1123df8e67f8",
+      "subject": "test: restore config.ini and web_users.json after with_server runs",
+      "files": [
+        "tests/py/with_server.sh"
+      ]
+    },
+    {
+      "commit": "bc811498204d3b0cd2e62912a236c047a79304f1",
+      "subject": "fix(cors): parse full HTTP method and harden preflight handler",
+      "files": [
+        "Makefile",
+        "src/cyclone/cyclone_tcp/http/http_server_misc.c",
+        "src/server.c",
+        "tests/py/test_cors_preflight.py"
+      ]
+    },
+    {
+      "commit": "c031a0e5f8888126358fa059b9eb6fd0a3eda939",
+      "subject": "Update frontend (make web)",
+      "files": [
+        "contrib/data/www/web/assets/index-BjxXCTBA.js",
+        "contrib/data/www/web/assets/index-CiVgNKss.js",
+        "contrib/data/www/web/index.html",
+        "contrib/data/www/web/translations/de.json",
+        "contrib/data/www/web/translations/en.json",
+        "contrib/data/www/web/translations/es.json",
+        "contrib/data/www/web/translations/fr.json",
+        "contrib/data/www/web/translations/it.json",
+        "contrib/data/www/web/translations/pl.json",
+        "contrib/data/www/web/web_version.json",
+        "teddycloud_web"
+      ]
+    },
+    {
+      "commit": "0d95429a77bdc5a2f59b208e545708e7545218b7",
+      "subject": "fix(cache): avoid NULL deref on /cache/ lookup of the list head",
+      "files": [
+        "src/cache.c"
+      ]
+    },
+    {
+      "commit": "0f6685f4181855100c823d199bcd6d3eff0a0200",
+      "subject": "fix(multipart): reject empty boundary and clamp data-end length",
+      "files": [
+        "src/server_helpers.c"
+      ]
+    },
+    {
+      "commit": "1180f365b9a70ba52275e536533a8b8c62f9b359",
+      "subject": "fix(esp32 upload): fix use-after-free and NULL deref in firmware upload",
+      "files": [
+        "src/handler_api.c"
+      ]
+    },
+    {
+      "commit": "07e468684924b8f7294a82bd37a5a78dc3b4e1cf",
+      "subject": "fix(toniefile): avoid double pclose of the ffmpeg pipe",
+      "files": [
+        "src/toniefile.c"
+      ]
+    },
+    {
+      "commit": "8b95222cdfcaec4f9425738a6892d44ad051477e",
+      "subject": "fix(api): bound source list and path length in /api/fileEncode",
+      "files": [
+        "src/handler_api.c"
+      ]
+    },
+    {
+      "commit": "7d9fb401b58fa71cf0c45d79203884bc332632c4",
+      "subject": "test: add hardening regression tests for PR #499/#501/#502/#503",
+      "files": [
+        "Makefile",
+        "tests/py/test_hardening.py"
+      ]
+    },
+    {
+      "commit": "d1d23f5593bda54ca37abba54e3260902ad479b5",
+      "subject": "fix(toniefile): prevent shell command injection via ffmpeg source",
+      "files": [
+        "src/toniefile.c"
+      ]
+    },
+    {
+      "commit": "4158c480bd7aae3e94b4e8b49ed255ca08036520",
+      "subject": "test: drop Encode494, it cannot tell the #494 bug from the fix",
+      "files": [
+        "Makefile",
+        "tests/py/test_hardening.py"
+      ]
+    },
+    {
+      "commit": "4c1ad0c356db63a5fa4abb7f7fa1949068492265",
+      "subject": "fix(api): never expose secret settings through getIndex",
+      "files": [
+        "src/handler_api.c"
+      ]
+    },
+    {
+      "commit": "96fabb91fbad5aebd73bfa881550dfc4d1ed1981",
+      "subject": "refactor(os_ext): move shell quoting to osShellQuote, fix Windows, add tests",
+      "files": [
+        "include/os_ext.h",
+        "src/os_ext.c",
+        "src/toniefile.c",
+        "tests/c/test_os_ext.c",
+        "tests/c/test_runner.c",
+        "tests/c/tests.h"
+      ]
+    },
+    {
+      "commit": "ea872e55f172b5386b76bfdfaf1cd6f01076103b",
+      "subject": "test: catch private keys leaking through settings getIndex (#505)",
+      "files": [
+        "Makefile",
+        "tests/py/test_hardening.py"
+      ]
+    },
+    {
+      "commit": "25aff55cdc937e18d1df585f5ee375f5edc47ac5",
+      "subject": "fix(web,tonies): close download file once in body callbacks",
+      "files": [
+        "src/toniesJson.c",
+        "src/web.c"
+      ]
+    },
+    {
+      "commit": "f5d65caf8bbfd94f563d1b644514edd795599566",
+      "subject": "fix(handler): stream passthrough headers instead of fixed stack buffers",
+      "files": [
+        "src/handler.c"
+      ]
+    },
+    {
+      "commit": "5d89c9ef73496c031006963eaec74618d53bac75",
+      "subject": "fix(cloud): bound URL parsing in split_url against redirect Location",
+      "files": [
+        "include/cloud_request.h",
+        "src/cloud_request.c"
+      ]
+    },
+    {
+      "commit": "4365c91345c871b2ed925a08198ce01a1d431f2b",
+      "subject": "fix(esp32): prevent stack overflow parsing crafted NVS partitions",
+      "files": [
+        "src/esp32.c"
+      ]
+    },
+    {
+      "commit": "7c6801d3a5327007b463e285c18f12bb0737c3d0",
+      "subject": "fix(rtnl): bound hex/escape output in RTNL log handlers",
+      "files": [
+        "src/handler_rtnl.c"
+      ]
+    },
+    {
+      "commit": "67eb70a2c99c9ae2a8a71de2499c704dc3c51384",
+      "subject": "fix(tap): bound file count and path copies in TAP playlists",
+      "files": [
+        "src/tonie_audio_playlist.c"
+      ]
+    },
+    {
+      "commit": "76168b83dd83cae9a8e17b9e886dc5d1f30974f0",
+      "subject": "test: cover #493/#495/#497, move string helpers to str_ext.c",
+      "files": [
+        "Makefile",
+        "include/cloud_request.h",
+        "include/str_ext.h",
+        "src/cloud_request.c",
+        "src/handler_rtnl.c",
+        "src/str_ext.c",
+        "tests/c/test_runner.c",
+        "tests/c/test_str_ext.c",
+        "tests/c/tests.h",
+        "tests/py/test_hardening.py"
+      ]
+    },
+    {
+      "commit": "0d1b92eb045580f688cff1f478d98e8ff21a4e4b",
+      "subject": "fix(esp32): abort NVS parsing when an item span is zero",
+      "files": [
+        "src/esp32.c"
+      ]
+    },
+    {
+      "commit": "a51a7c3b652c60b880438883171a34ef0af504bb",
+      "subject": "fix(cert): write private-key files with 0600 permissions",
+      "files": [
+        "src/cert.c"
+      ]
+    },
+    {
+      "commit": "2c8f8bac167125eac7c11577ff2887a9d8be0b67",
+      "subject": "fix(net): bound the 16-bit word index when parsing \"::\" in IPv6",
+      "files": [
+        "src/server_helpers.c"
+      ]
+    },
+    {
+      "commit": "f9c3888613c585739aee5a82b99d91bb80e50176",
+      "subject": "fix(security): run blacklist and crawler mitigations independently",
+      "files": [
+        "src/handler_security_mit.c"
+      ]
+    },
+    {
+      "commit": "8ba21f464ac1ff7332f398d3b766d9e6a4428d5f",
+      "subject": "fix(tap): free resolved file path in tap_free",
+      "files": [
+        "src/tonie_audio_playlist.c"
+      ]
+    },
+    {
+      "commit": "0e3d0aabe8cd8d5bc901eaf3d68d59b4a3bc7730",
+      "subject": "test: cover #508 crawler detection and #512 key file permissions",
+      "files": [
+        "Makefile",
+        "tests/py/test_hardening.py"
+      ]
+    },
+    {
+      "commit": "2f1b7bc4d3a58695e0ed91bdd30f1de568195ccb",
+      "subject": "fix: RTNL length parsing, status after redirects, owner-only box keys",
+      "files": [
+        "include/handler_rtnl.h",
+        "include/os_ext.h",
+        "src/cloud_request.c",
+        "src/esp32.c",
+        "src/handler_api.c",
+        "src/handler_rtnl.c",
+        "src/os_ext.c",
+        "tests/c/test_os_ext.c",
+        "tests/c/test_runner.c",
+        "tests/c/tests.h"
+      ]
+    },
+    {
+      "commit": "26a361306448826d2a2c5cc6c8c9e72d795a0fb0",
+      "subject": "fix(web): require HTTP 200 for a successful web_download",
+      "files": [
+        "src/web.c"
+      ]
+    },
+    {
+      "commit": "36b67f41a12be8dea8c479b289cd215524e88d52",
+      "subject": "fix(cert): shared owner-only helper in cert.c, fix cert upload settings",
+      "files": [
+        "src/cert.c",
+        "src/handler_api.c"
+      ]
+    },
+    {
+      "commit": "bd1dc42c3b51fec70eb694b22a854d6adb1009c0",
+      "subject": "test: guard the multipart helper against the 64 KB upload hang",
+      "files": [
+        "tests/py/test_hardening.py"
+      ]
+    },
+    {
+      "commit": "2ae8b5061d35adf76d7dfb4f3e46a50277494c11",
+      "subject": "fix(api): strip leading \"..\" in sanitizePath to stop path traversal (#513)",
+      "files": [
+        "src/handler_api.c"
+      ]
+    },
+    {
+      "commit": "8c4acd007f62c6aecf479cd8f8891b34946d238e",
+      "subject": "fix(rtnl): validate field6 length before reading box-supplied data (#514)",
+      "files": [
+        "src/handler_rtnl.c"
+      ]
+    },
+    {
+      "commit": "4d496e73e79a83fca582c6be26897a8ea96d1694",
+      "subject": "fix(http): validate Range and free Content-Range buffer (#515)",
+      "files": [
+        "src/cyclone/cyclone_tcp/http/http_server.c"
+      ]
+    },
+    {
+      "commit": "e225ebbd1c85b0953f052f364268887f7cee511d",
+      "subject": "fix(toniefile): guard TAF append against open failure and bad header (#516)",
+      "files": [
+        "src/toniefile.c"
+      ]
+    },
+    {
+      "commit": "ba95a3a76868af4424677f0c09065e65151413a9",
+      "subject": "fix(http): drop off-by-one in User-Agent copy (#517)",
+      "files": [
+        "src/cyclone/cyclone_tcp/http/http_server_misc.c"
+      ]
+    },
+    {
+      "commit": "a69591ac626a6f4e9c6b97f88b59476b82becfd3",
+      "subject": "fix(tls): free cert buffers on name-constraint rejection (#518)",
+      "files": [
+        "src/tls_adapter.c"
+      ]
+    },
+    {
+      "commit": "2f96700f9006629473595e66c06958ef58ada348",
+      "subject": "fix(tonies): bound tracks loop to the allocated count (#519)",
+      "files": [
+        "src/toniesJson.c"
+      ]
+    },
+    {
+      "commit": "24e5102aabb0912833a83ab717f2277e970d162e",
+      "subject": "fix(mqtt): bound topic/instance formatting with osSnprintf (#520)",
+      "files": [
+        "src/mqtt.c"
+      ]
+    },
+    {
+      "commit": "b2d15276090814868e06311c94ea21b30c73478f",
+      "subject": "fix(cloud): reject non-hex hash in V3 OTA requests (#521)",
+      "files": [
+        "src/handler_cloud.c"
+      ]
+    },
+    {
+      "commit": "d80f7d4b2943fade46b91240cd64b57807614b64",
+      "subject": "fix(esp32): validate filename and MAC in extractCerts (#522)",
+      "files": [
+        "src/handler_api.c"
+      ]
+    },
+    {
+      "commit": "a5c23bd11a13765ac1ac45eb599b6b67a41a0061",
+      "subject": "fix(http): guard TAF-header skip against short files (#523)",
+      "files": [
+        "src/cyclone/cyclone_tcp/http/http_server.c"
+      ]
+    },
+    {
+      "commit": "b41dc44d6c37a7bf02d081474d970b19c097907f",
+      "subject": "fix: stop file read loops from spinning on short/failed reads (#524)",
+      "files": [
+        "src/contentJson.c",
+        "src/tonie_audio_playlist.c",
+        "src/toniesJson.c"
+      ]
+    },
+    {
+      "commit": "c1a826b8ae9e03bf53cc8e3294b780b38e86b8eb",
+      "subject": "fix(fs): guard fsRemoveFilename against an empty string (#525)",
+      "files": [
+        "src/fs_ext.c"
+      ]
+    },
+    {
+      "commit": "201cb5377c20f151351968e439512ef35eb9e9fe",
+      "subject": "fix(content): free parsed fields before reloading on version mismatch (#526)",
+      "files": [
+        "src/contentJson.c"
+      ]
+    },
+    {
+      "commit": "e57fa45294d16fb50c0a6a5c89affbe80f881848",
+      "subject": "fix(cache): don't leak a duplicate entry in cache_add (#527)",
+      "files": [
+        "src/cache.c"
+      ]
+    },
+    {
+      "commit": "8e8744b4c05c31ef86f35d73d12cf216417a334b",
+      "subject": "perf(settings): look up options by name with a sorted index + bsearch (#528)",
+      "files": [
+        "src/settings.c"
+      ]
+    },
+    {
+      "commit": "906c9b3bdf3a1c3db246e9e8efb70259a06e8412",
+      "subject": "perf(api): move 405 KB encode source array off the request stack (#529)",
+      "files": [
+        "src/handler_api.c"
+      ]
+    },
+    {
+      "commit": "ccc70a61e0f40271dd0f22ffe47ab7093c9e2dd1",
+      "subject": "test: cover the sanitizePath, Range and extractCerts fixes (#513, #515, #522)",
+      "files": [
+        "Makefile",
+        "tests/py/test_hardening.py"
+      ]
+    },
+    {
+      "commit": "084a461440c267bdb05938f32ee33baa89d81320",
+      "subject": "test: cover fsRemoveFilename on empty input and settings lookup by name (#525, #528)",
+      "files": [
+        "Makefile",
+        "tests/c/test_fs_ext.c",
+        "tests/c/test_runner.c",
+        "tests/c/tests.h",
+        "tests/py/test_hardening.py"
+      ]
+    },
+    {
+      "commit": "7b2a7d63882a70c0dbf20613cb460c405031ff15",
+      "subject": "ci: run all tests in parallel to the builds, cancel the run on failure",
+      "files": [
+        ".github/workflows/build_release.yml"
+      ]
+    },
+    {
+      "commit": "62ff355401e1f5365f4574dfbaff406683ee7f9c",
+      "subject": "Validate filename and MAC in esp32 patchFirmware",
+      "files": [
+        "src/handler_api.c",
+        "tests/py/test_hardening.py"
+      ]
+    },
+    {
+      "commit": "69babb87bf461965cd264bbc76e02c5b41b3aec4",
+      "subject": "test: run integration tests in an isolated sandbox",
+      "files": [
+        ".github/workflows/build_release.yml",
+        ".gitignore",
+        "Makefile",
+        "tests/py/test_hardening.py",
+        "tests/py/with_server.sh"
+      ]
+    },
+    {
+      "commit": "bcc31eaa9ad50c43ddb3c7a007437875a3cf640f",
+      "subject": "test: run the Python tests with pytest from the Makefile",
+      "files": [
+        ".claude/settings.json",
+        ".github/workflows/build_release.yml",
+        "Makefile",
+        "docs/architecture.md",
+        "tests/py/run_auth_pool_reuse.sh",
+        "tests/py/test_cors_preflight.py",
+        "tests/py/test_hardening.py",
+        "tests/py/test_tonies_custom_json_api.py",
+        "tests/py/test_web_legacy_gone.py"
+      ]
+    },
+    {
+      "commit": "a5dc0501c15c432f8a2a4881ec7fa630c4b1b185",
+      "subject": "test: add a Toniebox simulator and box connection tests",
+      "files": [
+        "Makefile",
+        "tests/py/test_box_sim.py",
+        "tests/py/with_server.sh",
+        "tests/sim/__init__.py",
+        "tests/sim/box.py",
+        "tests/sim/rtnl.py"
+      ]
+    },
+    {
+      "commit": "27751ff88f7d01a2e7de97dde7c79640dc7e64b0",
+      "subject": "test: add per-hardware box profiles with TLS parameters",
+      "files": [
+        "Makefile",
+        "tests/py/test_box_profiles.py",
+        "tests/sim/box.py",
+        "tests/sim/profiles.py"
+      ]
+    },
+    {
+      "commit": "6dda0a8f1c722ffdee07f627038f9f1313de7fb4",
+      "subject": "test: add a fake cloud and cloud proxy tests",
+      "files": [
+        "Makefile",
+        "tests/py/test_cloud_proxy.py",
+        "tests/py/with_server.sh",
+        "tests/sim/upstream.py"
+      ]
+    },
+    {
+      "commit": "7078c156700d3dd8343940d0a24887ba2a31c7ad",
+      "subject": "settings: park replaced settings memory instead of freeing it in place",
+      "files": [
+        "include/mutex_manager.h",
+        "src/settings.c",
+        "tests/py/test_cloud_proxy.py"
+      ]
+    },
+    {
+      "commit": "1847198dd04d9dafffb99b17d0b2786779d0dfa9",
+      "subject": "Refuse downloads from non-public addresses (SSRF)",
+      "files": [
+        "Makefile",
+        "include/settings.h",
+        "include/str_ext.h",
+        "src/cloud_request.c",
+        "src/settings.c",
+        "src/str_ext.c",
+        "tests/c/test_runner.c",
+        "tests/c/test_str_ext.c",
+        "tests/c/tests.h",
+        "tests/py/test_hardening.py"
+      ]
+    },
+    {
+      "commit": "b2ede3f560f203fed515f97bb651e9f7266ac99e",
+      "subject": "ci: add concurrency settings to workflows for better job management",
+      "files": [
+        ".github/workflows/build_release.yml",
+        ".github/workflows/publish_docker_matrix_all.yml"
+      ]
+    },
+    {
+      "commit": "ede40095979662d57cca6ab1e6ec46937a1717e6",
+      "subject": "Update frontend (make web)",
+      "files": [
+        "contrib/data/www/web/assets/index-BHqLcz0Z.js",
+        "contrib/data/www/web/assets/index-BjxXCTBA.js",
+        "contrib/data/www/web/index.html",
+        "contrib/data/www/web/translations/de.json",
+        "contrib/data/www/web/translations/en.json",
+        "contrib/data/www/web/translations/es.json",
+        "contrib/data/www/web/translations/fr.json",
+        "contrib/data/www/web/translations/it.json",
+        "contrib/data/www/web/translations/pl.json",
+        "contrib/data/www/web/web_version.json",
+        "teddycloud_web"
+      ]
+    },
+    {
+      "commit": "cd9d21239cb95dbecc75fbbb2687d63bd5ed9dab",
+      "subject": "fix(tls): no session resumption where boxes authenticate by certificate",
+      "files": [
+        "src/mqtt_server.c",
+        "src/server.c",
+        "tests/py/test_box_sim.py",
+        "tests/sim/box.py"
+      ]
+    },
+    {
+      "commit": "bebda08fa32b4e1814b64caf194b07e9ac7989fe",
+      "subject": "fix(certs): uploads for a new box go to its own directory",
+      "files": [
+        "Makefile",
+        "include/settings.h",
+        "src/handler_api.c",
+        "src/settings.c",
+        "tests/py/test_box_cert_upload.py"
+      ]
+    },
+    {
+      "commit": "645289648c3347073754c32f8c723fb776fc02c2",
+      "subject": "feat(esp32): patch the port the box connects to",
+      "files": [
+        "Makefile",
+        "include/esp32.h",
+        "include/esp32_port.h",
+        "src/esp32.c",
+        "src/esp32_port.c",
+        "src/handler_api.c",
+        "src/main.c",
+        "tests/c/test_esp32_port.c",
+        "tests/c/test_runner.c",
+        "tests/c/tests.h"
+      ]
+    },
+    {
+      "commit": "b2a6025819d7f0fc9618d51550c92831b34693a4",
+      "subject": "feat: add total audio length to TAF info (#537)",
+      "files": [
+        "include/contentJson.h",
+        "src/handler.c",
+        "src/handler_api.c"
+      ]
+    },
+    {
+      "commit": "f09b4d4c46187eed7cde9d7dd6f362f6ad707667",
+      "subject": "test: run KeyPermissions512 from the sandbox, it needs the CA",
+      "files": [
+        "tests/py/test_hardening.py"
+      ]
+    },
+    {
+      "commit": "427895e5314a4e394374b36f8431f74986fa77b5",
+      "subject": "ci: install ffmpeg for the tests job",
+      "files": [
+        ".github/workflows/build_release.yml"
+      ]
+    },
+    {
+      "commit": "8b39ac9c9cbc312ea1fa948f66b0dc014fd096c1",
+      "subject": "test: check lengthSeconds of an encoded TAF",
+      "files": [
+        "Makefile",
+        "tests/py/test_taf_length.py"
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": ".claude/settings.json",
+      "classification": "Build, docs or developer configuration",
+      "evidence": "Go build/CI/container workflow and project documentation retained; C compiler/ASAN/Claude settings do not apply to Go runtime"
+    },
+    {
+      "path": ".github/workflows/build_commit_web.yml",
+      "classification": "Build, docs or developer configuration",
+      "evidence": "Go build/CI/container workflow and project documentation retained; C compiler/ASAN/Claude settings do not apply to Go runtime"
+    },
+    {
+      "path": ".github/workflows/build_release.yml",
+      "classification": "Build, docs or developer configuration",
+      "evidence": "Go build/CI/container workflow and project documentation retained; C compiler/ASAN/Claude settings do not apply to Go runtime"
+    },
+    {
+      "path": ".github/workflows/publish_docker_matrix_all.yml",
+      "classification": "Build, docs or developer configuration",
+      "evidence": "Go build/CI/container workflow and project documentation retained; C compiler/ASAN/Claude settings do not apply to Go runtime"
+    },
+    {
+      "path": ".github/workflows/publish_docker_matrix_base.yml",
+      "classification": "Build, docs or developer configuration",
+      "evidence": "Go build/CI/container workflow and project documentation retained; C compiler/ASAN/Claude settings do not apply to Go runtime"
+    },
+    {
+      "path": ".gitignore",
+      "classification": "Build, docs or developer configuration",
+      "evidence": "Go build/CI/container workflow and project documentation retained; C compiler/ASAN/Claude settings do not apply to Go runtime"
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "classification": "Build, docs or developer configuration",
+      "evidence": "Go build/CI/container workflow and project documentation retained; C compiler/ASAN/Claude settings do not apply to Go runtime"
+    },
+    {
+      "path": "DockerfileAlpine",
+      "classification": "Build, docs or developer configuration",
+      "evidence": "Go build/CI/container workflow and project documentation retained; C compiler/ASAN/Claude settings do not apply to Go runtime"
+    },
+    {
+      "path": "DockerfileDebian",
+      "classification": "Build, docs or developer configuration",
+      "evidence": "Go build/CI/container workflow and project documentation retained; C compiler/ASAN/Claude settings do not apply to Go runtime"
+    },
+    {
+      "path": "DockerfileUbuntu",
+      "classification": "Build, docs or developer configuration",
+      "evidence": "Go build/CI/container workflow and project documentation retained; C compiler/ASAN/Claude settings do not apply to Go runtime"
+    },
+    {
+      "path": "Makefile",
+      "classification": "Build, docs or developer configuration",
+      "evidence": "Go build/CI/container workflow and project documentation retained; C compiler/ASAN/Claude settings do not apply to Go runtime"
+    },
+    {
+      "path": "README.md",
+      "classification": "Build, docs or developer configuration",
+      "evidence": "Go build/CI/container workflow and project documentation retained; C compiler/ASAN/Claude settings do not apply to Go runtime"
+    },
+    {
+      "path": "contrib/data/www/legacy.html",
+      "classification": "Official frontend assets",
+      "evidence": "Pin 636a8d65043f6c6e322f76bcb11e958725159e96; scripts/frontend.sh; legacy bundle removed; browser acceptance remains pending"
+    },
+    {
+      "path": "contrib/data/www/library/babel.js",
+      "classification": "Official frontend assets",
+      "evidence": "Pin 636a8d65043f6c6e322f76bcb11e958725159e96; scripts/frontend.sh; legacy bundle removed; browser acceptance remains pending"
+    },
+    {
+      "path": "contrib/data/www/library/esptool.js",
+      "classification": "Official frontend assets",
+      "evidence": "Pin 636a8d65043f6c6e322f76bcb11e958725159e96; scripts/frontend.sh; legacy bundle removed; browser acceptance remains pending"
+    },
+    {
+      "path": "contrib/data/www/library/react-dom.development.js",
+      "classification": "Official frontend assets",
+      "evidence": "Pin 636a8d65043f6c6e322f76bcb11e958725159e96; scripts/frontend.sh; legacy bundle removed; browser acceptance remains pending"
+    },
+    {
+      "path": "contrib/data/www/library/react.development.js",
+      "classification": "Official frontend assets",
+      "evidence": "Pin 636a8d65043f6c6e322f76bcb11e958725159e96; scripts/frontend.sh; legacy bundle removed; browser acceptance remains pending"
+    },
+    {
+      "path": "contrib/data/www/web/assets/IO-DWITrE88.js",
+      "classification": "Official frontend assets",
+      "evidence": "Pin 636a8d65043f6c6e322f76bcb11e958725159e96; scripts/frontend.sh; legacy bundle removed; browser acceptance remains pending"
+    },
+    {
+      "path": "contrib/data/www/web/assets/IO-uB_rPCwC.js",
+      "classification": "Official frontend assets",
+      "evidence": "Pin 636a8d65043f6c6e322f76bcb11e958725159e96; scripts/frontend.sh; legacy bundle removed; browser acceptance remains pending"
+    },
+    {
+      "path": "contrib/data/www/web/assets/index-BHqLcz0Z.js",
+      "classification": "Official frontend assets",
+      "evidence": "Pin 636a8d65043f6c6e322f76bcb11e958725159e96; scripts/frontend.sh; legacy bundle removed; browser acceptance remains pending"
+    },
+    {
+      "path": "contrib/data/www/web/assets/index-BnloExRj.css",
+      "classification": "Official frontend assets",
+      "evidence": "Pin 636a8d65043f6c6e322f76bcb11e958725159e96; scripts/frontend.sh; legacy bundle removed; browser acceptance remains pending"
+    },
+    {
+      "path": "contrib/data/www/web/assets/index-CTPesxOB.css",
+      "classification": "Official frontend assets",
+      "evidence": "Pin 636a8d65043f6c6e322f76bcb11e958725159e96; scripts/frontend.sh; legacy bundle removed; browser acceptance remains pending"
+    },
+    {
+      "path": "contrib/data/www/web/assets/index-zUap2i4c.js",
+      "classification": "Official frontend assets",
+      "evidence": "Pin 636a8d65043f6c6e322f76bcb11e958725159e96; scripts/frontend.sh; legacy bundle removed; browser acceptance remains pending"
+    },
+    {
+      "path": "contrib/data/www/web/index.html",
+      "classification": "Official frontend assets",
+      "evidence": "Pin 636a8d65043f6c6e322f76bcb11e958725159e96; scripts/frontend.sh; legacy bundle removed; browser acceptance remains pending"
+    },
+    {
+      "path": "contrib/data/www/web/manifest.json",
+      "classification": "Official frontend assets",
+      "evidence": "Pin 636a8d65043f6c6e322f76bcb11e958725159e96; scripts/frontend.sh; legacy bundle removed; browser acceptance remains pending"
+    },
+    {
+      "path": "contrib/data/www/web/translations/de.json",
+      "classification": "Official frontend assets",
+      "evidence": "Pin 636a8d65043f6c6e322f76bcb11e958725159e96; scripts/frontend.sh; legacy bundle removed; browser acceptance remains pending"
+    },
+    {
+      "path": "contrib/data/www/web/translations/en.json",
+      "classification": "Official frontend assets",
+      "evidence": "Pin 636a8d65043f6c6e322f76bcb11e958725159e96; scripts/frontend.sh; legacy bundle removed; browser acceptance remains pending"
+    },
+    {
+      "path": "contrib/data/www/web/translations/es.json",
+      "classification": "Official frontend assets",
+      "evidence": "Pin 636a8d65043f6c6e322f76bcb11e958725159e96; scripts/frontend.sh; legacy bundle removed; browser acceptance remains pending"
+    },
+    {
+      "path": "contrib/data/www/web/translations/fr.json",
+      "classification": "Official frontend assets",
+      "evidence": "Pin 636a8d65043f6c6e322f76bcb11e958725159e96; scripts/frontend.sh; legacy bundle removed; browser acceptance remains pending"
+    },
+    {
+      "path": "contrib/data/www/web/translations/it.json",
+      "classification": "Official frontend assets",
+      "evidence": "Pin 636a8d65043f6c6e322f76bcb11e958725159e96; scripts/frontend.sh; legacy bundle removed; browser acceptance remains pending"
+    },
+    {
+      "path": "contrib/data/www/web/translations/pl.json",
+      "classification": "Official frontend assets",
+      "evidence": "Pin 636a8d65043f6c6e322f76bcb11e958725159e96; scripts/frontend.sh; legacy bundle removed; browser acceptance remains pending"
+    },
+    {
+      "path": "contrib/data/www/web/web_version.json",
+      "classification": "Official frontend assets",
+      "evidence": "Pin 636a8d65043f6c6e322f76bcb11e958725159e96; scripts/frontend.sh; legacy bundle removed; browser acceptance remains pending"
+    },
+    {
+      "path": "dev-sandbox/config/config.ini",
+      "classification": "Build, docs or developer configuration",
+      "evidence": "Go build/CI/container workflow and project documentation retained; C compiler/ASAN/Claude settings do not apply to Go runtime"
+    },
+    {
+      "path": "docker/docker-compose.traefik.example.yaml",
+      "classification": "Build, docs or developer configuration",
+      "evidence": "Go build/CI/container workflow and project documentation retained; C compiler/ASAN/Claude settings do not apply to Go runtime"
+    },
+    {
+      "path": "docker/docker-compose.yaml",
+      "classification": "Build, docs or developer configuration",
+      "evidence": "Go build/CI/container workflow and project documentation retained; C compiler/ASAN/Claude settings do not apply to Go runtime"
+    },
+    {
+      "path": "docs/README.md",
+      "classification": "Build, docs or developer configuration",
+      "evidence": "Go build/CI/container workflow and project documentation retained; C compiler/ASAN/Claude settings do not apply to Go runtime"
+    },
+    {
+      "path": "docs/architecture.md",
+      "classification": "Build, docs or developer configuration",
+      "evidence": "Go build/CI/container workflow and project documentation retained; C compiler/ASAN/Claude settings do not apply to Go runtime"
+    },
+    {
+      "path": "docs/github/issue-triage.md",
+      "classification": "Build, docs or developer configuration",
+      "evidence": "Go build/CI/container workflow and project documentation retained; C compiler/ASAN/Claude settings do not apply to Go runtime"
+    },
+    {
+      "path": "docs/webradio-streaming.md",
+      "classification": "Build, docs or developer configuration",
+      "evidence": "Go build/CI/container workflow and project documentation retained; C compiler/ASAN/Claude settings do not apply to Go runtime"
+    },
+    {
+      "path": "include/cert.h",
+      "classification": "C interface",
+      "evidence": "Declarations correspond to audited runtime units; Go types and standard library replace C headers"
+    },
+    {
+      "path": "include/cloud_request.h",
+      "classification": "C interface",
+      "evidence": "Declarations correspond to audited runtime units; Go types and standard library replace C headers"
+    },
+    {
+      "path": "include/contentJson.h",
+      "classification": "C interface",
+      "evidence": "Declarations correspond to audited runtime units; Go types and standard library replace C headers"
+    },
+    {
+      "path": "include/esp32.h",
+      "classification": "C interface",
+      "evidence": "Declarations correspond to audited runtime units; Go types and standard library replace C headers"
+    },
+    {
+      "path": "include/esp32_port.h",
+      "classification": "C interface",
+      "evidence": "Declarations correspond to audited runtime units; Go types and standard library replace C headers"
+    },
+    {
+      "path": "include/fs_ext.h",
+      "classification": "C interface",
+      "evidence": "Declarations correspond to audited runtime units; Go types and standard library replace C headers"
+    },
+    {
+      "path": "include/handler_api.h",
+      "classification": "C interface",
+      "evidence": "Declarations correspond to audited runtime units; Go types and standard library replace C headers"
+    },
+    {
+      "path": "include/handler_rtnl.h",
+      "classification": "C interface",
+      "evidence": "Declarations correspond to audited runtime units; Go types and standard library replace C headers"
+    },
+    {
+      "path": "include/handler_web_auth.h",
+      "classification": "C interface",
+      "evidence": "Declarations correspond to audited runtime units; Go types and standard library replace C headers"
+    },
+    {
+      "path": "include/libraryMeta.h",
+      "classification": "C interface",
+      "evidence": "Declarations correspond to audited runtime units; Go types and standard library replace C headers"
+    },
+    {
+      "path": "include/mutex_manager.h",
+      "classification": "C interface",
+      "evidence": "Declarations correspond to audited runtime units; Go types and standard library replace C headers"
+    },
+    {
+      "path": "include/net_config.h",
+      "classification": "C interface",
+      "evidence": "Declarations correspond to audited runtime units; Go types and standard library replace C headers"
+    },
+    {
+      "path": "include/os_ext.h",
+      "classification": "C interface",
+      "evidence": "Declarations correspond to audited runtime units; Go types and standard library replace C headers"
+    },
+    {
+      "path": "include/rand.h",
+      "classification": "C interface",
+      "evidence": "Declarations correspond to audited runtime units; Go types and standard library replace C headers"
+    },
+    {
+      "path": "include/settings.h",
+      "classification": "C interface",
+      "evidence": "Declarations correspond to audited runtime units; Go types and standard library replace C headers"
+    },
+    {
+      "path": "include/str_ext.h",
+      "classification": "C interface",
+      "evidence": "Declarations correspond to audited runtime units; Go types and standard library replace C headers"
+    },
+    {
+      "path": "src/cache.c",
+      "classification": "Go behavior or equivalent",
+      "evidence": "Exact-key bounded map, existing-entry reuse and guarded misses: internal/app/image_cache.go; image_cache_test.go"
+    },
+    {
+      "path": "src/cert.c",
+      "classification": "Go behavior or equivalent",
+      "evidence": "Go owned certificate buffers; internal/certificates tests; private material written atomically mode 0600"
+    },
+    {
+      "path": "src/cloud_request.c",
+      "classification": "Go behavior or equivalent",
+      "evidence": "Bounded net/url redirects and headers; direct validated-address dialing; internal/cloud/client.go, internal/fetchpolicy, internal/app/catalog_update.go; redirect credentials deliberately confined"
+    },
+    {
+      "path": "src/contentJson.c",
+      "classification": "Go behavior or equivalent",
+      "evidence": "Bounded JSON reads terminate on EOF; confined roots and metadata ownership: internal/content/store.go"
+    },
+    {
+      "path": "src/cyclone/cyclone_tcp/http/http_server.c",
+      "classification": "Go behavior or equivalent",
+      "evidence": "Per-request identity; bounded ranges, growing EOF retry and fresh TLS handshakes: internal/devicehttp, runtime, boxtransport, app/live.go"
+    },
+    {
+      "path": "src/cyclone/cyclone_tcp/http/http_server_misc.c",
+      "classification": "Go behavior or equivalent",
+      "evidence": "Go TLS lifecycle replaces Cyclone handling: internal/runtime and internal/boxtransport"
+    },
+    {
+      "path": "src/esp32.c",
+      "classification": "Go behavior or equivalent",
+      "evidence": "Validated partition/NVS/FAT bounds and spans; original-preserving repair; private extraction; internal/firmware and internal/app/firmware.go"
+    },
+    {
+      "path": "src/esp32_port.c",
+      "classification": "Go behavior or equivalent",
+      "evidence": "Xtensa instruction pattern matching, all-site patch/443 restore and checksum repair: internal/firmware/port.go and port_test.go"
+    },
+    {
+      "path": "src/fs_ext.c",
+      "classification": "Go behavior or equivalent",
+      "evidence": "Go checked I/O/SectionReader/CopyN and os.Root confinement: internal/storage; track_export.go"
+    },
+    {
+      "path": "src/handler.c",
+      "classification": "Go behavior or equivalent",
+      "evidence": "Owned request/response buffers; bounded headers and track position/duration: internal/app/cloud.go, file_index.go, tags.go"
+    },
+    {
+      "path": "src/handler_api.c",
+      "classification": "Go behavior or equivalent",
+      "evidence": "Web users moved to auth.go; CORS management preflight; safe multipart; certificate upload selection/isolation; listened sidecars; Ogg/ZIP track exports; duration; existing bounded firmware/files/encoding APIs; internal/app tests"
+    },
+    {
+      "path": "src/handler_cloud.c",
+      "classification": "Go behavior or equivalent",
+      "evidence": "No encoder restart for existing range prefix; growing EOF retries; listened on source sync; OTA hex guard; internal/app/live.go, listened.go, ota.go and tests"
+    },
+    {
+      "path": "src/handler_rtnl.c",
+      "classification": "Go behavior or equivalent",
+      "evidence": "Length-checked binary reads and bounded dump strings: internal/boxstate, internal/app/rtnl.go and rtnl_test.go"
+    },
+    {
+      "path": "src/handler_security_mit.c",
+      "classification": "Go behavior or equivalent",
+      "evidence": "Independent domain and crawler detection: internal/app/security.go and security_test.go"
+    },
+    {
+      "path": "src/handler_web_auth.c",
+      "classification": "Go behavior or equivalent",
+      "evidence": "Persistent salted SHA256 users; bounded sessions/rate limits; cookies/bearer and management gate: internal/app/auth.go and auth_test.go"
+    },
+    {
+      "path": "src/libraryMeta.c",
+      "classification": "Go behavior or equivalent",
+      "evidence": "Atomic JSON sidecar preserves unknown fields; index and sync heuristic: internal/app/listened.go and develop_content_test.go"
+    },
+    {
+      "path": "src/main.c",
+      "classification": "Go behavior or equivalent",
+      "evidence": "New esp32-portpatch/port flags: cmd/goteddycloud/operations.go; other development additions covered by server auth initialization"
+    },
+    {
+      "path": "src/mqtt.c",
+      "classification": "Go behavior or equivalent",
+      "evidence": "Dynamic formatting avoids fixed-array overflow; internal/mqtt/client.go, integration.go and tests"
+    },
+    {
+      "path": "src/mqtt_server.c",
+      "classification": "Go behavior or equivalent",
+      "evidence": "Fresh client identity on TLS: internal/app/integrations.go disables session tickets"
+    },
+    {
+      "path": "src/os_ext.c",
+      "classification": "Go behavior or equivalent",
+      "evidence": "Shell-free exec.CommandContext, crypto/rand, Go ZIP and 0600 atomic files; no shell quote/process wrappers needed"
+    },
+    {
+      "path": "src/server.c",
+      "classification": "Go behavior or equivalent",
+      "evidence": "CORS, authorization, pooled identity isolation, bearer parsing, root redirect, CC3235 generation, box TLS sessions: internal/app/server.go, auth.go, useragent.go; internal/runtime and boxtransport tests"
+    },
+    {
+      "path": "src/server_helpers.c",
+      "classification": "Go behavior or equivalent",
+      "evidence": "Standard Go MIME multipart and netip replace C parsers; checked empty upload/traversal/IPv6 cases"
+    },
+    {
+      "path": "src/settings.c",
+      "classification": "Go behavior or equivalent",
+      "evidence": "Typed snapshot maps avoid C allocation races/binary lookup; private settings hidden; new schema; new box certificate directories: internal/config, internal/identity"
+    },
+    {
+      "path": "src/str_ext.c",
+      "classification": "Go behavior or equivalent",
+      "evidence": "Standard Go strings/net/url/netip and bounded output; public-address predicate: internal/fetchpolicy"
+    },
+    {
+      "path": "src/tls_adapter.c",
+      "classification": "Go behavior or equivalent",
+      "evidence": "Owned immutable TLS config; tickets disabled only for box/embedded MQTT: internal/boxtransport and internal/app/integrations.go"
+    },
+    {
+      "path": "src/tonie_audio_playlist.c",
+      "classification": "Go behavior or equivalent",
+      "evidence": "Bounded playlist validation and owned strings; full integrity and rejection of oversized playlists are documented stronger behavior: internal/content/playlist.go"
+    },
+    {
+      "path": "src/toniefile.c",
+      "classification": "Go behavior or equivalent",
+      "evidence": "Validated append and subprocess arguments without a shell; owned stream lifecycle and repair: internal/taf and internal/audio"
+    },
+    {
+      "path": "src/toniesJson.c",
+      "classification": "Go behavior or equivalent",
+      "evidence": "Bounded file reads and atomic successful metadata publication; slices cannot wrap uint8 counts: internal/catalog and internal/app/catalog_update.go"
+    },
+    {
+      "path": "src/web.c",
+      "classification": "Go behavior or equivalent",
+      "evidence": "HTTP success and complete transfer required before atomic publication: internal/app/catalog_update.go, image_cache.go"
+    },
+    {
+      "path": "teddycloud_web",
+      "classification": "Official frontend assets",
+      "evidence": "Pin 636a8d65043f6c6e322f76bcb11e958725159e96; scripts/frontend.sh; legacy bundle removed; browser acceptance remains pending"
+    },
+    {
+      "path": "tests/c/test_esp32_port.c",
+      "classification": "Upstream validation",
+      "evidence": "scripts/develop-differential.py runs relevant upstream tests; Go regression/race/fuzz tests cover native equivalents; simulator hardware stubs remain skipped"
+    },
+    {
+      "path": "tests/c/test_fs_ext.c",
+      "classification": "Upstream validation",
+      "evidence": "scripts/develop-differential.py runs relevant upstream tests; Go regression/race/fuzz tests cover native equivalents; simulator hardware stubs remain skipped"
+    },
+    {
+      "path": "tests/c/test_os_ext.c",
+      "classification": "Upstream validation",
+      "evidence": "scripts/develop-differential.py runs relevant upstream tests; Go regression/race/fuzz tests cover native equivalents; simulator hardware stubs remain skipped"
+    },
+    {
+      "path": "tests/c/test_runner.c",
+      "classification": "Upstream validation",
+      "evidence": "scripts/develop-differential.py runs relevant upstream tests; Go regression/race/fuzz tests cover native equivalents; simulator hardware stubs remain skipped"
+    },
+    {
+      "path": "tests/c/test_str_ext.c",
+      "classification": "Upstream validation",
+      "evidence": "scripts/develop-differential.py runs relevant upstream tests; Go regression/race/fuzz tests cover native equivalents; simulator hardware stubs remain skipped"
+    },
+    {
+      "path": "tests/c/tests.h",
+      "classification": "Upstream validation",
+      "evidence": "scripts/develop-differential.py runs relevant upstream tests; Go regression/race/fuzz tests cover native equivalents; simulator hardware stubs remain skipped"
+    },
+    {
+      "path": "tests/py/requests.py",
+      "classification": "Upstream validation",
+      "evidence": "scripts/develop-differential.py runs relevant upstream tests; Go regression/race/fuzz tests cover native equivalents; simulator hardware stubs remain skipped"
+    },
+    {
+      "path": "tests/py/run_auth_pool_reuse.sh",
+      "classification": "Upstream validation",
+      "evidence": "scripts/develop-differential.py runs relevant upstream tests; Go regression/race/fuzz tests cover native equivalents; simulator hardware stubs remain skipped"
+    },
+    {
+      "path": "tests/py/test_auth_pool_reuse.py",
+      "classification": "Upstream validation",
+      "evidence": "scripts/develop-differential.py runs relevant upstream tests; Go regression/race/fuzz tests cover native equivalents; simulator hardware stubs remain skipped"
+    },
+    {
+      "path": "tests/py/test_box_cert_upload.py",
+      "classification": "Upstream validation",
+      "evidence": "scripts/develop-differential.py runs relevant upstream tests; Go regression/race/fuzz tests cover native equivalents; simulator hardware stubs remain skipped"
+    },
+    {
+      "path": "tests/py/test_box_profiles.py",
+      "classification": "Upstream validation",
+      "evidence": "scripts/develop-differential.py runs relevant upstream tests; Go regression/race/fuzz tests cover native equivalents; simulator hardware stubs remain skipped"
+    },
+    {
+      "path": "tests/py/test_box_sim.py",
+      "classification": "Upstream validation",
+      "evidence": "scripts/develop-differential.py runs relevant upstream tests; Go regression/race/fuzz tests cover native equivalents; simulator hardware stubs remain skipped"
+    },
+    {
+      "path": "tests/py/test_cloud_proxy.py",
+      "classification": "Upstream validation",
+      "evidence": "scripts/develop-differential.py runs relevant upstream tests; Go regression/race/fuzz tests cover native equivalents; simulator hardware stubs remain skipped"
+    },
+    {
+      "path": "tests/py/test_cors_preflight.py",
+      "classification": "Upstream validation",
+      "evidence": "scripts/develop-differential.py runs relevant upstream tests; Go regression/race/fuzz tests cover native equivalents; simulator hardware stubs remain skipped"
+    },
+    {
+      "path": "tests/py/test_hardening.py",
+      "classification": "Upstream validation",
+      "evidence": "scripts/develop-differential.py runs relevant upstream tests; Go regression/race/fuzz tests cover native equivalents; simulator hardware stubs remain skipped"
+    },
+    {
+      "path": "tests/py/test_taf_length.py",
+      "classification": "Upstream validation",
+      "evidence": "scripts/develop-differential.py runs relevant upstream tests; Go regression/race/fuzz tests cover native equivalents; simulator hardware stubs remain skipped"
+    },
+    {
+      "path": "tests/py/test_tonies_custom_json_api.py",
+      "classification": "Upstream validation",
+      "evidence": "scripts/develop-differential.py runs relevant upstream tests; Go regression/race/fuzz tests cover native equivalents; simulator hardware stubs remain skipped"
+    },
+    {
+      "path": "tests/py/test_web_legacy_gone.py",
+      "classification": "Upstream validation",
+      "evidence": "scripts/develop-differential.py runs relevant upstream tests; Go regression/race/fuzz tests cover native equivalents; simulator hardware stubs remain skipped"
+    },
+    {
+      "path": "tests/py/with_server.sh",
+      "classification": "Upstream validation",
+      "evidence": "scripts/develop-differential.py runs relevant upstream tests; Go regression/race/fuzz tests cover native equivalents; simulator hardware stubs remain skipped"
+    },
+    {
+      "path": "tests/sim/__init__.py",
+      "classification": "Upstream validation",
+      "evidence": "scripts/develop-differential.py runs relevant upstream tests; Go regression/race/fuzz tests cover native equivalents; simulator hardware stubs remain skipped"
+    },
+    {
+      "path": "tests/sim/box.py",
+      "classification": "Upstream validation",
+      "evidence": "scripts/develop-differential.py runs relevant upstream tests; Go regression/race/fuzz tests cover native equivalents; simulator hardware stubs remain skipped"
+    },
+    {
+      "path": "tests/sim/profiles.py",
+      "classification": "Upstream validation",
+      "evidence": "scripts/develop-differential.py runs relevant upstream tests; Go regression/race/fuzz tests cover native equivalents; simulator hardware stubs remain skipped"
+    },
+    {
+      "path": "tests/sim/rtnl.py",
+      "classification": "Upstream validation",
+      "evidence": "scripts/develop-differential.py runs relevant upstream tests; Go regression/race/fuzz tests cover native equivalents; simulator hardware stubs remain skipped"
+    },
+    {
+      "path": "tests/sim/upstream.py",
+      "classification": "Upstream validation",
+      "evidence": "scripts/develop-differential.py runs relevant upstream tests; Go regression/race/fuzz tests cover native equivalents; simulator hardware stubs remain skipped"
+    }
+  ],
+  "limitations": [
+    "Hardware unavailable; simulator is not physical acceptance",
+    "Official frontend built; interactive browser unavailable",
+    "C-only memory/build fixes are audited equivalents, not literal C code ports"
+  ]
+}

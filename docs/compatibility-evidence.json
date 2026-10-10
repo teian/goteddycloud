@@ -1,0 +1,382 @@
+{
+  "GET /v1/time": {
+    "status": "implemented",
+    "evidence": "testdata/device-offline.json; internal/app/cloud_test.go; scripts/cloud-differential.py; scripts/live-differential.py",
+    "remaining": "physical chip/firmware acceptance; documented stronger failure validation and exclusions in verification.md"
+  },
+  "GET /v1/claim": {
+    "status": "implemented",
+    "evidence": "testdata/device-offline.json; internal/app/cloud_test.go; scripts/cloud-differential.py; scripts/live-differential.py",
+    "remaining": "physical chip/firmware acceptance; documented stronger failure validation and exclusions in verification.md"
+  },
+  "GET /v1/content": {
+    "status": "implemented",
+    "evidence": "testdata/device-offline.json; scripts/container-smoke.py; internal/app/cloud_content_test.go; testdata/playlist-cached.json; internal/content/playlist_test.go; internal/app/playlist_test.go; scripts/cloud-differential.py; scripts/live-differential.py",
+    "remaining": "physical chip/firmware acceptance; documented stronger failure validation and exclusions in verification.md"
+  },
+  "GET /v2/content": {
+    "status": "implemented",
+    "evidence": "internal/app/auth_test.go; offline delivery service; internal/app/cloud_content_test.go; testdata/playlist-cached.json; internal/content/playlist_test.go; internal/app/playlist_test.go; scripts/cloud-differential.py; scripts/live-differential.py",
+    "remaining": "physical chip/firmware acceptance; documented stronger failure validation and exclusions in verification.md"
+  },
+  "POST /v1/freshness-check": {
+    "status": "implemented",
+    "evidence": "testdata/device-offline.json; internal/app/cloud_test.go; scripts/cloud-differential.py; scripts/live-differential.py",
+    "remaining": "physical chip/firmware acceptance; documented stronger failure validation and exclusions in verification.md"
+  },
+  "POST /v1/cloud-reset": {
+    "status": "implemented",
+    "evidence": "testdata/device-offline.json; scripts/cloud-differential.py; scripts/live-differential.py",
+    "remaining": "physical chip/firmware acceptance; documented stronger failure validation and exclusions in verification.md"
+  },
+  "POST /v1/log": {
+    "status": "implemented",
+    "evidence": "internal/app/server.go; scripts/cloud-differential.py; scripts/live-differential.py",
+    "remaining": "physical chip/firmware acceptance; documented stronger failure validation and exclusions in verification.md"
+  },
+  "ANY *binary": {
+    "status": "verified",
+    "evidence": "scripts/rtnl-differential.py; internal/boxstate/state_test.go; internal/app/rtnl_test.go; internal/boxtransport",
+    "remaining": "physical device acceptance and MQTT publication are separately pending"
+  },
+  "POST /api/auth/login": {
+    "status": "implemented",
+    "evidence": "internal/app/auth_test.go; scripts/develop-differential.py",
+    "remaining": "official frontend interactions"
+  },
+  "GET /api/auth/logout": {
+    "status": "implemented",
+    "evidence": "internal/app/auth_test.go; scripts/develop-differential.py",
+    "remaining": "official frontend interactions"
+  },
+  "POST /api/auth/refresh-token": {
+    "status": "implemented",
+    "evidence": "internal/app/auth_test.go; scripts/develop-differential.py",
+    "remaining": "official frontend interactions"
+  },
+  "GET /api/settings/getIndex": {
+    "status": "implemented",
+    "evidence": "testdata/device-offline.json; internal/app/settings.go",
+    "remaining": "full internal/runtime fields and frontend acceptance"
+  },
+  "GET /api/settings/get/": {
+    "status": "implemented",
+    "evidence": "testdata/device-offline.json",
+    "remaining": "all types and missing-key differential"
+  },
+  "POST /api/settings/set/": {
+    "status": "implemented",
+    "evidence": "testdata/device-offline.json; internal/app/server_test.go",
+    "remaining": "all types and malformed input differential"
+  },
+  "POST /api/settings/reset/": {
+    "status": "implemented",
+    "evidence": "internal/app/server_test.go; recorded C/Go LED reset comparison",
+    "remaining": "all types and missing-overlay differential"
+  },
+  "POST /api/settings/removeOverlay": {
+    "status": "implemented",
+    "evidence": "internal/app/server_test.go",
+    "remaining": "error/header differential"
+  },
+  "GET /api/getBoxes": {
+    "status": "verified",
+    "evidence": "scripts/tags-api-differential.py; scripts/cache-api-differential.py; internal/app/tags_test.go; scripts/native-smoke.py",
+    "remaining": "physical-device interaction and full official frontend acceptance"
+  },
+  "GET /api/sse": {
+    "status": "implemented",
+    "evidence": "testdata/auth-events.json; scripts/rtnl-differential.py; internal/events/hub_test.go",
+    "remaining": "complete event inventory and frontend acceptance"
+  },
+  "GET /api/plugins/get": {
+    "status": "verified",
+    "evidence": "testdata/static.json; internal/app/static_test.go",
+    "remaining": "full frontend plugin workflows"
+  },
+  "GET /api/toniesJson": {
+    "status": "implemented",
+    "evidence": "internal/app/catalog_update_test.go; internal/catalog/catalog_test.go; scripts/custom-api-tests.py",
+    "remaining": "update source mock-verified; deliberate fail-safe reload and update deviations in docs/verification.md"
+  },
+  "GET /api/toniesCustomJson": {
+    "status": "verified",
+    "evidence": "testdata/custom-models.json; scripts/custom-api-tests.py; internal/app/rename_test.go; internal/catalog/custom_test.go",
+    "remaining": ""
+  },
+  "GET /api/toniesJsonReload": {
+    "status": "implemented",
+    "evidence": "internal/app/catalog_update_test.go; internal/catalog/catalog_test.go; scripts/custom-api-tests.py",
+    "remaining": "update source mock-verified; deliberate fail-safe reload and update deviations in docs/verification.md"
+  },
+  "POST /api/toniesCustomJsonUpsert": {
+    "status": "verified",
+    "evidence": "testdata/custom-models.json; scripts/custom-api-tests.py; internal/app/rename_test.go; internal/catalog/custom_test.go",
+    "remaining": ""
+  },
+  "POST /api/toniesCustomJsonDelete": {
+    "status": "verified",
+    "evidence": "testdata/custom-models.json; scripts/custom-api-tests.py; internal/app/rename_test.go; internal/catalog/custom_test.go",
+    "remaining": ""
+  },
+  "POST /api/toniesCustomJsonRename": {
+    "status": "verified",
+    "evidence": "testdata/custom-models.json; scripts/custom-api-tests.py; internal/app/rename_test.go; internal/catalog/custom_test.go",
+    "remaining": ""
+  },
+  "GET /api/toniesJsonSearch": {
+    "status": "implemented",
+    "evidence": "internal/app/catalog_update_test.go; internal/catalog/catalog_test.go; scripts/custom-api-tests.py",
+    "remaining": "update source mock-verified; deliberate fail-safe reload and update deviations in docs/verification.md"
+  },
+  "GET /api/toniesJsonUpdate": {
+    "status": "implemented",
+    "evidence": "internal/app/catalog_update_test.go; internal/catalog/catalog_test.go; scripts/custom-api-tests.py",
+    "remaining": "update source mock-verified; deliberate fail-safe reload and update deviations in docs/verification.md"
+  },
+  "ANY /reverse": {
+    "status": "implemented",
+    "evidence": "internal/app/reverse_test.go; internal/app/reverse.go",
+    "remaining": "mock targets verified; bounded-error/header/cache deviations documented in docs/verification.md"
+  },
+  "ANY /reverseGeneric": {
+    "status": "implemented",
+    "evidence": "internal/app/reverse_test.go; internal/app/reverse.go",
+    "remaining": "mock targets verified; bounded-error/header/cache deviations documented in docs/verification.md"
+  },
+  "POST /api/fileEncode": {
+    "status": "implemented",
+    "evidence": "scripts/audio-api-differential.py; internal/app/audio_api_test.go; internal/app/files_test.go; internal/content/cache_test.go",
+    "remaining": "malformed-input/safe-publication and directory move deviations documented in docs/verification.md; frontend interaction pending"
+  },
+  "POST /api/pcmUpload": {
+    "status": "implemented",
+    "evidence": "scripts/audio-api-differential.py; internal/app/audio_api_test.go; internal/app/files_test.go; internal/content/cache_test.go",
+    "remaining": "malformed-input/safe-publication and directory move deviations documented in docs/verification.md; frontend interaction pending"
+  },
+  "POST /api/tafUpload": {
+    "status": "implemented",
+    "evidence": "scripts/audio-api-differential.py; internal/app/audio_api_test.go; internal/app/files_test.go; internal/content/cache_test.go",
+    "remaining": "malformed-input/safe-publication and directory move deviations documented in docs/verification.md; frontend interaction pending"
+  },
+  "POST /api/fileDelete": {
+    "status": "implemented",
+    "evidence": "scripts/audio-api-differential.py; internal/app/audio_api_test.go; internal/app/files_test.go; internal/content/cache_test.go",
+    "remaining": "malformed-input/safe-publication and directory move deviations documented in docs/verification.md; frontend interaction pending"
+  },
+  "POST /api/fileMove": {
+    "status": "implemented",
+    "evidence": "scripts/audio-api-differential.py; internal/app/audio_api_test.go; internal/app/files_test.go; internal/content/cache_test.go",
+    "remaining": "malformed-input/safe-publication and directory move deviations documented in docs/verification.md; frontend interaction pending"
+  },
+  "POST /api/dirDelete": {
+    "status": "implemented",
+    "evidence": "scripts/audio-api-differential.py; internal/app/audio_api_test.go; internal/app/files_test.go; internal/content/cache_test.go",
+    "remaining": "malformed-input/safe-publication and directory move deviations documented in docs/verification.md; frontend interaction pending"
+  },
+  "POST /api/dirCreate": {
+    "status": "implemented",
+    "evidence": "scripts/audio-api-differential.py; internal/app/audio_api_test.go; internal/app/files_test.go; internal/content/cache_test.go",
+    "remaining": "malformed-input/safe-publication and directory move deviations documented in docs/verification.md; frontend interaction pending"
+  },
+  "POST /api/migrateContent2Lib": {
+    "status": "implemented",
+    "evidence": "scripts/audio-api-differential.py; internal/app/audio_api_test.go; internal/app/files_test.go; internal/content/cache_test.go",
+    "remaining": "malformed-input/safe-publication and directory move deviations documented in docs/verification.md; frontend interaction pending"
+  },
+  "GET /content/download/": {
+    "status": "verified",
+    "evidence": "scripts/content-api-differential.py; internal/app/content_api_test.go; internal/content/inspect.go",
+    "remaining": "live/growing raw audio delivery is tracked separately in task 5.5"
+  },
+  "GET /content/json/get/": {
+    "status": "verified",
+    "evidence": "scripts/content-api-differential.py; internal/app/content_api_test.go; internal/content/inspect.go",
+    "remaining": "live/growing raw audio delivery is tracked separately in task 5.5"
+  },
+  "POST /content/json/set/": {
+    "status": "verified",
+    "evidence": "scripts/content-api-differential.py; internal/app/content_api_test.go; internal/content/inspect.go",
+    "remaining": "live/growing raw audio delivery is tracked separately in task 5.5"
+  },
+  "GET /content/json/": {
+    "status": "verified",
+    "evidence": "scripts/content-api-differential.py; internal/app/content_api_test.go; internal/content/inspect.go",
+    "remaining": "live/growing raw audio delivery is tracked separately in task 5.5"
+  },
+  "GET /content/": {
+    "status": "verified",
+    "evidence": "scripts/content-api-differential.py; internal/app/content_api_test.go; internal/content/inspect.go",
+    "remaining": "live/growing raw audio delivery is tracked separately in task 5.5"
+  },
+  "POST /api/fileUpload": {
+    "status": "verified",
+    "evidence": "scripts/content-api-differential.py; internal/app/content_api_test.go; internal/content/inspect.go",
+    "remaining": "live/growing raw audio delivery is tracked separately in task 5.5"
+  },
+  "GET /api/fileIndexV2": {
+    "status": "verified",
+    "evidence": "scripts/content-api-differential.py; internal/app/content_api_test.go; internal/content/inspect.go",
+    "remaining": "live/growing raw audio delivery is tracked separately in task 5.5"
+  },
+  "GET /api/fileIndex": {
+    "status": "verified",
+    "evidence": "scripts/content-api-differential.py; internal/app/content_api_test.go; internal/content/inspect.go",
+    "remaining": "live/growing raw audio delivery is tracked separately in task 5.5"
+  },
+  "GET /api/getTagInfo": {
+    "status": "verified",
+    "evidence": "scripts/tags-api-differential.py; scripts/cache-api-differential.py; internal/app/tags_test.go; scripts/native-smoke.py",
+    "remaining": "physical-device interaction and full official frontend acceptance"
+  },
+  "GET /api/getTagIndex": {
+    "status": "verified",
+    "evidence": "scripts/tags-api-differential.py; scripts/cache-api-differential.py; internal/app/tags_test.go; scripts/native-smoke.py",
+    "remaining": "physical-device interaction and full official frontend acceptance"
+  },
+  "GET /api/tonieboxesJson": {
+    "status": "verified",
+    "evidence": "scripts/tags-api-differential.py; scripts/cache-api-differential.py; internal/app/tags_test.go; scripts/native-smoke.py",
+    "remaining": "physical-device interaction and full official frontend acceptance"
+  },
+  "GET /api/tonieboxesCustomJson": {
+    "status": "verified",
+    "evidence": "scripts/tags-api-differential.py; scripts/cache-api-differential.py; internal/app/tags_test.go; scripts/native-smoke.py",
+    "remaining": "physical-device interaction and full official frontend acceptance"
+  },
+  "GET /api/trigger": {
+    "status": "verified",
+    "evidence": "scripts/tags-api-differential.py; scripts/cache-api-differential.py; internal/app/tags_test.go; scripts/native-smoke.py",
+    "remaining": "physical-device interaction and full official frontend acceptance"
+  },
+  "POST /api/assignUnknown": {
+    "status": "verified",
+    "evidence": "scripts/tags-api-differential.py; scripts/cache-api-differential.py; internal/app/tags_test.go; scripts/native-smoke.py",
+    "remaining": "physical-device interaction and full official frontend acceptance"
+  },
+  "GET /cache/": {
+    "status": "verified",
+    "evidence": "scripts/cache-api-differential.py; internal/app/image_cache_test.go; internal/app/stats.go",
+    "remaining": "official frontend acceptance; body read errors counted by internal/app/stats.go"
+  },
+  "GET /api/stats": {
+    "status": "verified",
+    "evidence": "scripts/cache-api-differential.py; internal/app/image_cache_test.go; internal/app/stats.go",
+    "remaining": "official frontend acceptance; body read errors counted by internal/app/stats.go"
+  },
+  "GET /api/cacheStats": {
+    "status": "verified",
+    "evidence": "scripts/cache-api-differential.py; internal/app/image_cache_test.go; internal/app/stats.go",
+    "remaining": "official frontend acceptance; body read errors counted by internal/app/stats.go"
+  },
+  "POST /api/cacheFlush": {
+    "status": "verified",
+    "evidence": "scripts/cache-api-differential.py; internal/app/image_cache_test.go; internal/app/stats.go",
+    "remaining": "official frontend acceptance; body read errors counted by internal/app/stats.go"
+  },
+  "POST /api/uploadCert": {
+    "status": "verified",
+    "evidence": "scripts/firmware-api-differential.py; scripts/firmware-fixture.py; internal/app/firmware_test.go; internal/firmware/image_test.go; internal/certificates/der.go",
+    "remaining": "documented validation/output safety deviations; privately supplied images and physical flashing unverified"
+  },
+  "GET /api/getFile/ca.der": {
+    "status": "verified",
+    "evidence": "scripts/firmware-api-differential.py; scripts/firmware-fixture.py; internal/app/firmware_test.go; internal/firmware/image_test.go; internal/certificates/der.go",
+    "remaining": "documented validation/output safety deviations; privately supplied images and physical flashing unverified"
+  },
+  "GET /api/getFile/c2.der": {
+    "status": "verified",
+    "evidence": "scripts/firmware-api-differential.py; scripts/firmware-fixture.py; internal/app/firmware_test.go; internal/firmware/image_test.go; internal/certificates/der.go",
+    "remaining": "documented validation/output safety deviations; privately supplied images and physical flashing unverified"
+  },
+  "POST /api/esp32/uploadFirmware": {
+    "status": "verified",
+    "evidence": "scripts/firmware-api-differential.py; scripts/firmware-fixture.py; internal/app/firmware_test.go; internal/firmware/image_test.go; internal/certificates/der.go",
+    "remaining": "documented validation/output safety deviations; privately supplied images and physical flashing unverified"
+  },
+  "POST /api/esp32/extractCerts": {
+    "status": "verified",
+    "evidence": "scripts/firmware-api-differential.py; scripts/firmware-fixture.py; internal/app/firmware_test.go; internal/firmware/image_test.go; internal/certificates/der.go",
+    "remaining": "documented validation/output safety deviations; privately supplied images and physical flashing unverified"
+  },
+  "GET /api/esp32/patchFirmware": {
+    "status": "verified",
+    "evidence": "scripts/firmware-api-differential.py; scripts/firmware-fixture.py; internal/app/firmware_test.go; internal/firmware/image_test.go; internal/certificates/der.go",
+    "remaining": "documented validation/output safety deviations; privately supplied images and physical flashing unverified"
+  },
+  "GET /robots.txt": {
+    "status": "implemented",
+    "evidence": "scripts/security-differential.py; internal/app/security_test.go",
+    "remaining": "physical chip/firmware acceptance; explicit policy and error differences in verification.md/settings-audit.md"
+  },
+  "GET /v1/ota": {
+    "status": "implemented",
+    "evidence": "scripts/cloud-differential.py; testdata/v3-offline.json; testdata/ota-offline.json; internal/app/v3_test.go; internal/app/ota_test.go",
+    "remaining": "physical chip/firmware acceptance; explicit policy and error differences in verification.md/settings-audit.md"
+  },
+  "POST /v3/freshness-check": {
+    "status": "implemented",
+    "evidence": "scripts/cloud-differential.py; testdata/v3-offline.json; testdata/ota-offline.json; internal/app/v3_test.go; internal/app/ota_test.go",
+    "remaining": "physical chip/firmware acceptance; explicit policy and error differences in verification.md/settings-audit.md"
+  },
+  "POST /v3/check-ota": {
+    "status": "implemented",
+    "evidence": "scripts/cloud-differential.py; testdata/v3-offline.json; testdata/ota-offline.json; internal/app/v3_test.go; internal/app/ota_test.go",
+    "remaining": "physical chip/firmware acceptance; explicit policy and error differences in verification.md/settings-audit.md"
+  },
+  "GET /v3/ota": {
+    "status": "implemented",
+    "evidence": "scripts/cloud-differential.py; testdata/v3-offline.json; testdata/ota-offline.json; internal/app/v3_test.go; internal/app/ota_test.go",
+    "remaining": "physical chip/firmware acceptance; explicit policy and error differences in verification.md/settings-audit.md"
+  },
+  "POST /v3/setup-status": {
+    "status": "implemented",
+    "evidence": "scripts/cloud-differential.py; testdata/v3-offline.json; testdata/ota-offline.json; internal/app/v3_test.go; internal/app/ota_test.go",
+    "remaining": "physical chip/firmware acceptance; explicit policy and error differences in verification.md/settings-audit.md"
+  },
+  "GET /v3/chapter": {
+    "status": "implemented",
+    "evidence": "scripts/cloud-differential.py; testdata/v3-offline.json; testdata/ota-offline.json; internal/app/v3_test.go; internal/app/ota_test.go",
+    "remaining": "physical chip/firmware acceptance; explicit policy and error differences in verification.md/settings-audit.md"
+  },
+  "GET /v3/content-meta": {
+    "status": "implemented",
+    "evidence": "scripts/cloud-differential.py; testdata/v3-offline.json; testdata/ota-offline.json; internal/app/v3_test.go; internal/app/ota_test.go",
+    "remaining": "physical chip/firmware acceptance; explicit policy and error differences in verification.md/settings-audit.md"
+  },
+  "GET /api/auth/status": {
+    "status": "implemented",
+    "evidence": "internal/app/auth_test.go; scripts/develop-differential.py",
+    "remaining": "official frontend interactions"
+  },
+  "GET /api/auth/users/get": {
+    "status": "implemented",
+    "evidence": "internal/app/auth_test.go; scripts/develop-differential.py",
+    "remaining": "official frontend interactions"
+  },
+  "POST /api/auth/users/create": {
+    "status": "implemented",
+    "evidence": "internal/app/auth_test.go; scripts/develop-differential.py",
+    "remaining": "official frontend interactions"
+  },
+  "POST /api/auth/users/delete": {
+    "status": "implemented",
+    "evidence": "internal/app/auth_test.go; scripts/develop-differential.py",
+    "remaining": "official frontend interactions"
+  },
+  "POST /api/auth/users/updatePassword": {
+    "status": "implemented",
+    "evidence": "internal/app/auth_test.go; scripts/develop-differential.py",
+    "remaining": "official frontend interactions"
+  },
+  "POST /api/auth/enabled": {
+    "status": "implemented",
+    "evidence": "internal/app/auth_test.go; scripts/develop-differential.py",
+    "remaining": "official frontend interactions"
+  },
+  "POST /api/fileSetListened": {
+    "status": "implemented",
+    "evidence": "internal/app/develop_content_test.go; internal/app/listened.go",
+    "remaining": "official frontend interactions"
+  }
+}

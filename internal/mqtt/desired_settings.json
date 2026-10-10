@@ -1,0 +1,48 @@
+{
+  "settings_history": {
+    "bi_tracking": 0,
+    "max_headphone_volume": 0,
+    "battery_threshold": 0,
+    "scrubbing_enabled": 0,
+    "fleet_obs_enabled": 0,
+    "bedtime_max_headphone_volume": 0,
+    "timezone_transitions": 0,
+    "log_level": 0,
+    "timezone": 0,
+    "bedtime_lightring_color": 0,
+    "bedtime_max_volume": 0,
+    "skipping_direction": 0,
+    "max_volume": 1773690866874,
+    "bedtime_schedules": 0,
+    "alarms": 0,
+    "bedtime_lightring_brightness": 1773690530304,
+    "age_mode": 1773690456997,
+    "skipping_enabled": 0,
+    "lightring_brightness": 1773306190892
+  },
+  "settings_applied": false,
+  "bi_tracking": true,
+  "max_headphone_volume": 100,
+  "battery_threshold": 1,
+  "scrubbing_enabled": false,
+  "fleet_obs_enabled": true,
+  "bedtime_max_headphone_volume": 75,
+  "timezone_transitions": [
+    {
+      "time": 0,
+      "offset": 0
+    }
+  ],
+  "log_level": "info",
+  "timezone": null,
+  "bedtime_lightring_color": "#ffffff",
+  "bedtime_max_volume": 75,
+  "skipping_direction": "right",
+  "max_volume": 100,
+  "bedtime_schedules": [],
+  "alarms": [],
+  "bedtime_lightring_brightness": 75,
+  "age_mode": "3+",
+  "skipping_enabled": true,
+  "lightring_brightness": 100
+}

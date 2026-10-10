@@ -1,0 +1,122 @@
+[
+  {
+    "name": "v3 setup status offline",
+    "path": "/v3/setup-status",
+    "method": "POST",
+    "kind": "bytes",
+    "body": "{}",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "v3 check OTA offline",
+    "path": "/v3/check-ota",
+    "method": "POST",
+    "kind": "json",
+    "body": "{}",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "v3 freshness local update",
+    "path": "/v3/freshness-check",
+    "method": "POST",
+    "kind": "json",
+    "body": "{\"content\":{\"0000000100000001\":0}}",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "v3 local content metadata",
+    "path": "/v3/content-meta/0000000100000001",
+    "method": "GET",
+    "kind": "json",
+    "body": "",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "v3 first chapter bytes",
+    "path": "/v3/chapter/teddycloud_00_0000000100000001",
+    "method": "GET",
+    "kind": "bytes",
+    "body": "",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "v3 second chapter and Ogg headers",
+    "path": "/v3/chapter/teddycloud_01_0000000100000001",
+    "method": "GET",
+    "kind": "bytes",
+    "body": "",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "v3 invalid chapter",
+    "path": "/v3/chapter/teddycloud_99_0000000100000001",
+    "method": "GET",
+    "kind": "bytes",
+    "body": "",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "v3 unknown content metadata",
+    "path": "/v3/content-meta/0200000002000000",
+    "method": "GET",
+    "kind": "bytes",
+    "body": "",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "v3 OTA local disabled",
+    "path": "/v3/ota/3/aabbccdd",
+    "method": "GET",
+    "kind": "bytes",
+    "body": "",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "enable v3 local OTA",
+    "path": "/api/settings/set/cloud.localOta",
+    "method": "POST",
+    "kind": "bytes",
+    "body": "true",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "v3 OTA hash selection",
+    "path": "/v3/ota/3/aabbccdd",
+    "method": "GET",
+    "kind": "bytes",
+    "body": "",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "restore v3 local OTA disabled",
+    "path": "/api/settings/set/cloud.localOta",
+    "method": "POST",
+    "kind": "bytes",
+    "body": "false",
+    "headers": [
+      "Content-Type"
+    ]
+  }
+]

@@ -1,0 +1,23 @@
+File: config-final.test
+Build ID: dc2d0cf33db56280dde63a8825ed88345a3c54cf
+Type: delay
+Time: 2026-10-09 22:03:34 CEST
+Showing nodes accounting for 177.92s, 100% of 177.92s total
+Dropped 12 nodes (cum <= 0.89s)
+Showing top 15 nodes out of 22
+      flat  flat%   sum%        cum   cum%
+   155.67s 87.49% 87.49%    155.67s 87.49%  sync.(*Mutex).Lock (inline)
+    11.13s  6.26% 93.75%     11.13s  6.26%  runtime.chanrecv1
+    11.12s  6.25%   100%     11.12s  6.25%  sync.(*WaitGroup).Wait
+         0     0%   100%    139.37s 78.33%  goteddycloud/internal/config.(*Store).Set (inline)
+         0     0%   100%     16.30s  9.16%  goteddycloud/internal/config.(*Store).SetRuntime
+         0     0%   100%    139.37s 78.33%  goteddycloud/internal/config.(*Store).Update
+         0     0%   100%     11.12s  6.25%  goteddycloud/internal/config.BenchmarkSettingsMixed
+         0     0%   100%    155.67s 87.49%  goteddycloud/internal/config.BenchmarkSettingsMixed.func1
+         0     0%   100%     11.13s  6.26%  main.main
+         0     0%   100%     11.13s  6.26%  runtime.main
+         0     0%   100%     11.13s  6.26%  testing.(*B).Run
+         0     0%   100%     11.12s  6.25%  testing.(*B).RunParallel
+         0     0%   100%    155.67s 87.49%  testing.(*B).RunParallel.func1
+         0     0%   100%     11.13s  6.25%  testing.(*B).doBench
+         0     0%   100%     11.12s  6.25%  testing.(*B).doBench.gowrap1

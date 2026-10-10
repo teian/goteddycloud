@@ -1,0 +1,75 @@
+[
+  {
+    "name": "OTA local disabled",
+    "method": "GET",
+    "path": "/v1/ota/3?cv=0",
+    "body": "",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "enable local OTA",
+    "method": "POST",
+    "path": "/api/settings/set/cloud.localOta",
+    "body": "true",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "OTA latest file and ignore tmp",
+    "method": "GET",
+    "path": "/v1/ota/3?cv=100",
+    "body": "",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "OTA partial range",
+    "method": "GET",
+    "path": "/v1/ota/3?cv=0",
+    "request_headers": {
+      "Range": "bytes=2-5"
+    },
+    "kind": "bytes",
+    "headers": [
+      "Content-Type",
+      "Content-Range"
+    ]
+  },
+  {
+    "name": "OTA already current",
+    "method": "GET",
+    "path": "/v1/ota/3?cv=200",
+    "body": "",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "OTA no files for ID",
+    "method": "GET",
+    "path": "/v1/ota/7?cv=0",
+    "body": "",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "restore local OTA disabled",
+    "method": "POST",
+    "path": "/api/settings/set/cloud.localOta",
+    "body": "false",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type"
+    ]
+  }
+]

@@ -1,0 +1,37 @@
+{
+  "binary_sha256": "cf700bb4fd01474cc71b3b60753780c3a93ea3fabcc1b57ac061ebcdff6668ee",
+  "concurrency": 4,
+  "gomaxprocs": 4,
+  "rounds": [
+    {
+      "requests": 20000,
+      "requests_per_second": 48366.853529748165,
+      "median_us": 73.82,
+      "p95_us": 142.418
+    },
+    {
+      "requests": 20000,
+      "requests_per_second": 48744.41372872082,
+      "median_us": 74.069,
+      "p95_us": 141.558
+    },
+    {
+      "requests": 20000,
+      "requests_per_second": 49510.83603440731,
+      "median_us": 72.629,
+      "p95_us": 139.079
+    },
+    {
+      "requests": 20000,
+      "requests_per_second": 48977.58903316944,
+      "median_us": 73.349,
+      "p95_us": 139.559
+    },
+    {
+      "requests": 20000,
+      "requests_per_second": 49439.32138677781,
+      "median_us": 72.719,
+      "p95_us": 138.068
+    }
+  ]
+}

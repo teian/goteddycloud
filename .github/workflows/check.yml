@@ -1,0 +1,76 @@
+name: Go compatibility checks
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version: '1.26.8'
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: scripts/build-cc3200-wasm.sh
+      - run: node --test scripts/cc3200-protocol.test.mjs
+      - run: go test -buildvcs=false ./...
+      - run: go vet -buildvcs=false ./...
+      - name: Staticcheck
+        env:
+          GOFLAGS: '-buildvcs=false'
+        run: go run honnef.co/go/tools/cmd/staticcheck@v0.8.1 ./...
+      - run: go mod tidy -diff
+      - run: go test -buildvcs=false -race ./...
+      - name: Bounded parser and path fuzz smoke
+        env:
+          GOMAXPROCS: '2'
+        run: |
+          go test -buildvcs=false ./internal/mqtt -run '^$' -fuzz FuzzPacket -fuzztime 3s
+          go test -buildvcs=false ./internal/firmware -run '^$' -fuzz FuzzFirmwareParse -fuzztime 3s
+          go test -buildvcs=false ./internal/cc3200 -run '^$' -fuzz FuzzInspect -fuzztime 3s
+          go test -buildvcs=false ./internal/taf -run '^$' -fuzz FuzzReadHeader -fuzztime 3s
+          go test -buildvcs=false ./internal/taf -run '^$' -fuzz FuzzOpusFrames -fuzztime 3s
+          go test -buildvcs=false ./internal/storage -run '^$' -fuzz FuzzConfinedRead -fuzztime 3s
+      - run: python3 scripts/build-release.py ci-${{ github.sha }}
+      - run: python3 scripts/native-smoke.py --binary dist/goteddycloud-ci-${{ github.sha }}-linux-amd64/goteddycloud
+      - run: python3 scripts/migration-rehearsal.py --binary dist/goteddycloud-ci-${{ github.sha }}-linux-amd64/goteddycloud
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: backend-builds
+          path: |
+            dist/*.tar.gz
+            dist/*.zip
+            dist/SHA256SUMS
+  oracle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version: '1.26.8'
+      - run: sudo apt-get update && sudo apt-get install -y build-essential ffmpeg
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: scripts/oracle-suite.sh
+      - run: python3 scripts/cli-smoke.py
+      - run: python3 scripts/mqtt-differential.py
+      - run: python3 scripts/port-differential.py
+      - run: python3 scripts/live-differential.py
+      - run: python3 scripts/cloud-differential.py
+      - run: python3 scripts/security-differential.py
+      - run: python3 scripts/diagnostics-smoke.py
+      - run: python3 scripts/custom-api-tests.py
+      - run: scripts/frontend.sh build
+      - run: scripts/frontend.sh test
+      - run: python3 -m venv .cache/develop-test-venv && .cache/develop-test-venv/bin/pip install pytest==9.1.1
+      - run: .cache/develop-test-venv/bin/python scripts/develop-differential.py
+      - run: .cache/develop-test-venv/bin/python scripts/develop-differential.py --stage .cache/develop-hardening --hardening-only
+      - run: python3 scripts/develop-inventory.py && python3 scripts/reference-inventory.py --check

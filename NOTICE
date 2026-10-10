@@ -1,0 +1,28 @@
+goTeddyCloud is a Go rewrite based on the teddyCloud project by the
+Toniebox Reverse Engineering community and its contributors.
+
+Reference: https://github.com/toniebox-reverse-engineering/teddycloud
+Pinned develop C source: 8b39ac9c9cbc312ea1fa948f66b0dc014fd096c1
+Original master baseline: 78c3b38e36f665d3a5fffe907f73a02725176377
+
+This project's authored code is distributed under GPL-2.0-only (see LICENSE).
+Retain upstream notices on copied schemas and source-derived code.
+Third-party components retain their own licenses; see docs/licenses.md.
+No affiliation with or endorsement by the Toniebox manufacturer is implied.
+
+internal/mqtt/box_entities.json, server_settings.json and desired_settings.json
+are derived from the pinned teddyCloud src/mqtt.c, src/settings.c and
+src/mqtt_server.c (GPL-2.0-only).
+
+internal/app/security.go derives domain hashes, crawler names and mitigation
+contracts from the pinned teddyCloud src/handler_security_mit.c (GPL-2.0-only).
+
+CC3200 ROM/UARTGWEX protocol and filesystem behavior are based on
+https://github.com/toniebox-reverse-engineering/cc3200tool
+at c2332898a1ededc0bdd01ec279b23366d213f81e.
+Reference attribution: Copyright (C) 2016-2020 Allterco Robotics;
+Copyright (C) 2020- Team RevvoX (GPL-2.0-or-later, used under GPL version 2).
+TI loader/firmware binaries are not redistributed or downloaded automatically.
+The embedded Go WebAssembly support runtime retains the Go Authors BSD notice;
+see third_party/Go-LICENSE. Native UART uses go.bug.st/serial (BSD-3-Clause)
+and golang.org/x/sys (BSD-3-Clause); their notices are in third_party/.

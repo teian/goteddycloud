@@ -1,0 +1,98 @@
+goos: linux
+goarch: amd64
+pkg: goteddycloud/internal/app
+cpu: AMD Ryzen 7 5800X 8-Core Processor             
+BenchmarkHandlers/Time-4         	    2922	    113464 ns/op	  158936 B/op	     210 allocs/op
+BenchmarkHandlers/Time-4         	    3152	    113768 ns/op	  158933 B/op	     210 allocs/op
+BenchmarkHandlers/Time-4         	    3082	    113820 ns/op	  158933 B/op	     210 allocs/op
+BenchmarkHandlers/Time-4         	    2959	    113660 ns/op	  158934 B/op	     210 allocs/op
+BenchmarkHandlers/Time-4         	    3266	    112968 ns/op	  158933 B/op	     210 allocs/op
+BenchmarkHandlers/AuthStatus-4   	    2294	    147684 ns/op	  197993 B/op	     269 allocs/op
+BenchmarkHandlers/AuthStatus-4   	    2587	    142404 ns/op	  197988 B/op	     269 allocs/op
+BenchmarkHandlers/AuthStatus-4   	    2362	    149554 ns/op	  197991 B/op	     269 allocs/op
+BenchmarkHandlers/AuthStatus-4   	    2558	    144695 ns/op	  197992 B/op	     269 allocs/op
+BenchmarkHandlers/AuthStatus-4   	    2569	    143216 ns/op	  197994 B/op	     269 allocs/op
+BenchmarkHandlers/SettingsIndex-4         	     435	    805119 ns/op	  383212 B/op	    2226 allocs/op
+BenchmarkHandlers/SettingsIndex-4         	     433	    815031 ns/op	  383218 B/op	    2226 allocs/op
+BenchmarkHandlers/SettingsIndex-4         	     440	    801936 ns/op	  383188 B/op	    2226 allocs/op
+BenchmarkHandlers/SettingsIndex-4         	     441	    787272 ns/op	  383266 B/op	    2226 allocs/op
+BenchmarkHandlers/SettingsIndex-4         	     439	    799091 ns/op	  383313 B/op	    2226 allocs/op
+BenchmarkHandlers/FileIndex-4             	    2080	    173463 ns/op	  237332 B/op	     320 allocs/op
+BenchmarkHandlers/FileIndex-4             	    1938	    175776 ns/op	  237302 B/op	     320 allocs/op
+BenchmarkHandlers/FileIndex-4             	    2172	    177130 ns/op	  237349 B/op	     320 allocs/op
+BenchmarkHandlers/FileIndex-4             	    2071	    178815 ns/op	  237282 B/op	     320 allocs/op
+BenchmarkHandlers/FileIndex-4             	    2202	    175898 ns/op	  237271 B/op	     320 allocs/op
+BenchmarkHandlers/TagInfo-4               	    1556	    231892 ns/op	  247426 B/op	     525 allocs/op
+BenchmarkHandlers/TagInfo-4               	    1522	    230481 ns/op	  247429 B/op	     525 allocs/op
+BenchmarkHandlers/TagInfo-4               	    1640	    222871 ns/op	  247438 B/op	     525 allocs/op
+BenchmarkHandlers/TagInfo-4               	    1455	    221347 ns/op	  247418 B/op	     525 allocs/op
+BenchmarkHandlers/TagInfo-4               	    1578	    230084 ns/op	  247429 B/op	     525 allocs/op
+BenchmarkHandlers/Freshness-4             	    3037	    114619 ns/op	  159733 B/op	     221 allocs/op
+BenchmarkHandlers/Freshness-4             	    3091	    115335 ns/op	  159727 B/op	     221 allocs/op
+BenchmarkHandlers/Freshness-4             	    3153	    118046 ns/op	  159727 B/op	     221 allocs/op
+BenchmarkHandlers/Freshness-4             	    3349	    114711 ns/op	  159726 B/op	     221 allocs/op
+BenchmarkHandlers/Freshness-4             	    3104	    116713 ns/op	  159727 B/op	     221 allocs/op
+PASS
+ok  	goteddycloud/internal/app	10.902s
+goos: linux
+goarch: amd64
+pkg: goteddycloud/internal/config
+cpu: AMD Ryzen 7 5800X 8-Core Processor             
+BenchmarkSnapshot/Global-4         	   15376	     23454 ns/op	   38048 B/op	      46 allocs/op
+BenchmarkSnapshot/Global-4         	   15934	     22365 ns/op	   38048 B/op	      46 allocs/op
+BenchmarkSnapshot/Global-4         	   15805	     22698 ns/op	   38048 B/op	      46 allocs/op
+BenchmarkSnapshot/Global-4         	   15328	     23146 ns/op	   38048 B/op	      46 allocs/op
+BenchmarkSnapshot/Global-4         	   16365	     21694 ns/op	   38048 B/op	      46 allocs/op
+BenchmarkSnapshot/Overlay-4        	   15339	     23732 ns/op	   38048 B/op	      46 allocs/op
+BenchmarkSnapshot/Overlay-4        	   15309	     23689 ns/op	   38048 B/op	      46 allocs/op
+BenchmarkSnapshot/Overlay-4        	   15001	     23783 ns/op	   38048 B/op	      46 allocs/op
+BenchmarkSnapshot/Overlay-4        	   15574	     23371 ns/op	   38048 B/op	      46 allocs/op
+BenchmarkSnapshot/Overlay-4        	   14725	     24639 ns/op	   38048 B/op	      46 allocs/op
+BenchmarkSnapshot/UnknownOverlay-4 	   16375	     22625 ns/op	   38048 B/op	      46 allocs/op
+BenchmarkSnapshot/UnknownOverlay-4 	   15759	     22824 ns/op	   38048 B/op	      46 allocs/op
+BenchmarkSnapshot/UnknownOverlay-4 	   16250	     22781 ns/op	   38048 B/op	      46 allocs/op
+BenchmarkSnapshot/UnknownOverlay-4 	   15108	     23485 ns/op	   38048 B/op	      46 allocs/op
+BenchmarkSnapshot/UnknownOverlay-4 	   15595	     22387 ns/op	   38048 B/op	      46 allocs/op
+BenchmarkSnapshot/Parallel-4       	   46093	      7654 ns/op	   38048 B/op	      46 allocs/op
+BenchmarkSnapshot/Parallel-4       	   46539	      7552 ns/op	   38048 B/op	      46 allocs/op
+BenchmarkSnapshot/Parallel-4       	   47631	      7740 ns/op	   38048 B/op	      46 allocs/op
+BenchmarkSnapshot/Parallel-4       	   47414	      7748 ns/op	   38048 B/op	      46 allocs/op
+BenchmarkSnapshot/Parallel-4       	   46172	      7771 ns/op	   38048 B/op	      46 allocs/op
+PASS
+ok  	goteddycloud/internal/config	7.601s
+goos: linux
+goarch: amd64
+pkg: goteddycloud/internal/catalog
+cpu: AMD Ryzen 7 5800X 8-Core Processor             
+BenchmarkCatalogLookup/100/ModelLast-4         	   18099	     19478 ns/op	   18123 B/op	     307 allocs/op
+BenchmarkCatalogLookup/100/ModelLast-4         	   17793	     19571 ns/op	   18123 B/op	     307 allocs/op
+BenchmarkCatalogLookup/100/ModelLast-4         	   18610	     19493 ns/op	   18123 B/op	     307 allocs/op
+BenchmarkCatalogLookup/100/ModelLast-4         	   18336	     19435 ns/op	   18123 B/op	     307 allocs/op
+BenchmarkCatalogLookup/100/ModelLast-4         	   18346	     19311 ns/op	   18123 B/op	     307 allocs/op
+BenchmarkCatalogLookup/100/AudioLast-4         	    5965	     56320 ns/op	   47968 B/op	     912 allocs/op
+BenchmarkCatalogLookup/100/AudioLast-4         	    6488	     53413 ns/op	   47968 B/op	     912 allocs/op
+BenchmarkCatalogLookup/100/AudioLast-4         	    6022	     55994 ns/op	   47968 B/op	     912 allocs/op
+BenchmarkCatalogLookup/100/AudioLast-4         	    7129	     55539 ns/op	   47968 B/op	     912 allocs/op
+BenchmarkCatalogLookup/100/AudioLast-4         	    6993	     55300 ns/op	   47968 B/op	     912 allocs/op
+BenchmarkCatalogLookup/100/AudioMissing-4      	    6289	     54366 ns/op	   47200 B/op	     900 allocs/op
+BenchmarkCatalogLookup/100/AudioMissing-4      	    6879	     53377 ns/op	   47200 B/op	     900 allocs/op
+BenchmarkCatalogLookup/100/AudioMissing-4      	    6879	     52204 ns/op	   47200 B/op	     900 allocs/op
+BenchmarkCatalogLookup/100/AudioMissing-4      	    5942	     54001 ns/op	   47200 B/op	     900 allocs/op
+BenchmarkCatalogLookup/100/AudioMissing-4      	    7395	     55644 ns/op	   47200 B/op	     900 allocs/op
+BenchmarkCatalogLookup/10000/ModelLast-4       	     183	   1941404 ns/op	 1760775 B/op	   30009 allocs/op
+BenchmarkCatalogLookup/10000/ModelLast-4       	     184	   1939729 ns/op	 1760754 B/op	   30009 allocs/op
+BenchmarkCatalogLookup/10000/ModelLast-4       	     183	   1938845 ns/op	 1760766 B/op	   30009 allocs/op
+BenchmarkCatalogLookup/10000/ModelLast-4       	     178	   1990255 ns/op	 1760771 B/op	   30009 allocs/op
+BenchmarkCatalogLookup/10000/ModelLast-4       	     188	   1920772 ns/op	 1760764 B/op	   30009 allocs/op
+BenchmarkCatalogLookup/10000/AudioLast-4       	      60	   5456223 ns/op	 4720777 B/op	   90012 allocs/op
+BenchmarkCatalogLookup/10000/AudioLast-4       	      56	   5664068 ns/op	 4720781 B/op	   90012 allocs/op
+BenchmarkCatalogLookup/10000/AudioLast-4       	      63	   5415785 ns/op	 4720775 B/op	   90012 allocs/op
+BenchmarkCatalogLookup/10000/AudioLast-4       	      64	   5451856 ns/op	 4720774 B/op	   90012 allocs/op
+BenchmarkCatalogLookup/10000/AudioLast-4       	      69	   5240331 ns/op	 4720779 B/op	   90012 allocs/op
+BenchmarkCatalogLookup/10000/AudioMissing-4    	      78	   5394417 ns/op	 4720006 B/op	   90000 allocs/op
+BenchmarkCatalogLookup/10000/AudioMissing-4    	      64	   5272588 ns/op	 4720005 B/op	   90000 allocs/op
+BenchmarkCatalogLookup/10000/AudioMissing-4    	      67	   5310404 ns/op	 4720008 B/op	   90000 allocs/op
+BenchmarkCatalogLookup/10000/AudioMissing-4    	      64	   5390263 ns/op	 4720009 B/op	   90000 allocs/op
+BenchmarkCatalogLookup/10000/AudioMissing-4    	      79	   5463395 ns/op	 4720007 B/op	   90000 allocs/op
+PASS
+ok  	goteddycloud/internal/catalog	10.802s

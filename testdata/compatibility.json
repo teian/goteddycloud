@@ -1,0 +1,4 @@
+[
+  {"name":"offline time", "method":"GET", "path":"/v1/time", "headers":["Content-Type"], "kind":"unix-time", "time_tolerance_seconds":2},
+  {"name":"time ordered prefix dispatch", "method":"GET", "path":"/v1/time/extra", "headers":["Content-Type"], "kind":"unix-time", "time_tolerance_seconds":2}
+]

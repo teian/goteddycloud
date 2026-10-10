@@ -1,0 +1,9 @@
+goos: linux
+goarch: amd64
+pkg: goteddycloud/internal/config
+cpu: AMD Ryzen 7 5800X 8-Core Processor             
+BenchmarkSettingsMixed-16    	24381238	       148.5 ns/op	     162 B/op	       0 allocs/op
+BenchmarkSettingsMixed-16    	23647284	       146.8 ns/op	     162 B/op	       0 allocs/op
+BenchmarkSettingsMixed-16    	24311502	       147.2 ns/op	     162 B/op	       0 allocs/op
+PASS
+ok  	goteddycloud/internal/config	11.138s

@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="de"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Katalog teilen – goteddycloud</title>
+<style>body{font:16px system-ui;max-width:960px;margin:2rem auto;padding:0 1rem;background:#f5f7fa;color:#202838}section{background:white;padding:1rem;margin:1rem 0;border-radius:8px}label{display:block;margin:.6rem 0}input,select,button{font:inherit;padding:.4rem;margin:.2rem}button{cursor:pointer}#message{white-space:pre-wrap}[hidden]{display:none!important}a{color:#165bb7}#items{max-height:28rem;overflow:auto}</style>
+<h1>Katalog teilen</h1><p><a href="/web/settings/users">Benutzer und Bereiche</a> · <a href="/web" target="_top">Weboberfläche</a></p>
+<p id="message" role="status" aria-live="polite"></p>
+<section id="login" hidden><p>Bitte zuerst unter <a href="/web/settings/users">Benutzer und Bereiche</a> anmelden.</p></section>
+<section id="catalogs" hidden><label>Katalog <select id="catalog"></select></label><p>Erhaltene Freigaben erlauben Lesen und Herunterladen. Sie ändern keine Bereichsmitgliedschaft.</p><button id="reload" type="button">Aktualisieren</button><h2>Inhalte</h2><div id="items"></div></section>
+<section id="manage" hidden><h2>Freigabe erteilen oder ersetzen</h2><form id="grant"><label>Empfänger (bestehender Benutzername) <input name="username" required maxlength="32" autocomplete="off"></label><label><input name="all" type="checkbox"> Gesamter Katalog, einschließlich später hinzugefügter Inhalte</label><p>Für eine Teilfreigabe oben einzelne Inhalte markieren. Gespeicherte Audiodateien aus Inhalt und Bibliothek werden geteilt; externe Quellen und Zugangsdaten bleiben privat. Erneutes Speichern ersetzt die Freigabe für diesen Empfänger.</p><button>Freigabe speichern</button></form><h2>Bestehende Freigaben</h2><div id="recipients"></div></section>
+<script type="module" src="/tools/shares.mjs"></script></html>

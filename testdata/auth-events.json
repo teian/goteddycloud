@@ -1,0 +1,82 @@
+[
+  {
+    "name": "develop auth login 0",
+    "method": "POST",
+    "path": "/api/auth/login",
+    "body": "username=admin&passwordHash=anything",
+    "kind": "json",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "develop auth login 1",
+    "method": "POST",
+    "path": "/api/auth/login",
+    "body": "username=admin",
+    "kind": "json",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "develop auth login 2",
+    "method": "POST",
+    "path": "/api/auth/login",
+    "body": "username=other&passwordHash=anything",
+    "kind": "json",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "develop auth refresh-token 3",
+    "method": "POST",
+    "path": "/api/auth/refresh-token",
+    "body": "",
+    "kind": "json",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "develop auth refresh-token 4",
+    "method": "POST",
+    "path": "/api/auth/refresh-token",
+    "body": "",
+    "kind": "json",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "develop auth logout 5",
+    "method": "GET",
+    "path": "/api/auth/logout",
+    "body": "",
+    "kind": "json",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "management no session",
+    "method": "GET",
+    "path": "/api/getBoxes",
+    "body": "",
+    "kind": "json",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "SSE keepalive",
+    "method": "GET",
+    "path": "/api/sse",
+    "kind": "sse-json",
+    "events": 1,
+    "headers": [
+      "Content-Type"
+    ]
+  }
+]

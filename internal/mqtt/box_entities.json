@@ -1,0 +1,215 @@
+[
+  {
+    "id": "TagInvalid",
+    "name": "Tag Invalid",
+    "type": "sensor",
+    "stat_t": "%s/TagInvalid"
+  },
+  {
+    "id": "TagValid",
+    "name": "Tag Valid",
+    "type": "sensor",
+    "stat_t": "%s/TagValid"
+  },
+  {
+    "id": "VolUp",
+    "name": "Volume Up",
+    "type": "event",
+    "stat_t": "%s/VolUp",
+    "event_types": "pressed;double-pressed;triple-pressed"
+  },
+  {
+    "id": "VolDown",
+    "name": "Volume Down",
+    "type": "event",
+    "stat_t": "%s/VolDown",
+    "event_types": "pressed;double-pressed;triple-pressed"
+  },
+  {
+    "id": "CloudRequest",
+    "name": "Cloud Request",
+    "type": "sensor",
+    "stat_t": "%s/CloudRequest"
+  },
+  {
+    "id": "BoxTilt",
+    "name": "Box Tilt",
+    "type": "sensor",
+    "stat_t": "%s/BoxTilt"
+  },
+  {
+    "id": "KnockForward",
+    "name": "Knock Forward",
+    "type": "event",
+    "event_types": "triggered",
+    "stat_t": "%s/KnockForward"
+  },
+  {
+    "id": "KnockBackward",
+    "name": "Knock Backward",
+    "type": "event",
+    "event_types": "triggered",
+    "stat_t": "%s/KnockBackward"
+  },
+  {
+    "id": "TiltForward",
+    "name": "Tilt Forward",
+    "type": "event",
+    "event_types": "triggered",
+    "stat_t": "%s/TiltForward"
+  },
+  {
+    "id": "TiltBackward",
+    "name": "Tilt Backward",
+    "type": "event",
+    "event_types": "triggered",
+    "stat_t": "%s/TiltBackward"
+  },
+  {
+    "id": "Playback",
+    "name": "Playback",
+    "type": "sensor",
+    "stat_t": "%s/Playback"
+  },
+  {
+    "id": "VolumeLevel",
+    "name": "Volume Level",
+    "type": "sensor",
+    "stat_t": "%s/VolumeLevel"
+  },
+  {
+    "id": "VolumedB",
+    "name": "Volume dB",
+    "type": "sensor",
+    "stat_t": "%s/VolumedB",
+    "unit_of_meas": "dB"
+  },
+  {
+    "id": "Charger",
+    "name": "Charger",
+    "type": "binary_sensor",
+    "stat_t": "%s/Charger"
+  },
+  {
+    "id": "LastSeen",
+    "name": "LastSeen",
+    "type": "sensor",
+    "stat_t": "%s/LastSeen",
+    "dev_class": "timestamp"
+  },
+  {
+    "id": "LastCloudTime",
+    "name": "LastCloudTime",
+    "type": "sensor",
+    "stat_t": "%s/LastCloudTime",
+    "dev_class": "timestamp"
+  },
+  {
+    "id": "LastCloudOtaTime",
+    "name": "LastCloudOtaTime",
+    "type": "sensor",
+    "stat_t": "%s/LastCloudOtaTime",
+    "dev_class": "timestamp"
+  },
+  {
+    "id": "LastCloudClaimTime",
+    "name": "LastCloudClaimTime",
+    "type": "sensor",
+    "stat_t": "%s/LastCloudClaimTime",
+    "dev_class": "timestamp"
+  },
+  {
+    "id": "LastCloudContentTime",
+    "name": "LastCloudContentTime",
+    "type": "sensor",
+    "stat_t": "%s/LastCloudContentTime",
+    "dev_class": "timestamp"
+  },
+  {
+    "id": "LastCloudFreshnessCheckTime",
+    "name": "LastCloudFreshnessCheckTime",
+    "type": "sensor",
+    "stat_t": "%s/LastCloudFreshnessCheckTime",
+    "dev_class": "timestamp"
+  },
+  {
+    "id": "LastCloudResetTime",
+    "name": "LastCloudResetTime",
+    "type": "sensor",
+    "stat_t": "%s/LastCloudResetTime",
+    "dev_class": "timestamp"
+  },
+  {
+    "id": "ContentAudioId",
+    "name": "Content Audio Id",
+    "type": "sensor",
+    "stat_t": "%s/ContentAudioId"
+  },
+  {
+    "id": "ContentTitle",
+    "name": "Content Title",
+    "type": "sensor",
+    "stat_t": "%s/ContentTitle"
+  },
+  {
+    "id": "ContentPicture",
+    "name": "Content Picture",
+    "type": "image",
+    "url_t": "%s/ContentPicture"
+  },
+  {
+    "id": "CmdStop",
+    "name": "Stop Stream",
+    "type": "button",
+    "cmd_t": "%s/CmdStop/set"
+  },
+  {
+    "id": "CmdVolLimitSpk",
+    "name": "Speaker Volume Limit",
+    "type": "number",
+    "cmd_t": "%s/CmdVolLimitSpk/set",
+    "stat_t": "%s/CmdVolLimitSpk",
+    "min": 0,
+    "max": 3,
+    "mode": "slider",
+    "ic": "mdi:volume-high"
+  },
+  {
+    "id": "CmdVolLimitHdp",
+    "name": "Headphone Volume Limit",
+    "type": "number",
+    "cmd_t": "%s/CmdVolLimitHdp/set",
+    "stat_t": "%s/CmdVolLimitHdp",
+    "min": 0,
+    "max": 3,
+    "mode": "slider",
+    "ic": "mdi:headphones"
+  },
+  {
+    "id": "CmdLed",
+    "name": "LED Mode",
+    "type": "number",
+    "cmd_t": "%s/CmdLed/set",
+    "stat_t": "%s/CmdLed",
+    "min": 0,
+    "max": 2,
+    "mode": "slider",
+    "ic": "mdi:led-on"
+  },
+  {
+    "id": "CmdSlapEnabled",
+    "name": "Slap to Skip",
+    "type": "switch",
+    "cmd_t": "%s/CmdSlapEnabled/set",
+    "stat_t": "%s/CmdSlapEnabled",
+    "ic": "mdi:gesture-tap"
+  },
+  {
+    "id": "CmdSlapDirection",
+    "name": "Slap Direction",
+    "type": "switch",
+    "cmd_t": "%s/CmdSlapDirection/set",
+    "stat_t": "%s/CmdSlapDirection",
+    "ic": "mdi:swap-horizontal"
+  }
+]

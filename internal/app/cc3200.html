@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CC3200 flashing · teddyCloud</title>
+<style>
+:root{font:17px/1.55 system-ui,sans-serif;color-scheme:light dark}body{max-width:860px;margin:40px auto;padding:0 22px}h1{line-height:1.15}section{border:1px solid #8886;border-radius:12px;padding:22px;margin:22px 0}label{display:block;margin:12px 0}input,button{font:inherit;padding:8px}input[type=text]{width:min(95%,650px)}button{margin:6px 8px 6px 0;cursor:pointer}button:disabled{cursor:default}a{color:#438deb}code{overflow-wrap:anywhere}.pins{display:flex;flex-wrap:wrap;gap:12px}.pins input{width:55px}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#8881;padding:16px;max-height:350px;overflow:auto}progress{width:100%}.notice{border-left:4px solid #d29229;padding-left:14px}small{display:block}#status{font-weight:600}
+</style></head><body>
+<a href="/web">← teddyCloud</a><h1>Flash a CC3200 Toniebox</h1>
+<p>Use an ESP32-C3 with native USB as a UART gateway. This workflow backs up the box before installing the HackieboxNG preloader and teddyCloud replacement CA.</p>
+<p class="notice">Hardware acceptance is pending. Keep an independent backup, use stable power, and keep the browser open during writes. USB access requires a Web Serial browser and HTTPS or localhost.</p>
+<section><h2>1. Prepare the gateway and wiring</h2>
+<p><a href="https://g3gg0.github.io/ESP32-UART-Gateway/flasher.static.html" target="_blank" rel="noopener noreferrer">Install the ESP32-C3 gateway firmware</a>, then disconnect that tool to release the USB port. This page configures the gateway when connecting.</p>
+<p>Connect common GND, gateway TX → box RX, gateway RX → box TX, reset GPIO → box RST, control GPIO → box SOP2. Use 3.3 V logic; never connect 5 V to the box. Check your board’s pinout before connecting.</p>
+<p><a href="https://toniebox-reverse-engineering.github.io/docs/wiki/cc3200/pinout/" target="_blank" rel="noopener noreferrer">CC3200 pinout</a> · <a href="https://github.com/toniebox-reverse-engineering/cc3200tool#esp32-gateway" target="_blank" rel="noopener noreferrer">Gateway reference</a></p>
+<div class="pins"><label>TX GPIO <input id="tx" type="number" value="20" min="0" max="21"></label><label>RX GPIO <input id="rx" type="number" value="21" min="0" max="21"></label><label>Reset GPIO <input id="reset" type="number" value="10" min="0" max="21"></label><label>SOP2 GPIO <input id="control" type="number" value="9" min="0" max="21"></label><label>LED GPIO <input id="led" type="number" value="8" min="0" max="21"></label></div>
+<label>Network processor loader: select <code>rbtl3100s.dll</code> from <a href="https://github.com/toniebox-reverse-engineering/cc3200tool/blob/master/cc3200tool/dll/rbtl3100s.dll" target="_blank" rel="noopener noreferrer">cc3200tool</a> <input id="loader" type="file"></label><small>The loader is checked against a pinned SHA-256 before upload to SRAM. CC3200 ROM revisions below 4 require the legacy tool.</small>
+<button id="connect">Connect and prepare CC3200</button><button id="disconnect" disabled>Disconnect / cancel</button>
+</section>
+<section><h2>2. Back up flash and files</h2>
+<p>Read and compare the complete serial flash twice, then read every named file twice. Unnamed and mirrored allocations are preserved by ID. Important files missing from the FAT are also queried directly by name.</p>
+<button id="backup" disabled>Read, verify and save backup</button><button id="download" disabled>Download backup ZIP</button>
+<label><input id="saved" type="checkbox"> I saved the backup ZIP independently of teddyCloud.</label>
+<label>Box MAC address for certificate import (12 hex digits) <input id="mac" type="text" maxlength="12" placeholder="001122aabbcc"></label><button id="import" disabled>Import backup certificates</button>
+<small>Backups include private certificate keys. The ZIP is stored in the selected filesystem/S3 backend under the firmware directory.</small>
+</section>
+<section><h2>3. Review and install</h2>
+<label>HackieboxNG <code>flash/sys/mcuimg.bin</code> <input id="preloader" type="file" accept=".bin"></label>
+<p><a href="https://github.com/toniebox-reverse-engineering/hackiebox_cfw_ng/releases" target="_blank" rel="noopener noreferrer">Get a HackieboxNG release</a> and extract it first. The preloader is a different file from your box’s original <code>mcuimg.bin</code>.</p>
+<label>SHA-256 of the original bootloader from your trusted backup <input id="originalHash" type="text" minlength="64" maxlength="64" spellcheck="false" placeholder="64 hexadecimal characters"></label>
+<small>The hash must independently identify your original bootloader, or an already preserved <code>/sys/pre-img.bin</code>. Structural checks alone do not identify an official release.</small>
+<label><input id="sdReady" type="checkbox"> I copied the release’s <code>sd/</code> contents to the microSD and the original bootloader to <code>revvox/boot/ng-ofw1.bin</code>.</label>
+<button id="plan" disabled>Prepare installation plan</button><pre id="planDetails">No installation plan prepared.</pre><button id="install" disabled>Install and verify the three files</button>
+<p>The original bootloader is preserved in <code>/sys/pre-img.bin</code> first, followed by <code>/cert/c2.der</code>. The preloader replaces <code>/sys/mcuimg.bin</code> last. Every write is read back and compared.</p>
+</section>
+<section><h2>4. Finish setup</h2><p>After successful verification, disconnect, remove programming wiring and restart the box. Configure the SD bootloader’s <code>altCA.305</code> and URL patches for your teddyCloud address.</p>
+<label>Box connection port <input id="connectionPort" type="number" min="1" max="65535" value="10443"></label><button id="portPatch">Download altPort.json</button>
+<p>For firmware 3.1.0 BF2, 3.3.0 or 3.4.0, copy this file to <code>revvox/boot/patch/altPort.json</code> on the microSD and enable <code>altPort</code> in <code>ngCfg.json</code> for the selected original firmware. API and RTNL connections use this port with TLS. Your proxy must forward it to the box TLS listener. Port 8443 is normally the web UI; keep it separate. To return to 443, disable the patch or generate it with port 443.</p>
+<a href="https://toniebox-reverse-engineering.github.io/docs/custom-firmware/cc3200/hackieboxng-bl/install/" target="_blank" rel="noopener noreferrer">SD installation and configuration guide</a>
+<details><summary>Legacy: cc3200tool</summary><p>The UART adapter workflow remains available. For an ESP32-C3 gateway, add <code>--gateway</code> immediately after <code>-p PORT</code>; SOP2 and reset are handled through the connected gateway pins.</p><pre>cc3200tool -p PORT --gateway read_all_files ExtractedFromBox/ read_flash backup.bin</pre><a href="https://github.com/toniebox-reverse-engineering/cc3200tool" target="_blank" rel="noopener noreferrer">Legacy tool instructions</a></details></section>
+<p id="status" role="status" aria-live="polite">Ready.</p><progress id="progress" value="0" max="1"></progress><pre id="log" aria-label="Operation log"></pre>
+<script type="module" src="/tools/cc3200-ui.mjs"></script></body></html>

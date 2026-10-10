@@ -1,0 +1,209 @@
+[
+  {
+    "name": "offline time",
+    "method": "GET",
+    "path": "/v1/time",
+    "headers": [
+      "Content-Type"
+    ],
+    "kind": "unix-time",
+    "time_tolerance_seconds": 2
+  },
+  {
+    "name": "time ordered prefix dispatch",
+    "method": "GET",
+    "path": "/v1/time/extra",
+    "headers": [
+      "Content-Type"
+    ],
+    "kind": "unix-time",
+    "time_tolerance_seconds": 2
+  },
+  {
+    "name": "offline reset",
+    "method": "POST",
+    "path": "/v1/cloud-reset",
+    "body": "",
+    "kind": "json",
+    "headers": [
+      "Content-Type"
+    ],
+    "request_headers": {}
+  },
+  {
+    "name": "freshness local update and settings",
+    "method": "POST",
+    "path": "/v1/freshness-check",
+    "body": "\n\u000e\t\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0001\u0015{\u0000\u0000\u0000",
+    "kind": "protobuf-wire",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "global speaker",
+    "method": "GET",
+    "path": "/api/settings/get/toniebox.max_vol_spk",
+    "body": "",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type"
+    ],
+    "request_headers": {}
+  },
+  {
+    "name": "box one speaker",
+    "method": "GET",
+    "path": "/api/settings/get/toniebox.max_vol_spk?overlay=001122334455",
+    "body": "",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type"
+    ],
+    "request_headers": {}
+  },
+  {
+    "name": "box two speaker",
+    "method": "GET",
+    "path": "/api/settings/get/toniebox.max_vol_spk?overlay=AABBCCDDEEFF",
+    "body": "",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type"
+    ],
+    "request_headers": {}
+  },
+  {
+    "name": "settings default index",
+    "method": "GET",
+    "path": "/api/settings/getIndex",
+    "body": "",
+    "kind": "json",
+    "headers": [
+      "Content-Type"
+    ],
+    "request_headers": {}
+  },
+  {
+    "name": "known boxes",
+    "method": "GET",
+    "path": "/api/getBoxes",
+    "body": "",
+    "kind": "json",
+    "headers": [
+      "Content-Type"
+    ],
+    "request_headers": {}
+  },
+  {
+    "name": "stored bytes",
+    "method": "GET",
+    "path": "/v1/content/0000000100000001",
+    "body": "",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type",
+      "Content-Length"
+    ],
+    "request_headers": {}
+  },
+  {
+    "name": "range positive",
+    "method": "GET",
+    "path": "/v1/content/0000000100000001",
+    "body": "",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type",
+      "Content-Length",
+      "Content-Range"
+    ],
+    "request_headers": {
+      "Range": "bytes=4096-8191"
+    }
+  },
+  {
+    "name": "range zero reference full file",
+    "method": "GET",
+    "path": "/v1/content/0000000100000001",
+    "body": "",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type",
+      "Content-Length",
+      "Content-Range"
+    ],
+    "request_headers": {
+      "Range": "bytes=0-99"
+    }
+  },
+  {
+    "name": "skip TAF header",
+    "method": "GET",
+    "path": "/v1/content/0000000100000001?skip_header=true",
+    "body": "",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type",
+      "Content-Length"
+    ],
+    "request_headers": {}
+  },
+  {
+    "name": "skip TAF header and range",
+    "method": "GET",
+    "path": "/v1/content/0000000100000001?skip_header=true",
+    "body": "",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type",
+      "Content-Length",
+      "Content-Range"
+    ],
+    "request_headers": {
+      "Range": "bytes=4096-8191"
+    }
+  },
+  {
+    "name": "offline claim",
+    "method": "GET",
+    "path": "/v1/claim/0000000100000001",
+    "body": "",
+    "kind": "bytes",
+    "headers": [],
+    "request_headers": {}
+  },
+  {
+    "name": "set box speaker",
+    "method": "POST",
+    "path": "/api/settings/set/toniebox.max_vol_spk?overlay=001122334455",
+    "body": "2",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type"
+    ],
+    "request_headers": {}
+  },
+  {
+    "name": "get changed box speaker",
+    "method": "GET",
+    "path": "/api/settings/get/toniebox.max_vol_spk?overlay=001122334455",
+    "body": "",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type"
+    ],
+    "request_headers": {}
+  },
+  {
+    "name": "restore box speaker",
+    "method": "POST",
+    "path": "/api/settings/set/toniebox.max_vol_spk?overlay=001122334455",
+    "body": "1",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type"
+    ],
+    "request_headers": {}
+  }
+]

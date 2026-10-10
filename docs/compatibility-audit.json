@@ -1,0 +1,1871 @@
+{
+  "settings": {
+    "configVersion": {
+      "status": "documented deviation",
+      "behavior": "preserved without C historical configuration migrations",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "commonName": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured commonName consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "boxName": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured boxName consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "boxModel": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured boxModel consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "log": {
+      "status": "implemented",
+      "behavior": "UI tree or non-editable internal array declaration",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/logging.go",
+      "remaining": "none for schema exposure"
+    },
+    "log.level": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured log consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/logging.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "log.color": {
+      "status": "documented deviation",
+      "behavior": "structured logs omit ANSI colors",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/logging.go",
+      "remaining": "documented consumer difference"
+    },
+    "log.logFullAuth": {
+      "status": "documented deviation",
+      "behavior": "normal logs omit tag tokens",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/logging.go",
+      "remaining": "documented consumer difference"
+    },
+    "core.server": {
+      "status": "implemented",
+      "behavior": "UI tree or non-editable internal array declaration",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "none for schema exposure"
+    },
+    "core.server.http_port": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.server.https_web_port": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.server.https_api_port": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.server.bind_ip": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core": {
+      "status": "implemented",
+      "behavior": "UI tree or non-editable internal array declaration",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "none for schema exposure"
+    },
+    "core.host_url": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.certdir": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.configdir": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.contentdir": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.librarydir": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.datadir": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.wwwdir": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.pluginsdir": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.firmwaredir": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.cachedir": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.sslkeylogfile": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.server.http_client_timeout": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.file_upload_timeout_ms": {
+      "status": "implemented",
+      "behavior": "frontend configuration or declaration unused by pinned C backend",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "official frontend interaction acceptance"
+    },
+    "core.server_cert": {
+      "status": "implemented",
+      "behavior": "UI tree or non-editable internal array declaration",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "none for schema exposure"
+    },
+    "core.client_cert.file": {
+      "status": "implemented",
+      "behavior": "UI tree or non-editable internal array declaration",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "none for schema exposure"
+    },
+    "core.server_cert.file.ca": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.server_cert.file.ca_der": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.server_cert.file.ca_key": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.server_cert.file.crt": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.server_cert.file.key": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.server_cert.data": {
+      "status": "implemented",
+      "behavior": "UI tree or non-editable internal array declaration",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "none for schema exposure"
+    },
+    "core.server_cert.data.ca": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.server_cert.data.ca_key": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.server_cert.data.crt": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.server_cert.data.key": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.server_cert_tb2": {
+      "status": "implemented",
+      "behavior": "UI tree or non-editable internal array declaration",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "none for schema exposure"
+    },
+    "core.server_cert_tb2.file": {
+      "status": "implemented",
+      "behavior": "UI tree or non-editable internal array declaration",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "none for schema exposure"
+    },
+    "core.server_cert_tb2.file.ca": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.server_cert_tb2.file.ca_der": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.server_cert_tb2.file.ca_key": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.server_cert_tb2.file.crt": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.server_cert_tb2.file.key": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.server_cert_tb2.data": {
+      "status": "implemented",
+      "behavior": "UI tree or non-editable internal array declaration",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "none for schema exposure"
+    },
+    "core.server_cert_tb2.data.ca": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.server_cert_tb2.data.ca_key": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.server_cert_tb2.data.crt": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.server_cert_tb2.data.key": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.client_cert": {
+      "status": "implemented",
+      "behavior": "UI tree or non-editable internal array declaration",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "none for schema exposure"
+    },
+    "core.client_cert.file.ca": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.client_cert.file.crt": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.client_cert.file.key": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.client_cert.data": {
+      "status": "implemented",
+      "behavior": "UI tree or non-editable internal array declaration",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "none for schema exposure"
+    },
+    "core.client_cert.data.ca": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.client_cert.data.crt": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.client_cert.data.key": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.client_cert_fake": {
+      "status": "implemented",
+      "behavior": "UI tree or non-editable internal array declaration",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "none for schema exposure"
+    },
+    "core.client_cert_fake.file": {
+      "status": "implemented",
+      "behavior": "UI tree or non-editable internal array declaration",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "none for schema exposure"
+    },
+    "core.client_cert_fake.file.ca": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.client_cert_fake.file.crt": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.client_cert_fake.file.key": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.client_cert_fake.data": {
+      "status": "implemented",
+      "behavior": "UI tree or non-editable internal array declaration",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "none for schema exposure"
+    },
+    "core.client_cert_fake.data.ca": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.client_cert_fake.data.crt": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.client_cert_fake.data.key": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.allowOrigin": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.boxCertAuth": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.allowNewBox": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.flex_enabled": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.flex_uid": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.settings_level": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.tonies_json_auto_update": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.full_taf_validation": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured core consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "core.tap_taf_validation": {
+      "status": "documented deviation",
+      "behavior": "TAP cache integrity validation is always enabled",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "documented consumer difference"
+    },
+    "core.track_pos_taf_validation": {
+      "status": "documented deviation",
+      "behavior": "no extra diagnostic-only hash pass after rejected track mapping",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; cmd/goteddycloud/main.go; internal/certificates; internal/app/catalog_update.go; internal/cloud/client.go",
+      "remaining": "documented consumer difference"
+    },
+    "security_mit": {
+      "status": "implemented",
+      "behavior": "UI tree or non-editable internal array declaration",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/security.go; scripts/security-differential.py",
+      "remaining": "none for schema exposure"
+    },
+    "security_mit.warnAccess": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured security_mit consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/security.go; scripts/security-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "security_mit.lockAccess": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured security_mit consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/security.go; scripts/security-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "security_mit.httpsOnly": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured security_mit consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/security.go; scripts/security-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "security_mit.onBlacklistDomain": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured security_mit consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/security.go; scripts/security-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "security_mit.onCrawler": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured security_mit consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/security.go; scripts/security-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "security_mit.onRobotsTxt": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured security_mit consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/security.go; scripts/security-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "security_mit.hardLock": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured security_mit consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/security.go; scripts/security-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "internal": {
+      "status": "implemented",
+      "behavior": "UI tree or non-editable internal array declaration",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "none for schema exposure"
+    },
+    "internal.server.ca": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.server.ca_key": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.server.crt": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.server.key": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.server.cert_chain": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.server_tb2.ca": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.server_tb2.ca_key": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.server_tb2.crt": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.server_tb2.key": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.server_tb2.cert_chain": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.client.ca": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.client.crt": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.client.key": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.autogen_certs": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.exit": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.returncode": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.config_init": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.config_used": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.config_changed": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.logColorSupport": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.basedir": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.basedirfull": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.cwd": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.certdirfull": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.configdirfull": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.contentdirrel": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.contentdirfull": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.librarydirfull": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.datadirfull": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.wwwdirfull": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.pluginsdirfull": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.firmwaredirfull": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.cachedirfull": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.overlayUniqueId": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.overlayNumber": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.assign_unknown": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.rtnl.lastEarId": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.rtnl.lastEarpress": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.rtnl.wasDoubleEarpress": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.rtnl.multipressTime": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.rtnl.prodDomain": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.rtnl.rtnlDomain": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.version.id": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.version.git_sha_short": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.version.git_sha": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.version.dirty": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.version.datetime": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.version.platform": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.version.os": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.version.architecture": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.version.v_short": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.version.v_long": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.version.v_full": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.version_web.id": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.version_web.git_sha_short": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.version_web.git_sha": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.version_web.dirty": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.version_web.datetime": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.version_web.v_short": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.version_web.v_long": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.version_web.v_full": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.toniebox_firmware.boxIC": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.toniebox_firmware.uaVersionFirmware": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.toniebox_firmware.uaVersionServicePack": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.toniebox_firmware.uaVersionHardware": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.toniebox_firmware.uaEsp32Firmware": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.toniebox_firmware.rtnlVersion": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.toniebox_firmware.rtnlFullVersion": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.toniebox_firmware.rtnlDetail": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.toniebox_firmware.rtnlRegion": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.toniebox_firmware.otaVersionSfx": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.toniebox_firmware.otaVersionServicePack": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.toniebox_firmware.otaVersionHtml": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.toniebox_firmware.otaVersionEu": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.toniebox_firmware.otaVersionPd": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.freshnessCache": {
+      "status": "implemented",
+      "behavior": "UI tree or non-editable internal array declaration",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "none for schema exposure"
+    },
+    "internal.freshnessCacheChanged": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.last_connection": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.last_ruid": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.last_ruid_time": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.ip": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.online": {
+      "status": "documented deviation",
+      "behavior": "native C state is retained as default/persisted schema, not a claim of C memory-state equivalence",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.security_mit.incident": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.security_mit.blacklisted_domain_access": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.security_mit.crawler_access": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.security_mit.external_access": {
+      "status": "documented deviation",
+      "behavior": "external address detection is disabled in pinned C and not invented in Go",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "internal.security_mit.robots_txt_access": {
+      "status": "implemented",
+      "behavior": "derived path/runtime policy or explicitly updated transient state",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go; internal/app/useragent.go; internal/app/rtnl.go; internal/app/ota.go; internal/app/security.go",
+      "remaining": "internal-state differences in settings-audit.md"
+    },
+    "cloud": {
+      "status": "implemented",
+      "behavior": "UI tree or non-editable internal array declaration",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/cloud.go; scripts/cloud-differential.py",
+      "remaining": "none for schema exposure"
+    },
+    "cloud.enabled": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured cloud consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/cloud.go; scripts/cloud-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "cloud.remote_hostname": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured cloud consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/cloud.go; scripts/cloud-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "cloud.remote_hostname_tb2": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured cloud consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/cloud.go; scripts/cloud-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "cloud.remote_port": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured cloud consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/cloud.go; scripts/cloud-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "cloud.remote_port_tb2": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured cloud consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/cloud.go; scripts/cloud-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "cloud.enableV1Claim": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured cloud consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/cloud.go; scripts/cloud-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "cloud.enableV1CloudReset": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured cloud consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/cloud.go; scripts/cloud-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "cloud.enableV1FreshnessCheck": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured cloud consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/cloud.go; scripts/cloud-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "cloud.enableV3FreshnessCheck": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured cloud consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/cloud.go; scripts/cloud-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "cloud.enableV1Log": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured cloud consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/cloud.go; scripts/cloud-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "cloud.enableV1Time": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured cloud consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/cloud.go; scripts/cloud-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "cloud.enableV1Ota": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured cloud consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/cloud.go; scripts/cloud-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "cloud.enableV3Ota": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured cloud consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/cloud.go; scripts/cloud-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "cloud.enableV2Content": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured cloud consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/cloud.go; scripts/cloud-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "cloud.enableV3SetupStatus": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured cloud consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/cloud.go; scripts/cloud-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "cloud.enableV3ContentMeta": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured cloud consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/cloud.go; scripts/cloud-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "cloud.enableV3Chapter": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured cloud consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/cloud.go; scripts/cloud-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "cloud.cacheOta": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured cloud consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/cloud.go; scripts/cloud-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "cloud.localOta": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured cloud consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/cloud.go; scripts/cloud-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "cloud.cacheContent": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured cloud consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/cloud.go; scripts/cloud-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "cloud.cacheToLibrary": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured cloud consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/cloud.go; scripts/cloud-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "cloud.markCustomTagByPass": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured cloud consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/cloud.go; scripts/cloud-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "cloud.markCustomTagByUid": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured cloud consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/cloud.go; scripts/cloud-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "cloud.prioCustomContent": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured cloud consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/cloud.go; scripts/cloud-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "cloud.updateOnLowerAudioId": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured cloud consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/cloud.go; scripts/cloud-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "cloud.dumpRuidAuthContentJson": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured cloud consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/cloud.go; scripts/cloud-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "encode": {
+      "status": "implemented",
+      "behavior": "UI tree or non-editable internal array declaration",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/audio; internal/app/live_test.go; scripts/live-differential.py",
+      "remaining": "none for schema exposure"
+    },
+    "encode.bitrate": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured encode consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/audio; internal/app/live_test.go; scripts/live-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "encode.ffmpeg_stream_buffer_ms": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured encode consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/audio; internal/app/live_test.go; scripts/live-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "encode.ffmpeg_stream_restart": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured encode consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/audio; internal/app/live_test.go; scripts/live-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "encode.ffmpeg_sweep_startup_buffer": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured encode consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/audio; internal/app/live_test.go; scripts/live-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "encode.ffmpeg_sweep_delay_ms": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured encode consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/audio; internal/app/live_test.go; scripts/live-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "encode.stream_max_size": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured encode consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/audio; internal/app/live_test.go; scripts/live-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "encode.use_frontend": {
+      "status": "implemented",
+      "behavior": "frontend configuration or declaration unused by pinned C backend",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/audio; internal/app/live_test.go; scripts/live-differential.py",
+      "remaining": "official frontend interaction acceptance"
+    },
+    "frontend": {
+      "status": "implemented",
+      "behavior": "UI tree or non-editable internal array declaration",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "none for schema exposure"
+    },
+    "frontend.split_model_content": {
+      "status": "implemented",
+      "behavior": "frontend configuration or declaration unused by pinned C backend",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "official frontend interaction acceptance"
+    },
+    "frontend.ignore_web_version_mismatch": {
+      "status": "implemented",
+      "behavior": "frontend configuration or declaration unused by pinned C backend",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "official frontend interaction acceptance"
+    },
+    "frontend.confirm_audioplayer_close": {
+      "status": "implemented",
+      "behavior": "frontend configuration or declaration unused by pinned C backend",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "official frontend interaction acceptance"
+    },
+    "frontend.check_cc3200_cfw": {
+      "status": "implemented",
+      "behavior": "frontend configuration or declaration unused by pinned C backend",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "official frontend interaction acceptance"
+    },
+    "toniebox": {
+      "status": "implemented",
+      "behavior": "UI tree or non-editable internal array declaration",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/server.go; internal/boxcommands; scripts/mqtt-differential.py",
+      "remaining": "none for schema exposure"
+    },
+    "toniebox.api_access": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured toniebox consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/server.go; internal/boxcommands; scripts/mqtt-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "toniebox.overrideCloud": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured toniebox consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/server.go; internal/boxcommands; scripts/mqtt-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "toniebox.boxGeneration": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured toniebox consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/server.go; internal/boxcommands; scripts/mqtt-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "toniebox.max_vol_spk": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured toniebox consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/server.go; internal/boxcommands; scripts/mqtt-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "toniebox.max_vol_hdp": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured toniebox consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/server.go; internal/boxcommands; scripts/mqtt-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "toniebox.slap_enabled": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured toniebox consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/server.go; internal/boxcommands; scripts/mqtt-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "toniebox.slap_back_left": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured toniebox consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/server.go; internal/boxcommands; scripts/mqtt-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "toniebox.led": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured toniebox consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/server.go; internal/boxcommands; scripts/mqtt-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "toniebox.overrideFields": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured toniebox consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/server.go; internal/boxcommands; scripts/mqtt-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "toniebox.field2": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured toniebox consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/server.go; internal/boxcommands; scripts/mqtt-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "toniebox.field6": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured toniebox consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/server.go; internal/boxcommands; scripts/mqtt-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "toniebox2": {
+      "status": "implemented",
+      "behavior": "UI tree or non-editable internal array declaration",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "none for schema exposure"
+    },
+    "toniebox2.baby_mode": {
+      "status": "implemented",
+      "behavior": "frontend configuration or declaration unused by pinned C backend",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "official frontend interaction acceptance"
+    },
+    "toniebox2.lightring_brightness": {
+      "status": "implemented",
+      "behavior": "frontend configuration or declaration unused by pinned C backend",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "official frontend interaction acceptance"
+    },
+    "rtnl": {
+      "status": "implemented",
+      "behavior": "UI tree or non-editable internal array declaration",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/rtnl.go; scripts/rtnl-differential.py",
+      "remaining": "none for schema exposure"
+    },
+    "rtnl.logRaw": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured rtnl consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/rtnl.go; scripts/rtnl-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "rtnl.logHuman": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured rtnl consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/rtnl.go; scripts/rtnl-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "rtnl.logRawFile": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured rtnl consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/rtnl.go; scripts/rtnl-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "rtnl.logHumanFile": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured rtnl consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/rtnl.go; scripts/rtnl-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "pcap": {
+      "status": "implemented",
+      "behavior": "UI tree or non-editable internal array declaration",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/diagnostics; scripts/diagnostics-smoke.py",
+      "remaining": "none for schema exposure"
+    },
+    "pcap.enabled": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured pcap consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/diagnostics; scripts/diagnostics-smoke.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "pcap.filename": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured pcap consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/diagnostics; scripts/diagnostics-smoke.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "mqtt": {
+      "status": "implemented",
+      "behavior": "UI tree or non-editable internal array declaration",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/mqtt; scripts/mqtt-differential.py",
+      "remaining": "none for schema exposure"
+    },
+    "mqtt.enabled": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured mqtt consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/mqtt; scripts/mqtt-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "mqtt.hostname": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured mqtt consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/mqtt; scripts/mqtt-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "mqtt.port": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured mqtt consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/mqtt; scripts/mqtt-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "mqtt.username": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured mqtt consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/mqtt; scripts/mqtt-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "mqtt.password": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured mqtt consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/mqtt; scripts/mqtt-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "mqtt.identification": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured mqtt consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/mqtt; scripts/mqtt-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "mqtt.topic": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured mqtt consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/mqtt; scripts/mqtt-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "mqtt.qosLevel": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured mqtt consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/mqtt; scripts/mqtt-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "mqtt.retain_will": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured mqtt consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/mqtt; scripts/mqtt-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "mqtt.disable_on_error": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured mqtt consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/mqtt; scripts/mqtt-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "mqtt.tls_enabled": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured mqtt consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/mqtt; scripts/mqtt-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "mqtt.tls_ca_file": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured mqtt consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/mqtt; scripts/mqtt-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "mqtt.tls_insecure": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured mqtt consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/mqtt; scripts/mqtt-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "mqtt_server": {
+      "status": "implemented",
+      "behavior": "UI tree or non-editable internal array declaration",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/mqtt/server.go; scripts/mqtt-differential.py",
+      "remaining": "none for schema exposure"
+    },
+    "mqtt_server.enabled": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured mqtt_server consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/mqtt/server.go; scripts/mqtt-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "mqtt_server.port": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured mqtt_server consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/mqtt/server.go; scripts/mqtt-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "mqtt_server.cert.crt": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured mqtt_server consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/mqtt/server.go; scripts/mqtt-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "mqtt_server.cert.key": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured mqtt_server consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/mqtt/server.go; scripts/mqtt-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "hass": {
+      "status": "implemented",
+      "behavior": "UI tree or non-editable internal array declaration",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/mqtt/integration.go; scripts/mqtt-differential.py",
+      "remaining": "none for schema exposure"
+    },
+    "hass.name": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured hass consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/mqtt/integration.go; scripts/mqtt-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "hass.id": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured hass consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/mqtt/integration.go; scripts/mqtt-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "tonie_json": {
+      "status": "implemented",
+      "behavior": "UI tree or non-editable internal array declaration",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/image_cache.go; internal/catalog/custom_test.go",
+      "remaining": "none for schema exposure"
+    },
+    "tonie_json.cache_images": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured tonie_json consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/image_cache.go; internal/catalog/custom_test.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "tonie_json.cache_preload": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured tonie_json consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/image_cache.go; internal/catalog/custom_test.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "tonie_json.custom_backup_keep": {
+      "status": "implemented",
+      "behavior": "typed defaults/index, global and overlay persistence, configured tonie_json consumer",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/app/image_cache.go; internal/catalog/custom_test.go",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "debug": {
+      "status": "implemented",
+      "behavior": "UI tree or non-editable internal array declaration",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "none for schema exposure"
+    },
+    "debug.web.pcm_encode_console_url": {
+      "status": "implemented",
+      "behavior": "frontend configuration or declaration unused by pinned C backend",
+      "evidence": "internal/config/schema.json; internal/config/store_test.go; testdata/device-offline.json; docs/settings-audit.md; internal/config/store.go",
+      "remaining": "official frontend interaction acceptance"
+    },
+    "core.allowPrivateFetch": {
+      "status": "implemented",
+      "behavior": "Validated public-address dial policy with explicit private-network opt-in",
+      "evidence": "internal/app/auth_test.go; internal/app/develop_content_test.go; internal/fetchpolicy/dial_test.go; scripts/develop-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "cloud.autoMarkListenedOnSync": {
+      "status": "implemented",
+      "behavior": "Library source sidecar updated on local sync; download heuristic",
+      "evidence": "internal/app/auth_test.go; internal/app/develop_content_test.go; internal/fetchpolicy/dial_test.go; scripts/develop-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    },
+    "frontend.web_auth_enabled": {
+      "status": "implemented",
+      "behavior": "Persistent users, cookie/bearer sessions and management authorization",
+      "evidence": "internal/app/auth_test.go; internal/app/develop_content_test.go; internal/fetchpolicy/dial_test.go; scripts/develop-differential.py",
+      "remaining": "physical/frontend acceptance where applicable"
+    }
+  },
+  "cli": {
+    "base_path": {
+      "status": "implemented",
+      "behavior": "parsed option and invoked operation; auxiliary flags inherit operation",
+      "evidence": "cmd/goteddycloud/arguments_test.go; scripts/cli-smoke.py; scripts/cloud-differential.py; scripts/native-smoke.py",
+      "remaining": "runtime platforms beyond Linux amd64; documented safety differences"
+    },
+    "source": {
+      "status": "implemented",
+      "behavior": "parsed option and invoked operation; auxiliary flags inherit operation",
+      "evidence": "cmd/goteddycloud/arguments_test.go; scripts/cli-smoke.py; scripts/cloud-differential.py; scripts/native-smoke.py",
+      "remaining": "runtime platforms beyond Linux amd64; documented safety differences"
+    },
+    "destination": {
+      "status": "implemented",
+      "behavior": "parsed option and invoked operation; auxiliary flags inherit operation",
+      "evidence": "cmd/goteddycloud/arguments_test.go; scripts/cli-smoke.py; scripts/cloud-differential.py; scripts/native-smoke.py",
+      "remaining": "runtime platforms beyond Linux amd64; documented safety differences"
+    },
+    "generate-server-certs": {
+      "status": "implemented",
+      "behavior": "parsed option and invoked operation; auxiliary flags inherit operation",
+      "evidence": "cmd/goteddycloud/arguments_test.go; scripts/cli-smoke.py; scripts/cloud-differential.py; scripts/native-smoke.py",
+      "remaining": "runtime platforms beyond Linux amd64; documented safety differences"
+    },
+    "generate-client-cert": {
+      "status": "implemented",
+      "behavior": "parsed option and invoked operation; auxiliary flags inherit operation",
+      "evidence": "cmd/goteddycloud/arguments_test.go; scripts/cli-smoke.py; scripts/cloud-differential.py; scripts/native-smoke.py",
+      "remaining": "runtime platforms beyond Linux amd64; documented safety differences"
+    },
+    "generate-client-cert-tb2": {
+      "status": "implemented",
+      "behavior": "parsed option and invoked operation; auxiliary flags inherit operation",
+      "evidence": "cmd/goteddycloud/arguments_test.go; scripts/cli-smoke.py; scripts/cloud-differential.py; scripts/native-smoke.py",
+      "remaining": "runtime platforms beyond Linux amd64; documented safety differences"
+    },
+    "add-to-settings": {
+      "status": "implemented",
+      "behavior": "parsed option and invoked operation; auxiliary flags inherit operation",
+      "evidence": "cmd/goteddycloud/arguments_test.go; scripts/cli-smoke.py; scripts/cloud-differential.py; scripts/native-smoke.py",
+      "remaining": "runtime platforms beyond Linux amd64; documented safety differences"
+    },
+    "encode": {
+      "status": "implemented",
+      "behavior": "parsed option and invoked operation; auxiliary flags inherit operation",
+      "evidence": "cmd/goteddycloud/arguments_test.go; scripts/cli-smoke.py; scripts/cloud-differential.py; scripts/native-smoke.py",
+      "remaining": "runtime platforms beyond Linux amd64; documented safety differences"
+    },
+    "encode_test": {
+      "status": "implemented",
+      "behavior": "parsed option and invoked operation; auxiliary flags inherit operation",
+      "evidence": "cmd/goteddycloud/arguments_test.go; scripts/cli-smoke.py; scripts/cloud-differential.py; scripts/native-smoke.py",
+      "remaining": "runtime platforms beyond Linux amd64; documented safety differences"
+    },
+    "skip-seconds": {
+      "status": "implemented",
+      "behavior": "parsed option and invoked operation; auxiliary flags inherit operation",
+      "evidence": "cmd/goteddycloud/arguments_test.go; scripts/cli-smoke.py; scripts/cloud-differential.py; scripts/native-smoke.py",
+      "remaining": "runtime platforms beyond Linux amd64; documented safety differences"
+    },
+    "esp32-hostpatch": {
+      "status": "implemented",
+      "behavior": "parsed option and invoked operation; auxiliary flags inherit operation",
+      "evidence": "cmd/goteddycloud/arguments_test.go; scripts/cli-smoke.py; scripts/cloud-differential.py; scripts/native-smoke.py",
+      "remaining": "runtime platforms beyond Linux amd64; documented safety differences"
+    },
+    "oldrtnlhost": {
+      "status": "implemented",
+      "behavior": "parsed option and invoked operation; auxiliary flags inherit operation",
+      "evidence": "cmd/goteddycloud/arguments_test.go; scripts/cli-smoke.py; scripts/cloud-differential.py; scripts/native-smoke.py",
+      "remaining": "runtime platforms beyond Linux amd64; documented safety differences"
+    },
+    "oldapihost": {
+      "status": "implemented",
+      "behavior": "parsed option and invoked operation; auxiliary flags inherit operation",
+      "evidence": "cmd/goteddycloud/arguments_test.go; scripts/cli-smoke.py; scripts/cloud-differential.py; scripts/native-smoke.py",
+      "remaining": "runtime platforms beyond Linux amd64; documented safety differences"
+    },
+    "esp32-fixup": {
+      "status": "implemented",
+      "behavior": "parsed option and invoked operation; auxiliary flags inherit operation",
+      "evidence": "cmd/goteddycloud/arguments_test.go; scripts/cli-smoke.py; scripts/cloud-differential.py; scripts/native-smoke.py",
+      "remaining": "runtime platforms beyond Linux amd64; documented safety differences"
+    },
+    "esp32-inject": {
+      "status": "implemented",
+      "behavior": "parsed option and invoked operation; auxiliary flags inherit operation",
+      "evidence": "cmd/goteddycloud/arguments_test.go; scripts/cli-smoke.py; scripts/cloud-differential.py; scripts/native-smoke.py",
+      "remaining": "runtime platforms beyond Linux amd64; documented safety differences"
+    },
+    "esp32-extract": {
+      "status": "implemented",
+      "behavior": "parsed option and invoked operation; auxiliary flags inherit operation",
+      "evidence": "cmd/goteddycloud/arguments_test.go; scripts/cli-smoke.py; scripts/cloud-differential.py; scripts/native-smoke.py",
+      "remaining": "runtime platforms beyond Linux amd64; documented safety differences"
+    },
+    "docker-test": {
+      "status": "implemented",
+      "behavior": "parsed option and invoked operation; auxiliary flags inherit operation",
+      "evidence": "cmd/goteddycloud/arguments_test.go; scripts/cli-smoke.py; scripts/cloud-differential.py; scripts/native-smoke.py",
+      "remaining": "runtime platforms beyond Linux amd64; documented safety differences"
+    },
+    "url-test": {
+      "status": "implemented",
+      "behavior": "parsed option and invoked operation; auxiliary flags inherit operation",
+      "evidence": "cmd/goteddycloud/arguments_test.go; scripts/cli-smoke.py; scripts/cloud-differential.py; scripts/native-smoke.py",
+      "remaining": "runtime platforms beyond Linux amd64; documented safety differences"
+    },
+    "cloud-test": {
+      "status": "implemented",
+      "behavior": "parsed option and invoked operation; auxiliary flags inherit operation",
+      "evidence": "cmd/goteddycloud/arguments_test.go; scripts/cli-smoke.py; scripts/cloud-differential.py; scripts/native-smoke.py",
+      "remaining": "runtime platforms beyond Linux amd64; documented safety differences"
+    },
+    "hash": {
+      "status": "implemented",
+      "behavior": "parsed option and invoked operation; auxiliary flags inherit operation",
+      "evidence": "cmd/goteddycloud/arguments_test.go; scripts/cli-smoke.py; scripts/cloud-differential.py; scripts/native-smoke.py",
+      "remaining": "runtime platforms beyond Linux amd64; documented safety differences"
+    },
+    "hostname": {
+      "status": "implemented",
+      "behavior": "parsed option and invoked operation; auxiliary flags inherit operation",
+      "evidence": "cmd/goteddycloud/arguments_test.go; scripts/cli-smoke.py; scripts/cloud-differential.py; scripts/native-smoke.py",
+      "remaining": "runtime platforms beyond Linux amd64; documented safety differences"
+    },
+    "config-set": {
+      "status": "implemented",
+      "behavior": "parsed option and invoked operation; auxiliary flags inherit operation",
+      "evidence": "cmd/goteddycloud/arguments_test.go; scripts/cli-smoke.py; scripts/cloud-differential.py; scripts/native-smoke.py",
+      "remaining": "runtime platforms beyond Linux amd64; documented safety differences"
+    },
+    "help": {
+      "status": "implemented",
+      "behavior": "parsed option and invoked operation; auxiliary flags inherit operation",
+      "evidence": "cmd/goteddycloud/arguments_test.go; scripts/cli-smoke.py; scripts/cloud-differential.py; scripts/native-smoke.py",
+      "remaining": "runtime platforms beyond Linux amd64; documented safety differences"
+    },
+    "esp32-portpatch": {
+      "status": "implemented",
+      "evidence": "cmd/goteddycloud/operations.go; internal/firmware/port_test.go",
+      "remaining": "physical firmware acceptance"
+    },
+    "port": {
+      "status": "implemented",
+      "evidence": "cmd/goteddycloud/operations.go; internal/firmware/port_test.go",
+      "remaining": "physical firmware acceptance"
+    }
+  },
+  "routing": {
+    "root redirect": {
+      "status": "implemented",
+      "evidence": "testdata/static.json; internal/app/static_test.go",
+      "remaining": "physical firmware and official frontend acceptance where applicable"
+    },
+    "SPA/static": {
+      "status": "implemented",
+      "evidence": "testdata/static.json; internal/app/static_test.go",
+      "remaining": "physical firmware and official frontend acceptance where applicable"
+    },
+    "listener isolation": {
+      "status": "implemented",
+      "evidence": "testdata/static.json; internal/runtime/server_test.go",
+      "remaining": "physical firmware and official frontend acceptance where applicable"
+    },
+    "binary framing": {
+      "status": "implemented",
+      "evidence": "internal/boxtransport/framing_test.go; scripts/rtnl-differential.py",
+      "remaining": "physical firmware and official frontend acceptance where applicable"
+    },
+    "TLS selection": {
+      "status": "implemented",
+      "evidence": "internal/runtime/server_test.go; docs/tls-compatibility.md",
+      "remaining": "physical firmware and official frontend acceptance where applicable"
+    }
+  },
+  "areas": {
+    "INI": {
+      "status": "implemented",
+      "evidence": "internal/config/store_test.go; scripts/migration-rehearsal.py",
+      "remaining": "scoped deviations in verification.md/settings-audit.md; physical/frontend acceptance as applicable"
+    },
+    "Certificates": {
+      "status": "implemented",
+      "evidence": "internal/certificates; scripts/cli-smoke.py; scripts/native-smoke.py",
+      "remaining": "scoped deviations in verification.md/settings-audit.md; physical/frontend acceptance as applicable"
+    },
+    "Content": {
+      "status": "implemented",
+      "evidence": "internal/content; scripts/cloud-differential.py; scripts/live-differential.py",
+      "remaining": "scoped deviations in verification.md/settings-audit.md; physical/frontend acceptance as applicable"
+    },
+    "Library and playlists": {
+      "status": "implemented",
+      "evidence": "testdata/playlist-cached.json; internal/app/live_test.go; scripts/migration-rehearsal.py",
+      "remaining": "scoped deviations in verification.md/settings-audit.md; physical/frontend acceptance as applicable"
+    },
+    "TAF": {
+      "status": "implemented",
+      "evidence": "internal/taf; internal/audio; scripts/audio-api-differential.py; scripts/live-differential.py",
+      "remaining": "scoped deviations in verification.md/settings-audit.md; physical/frontend acceptance as applicable"
+    },
+    "Tonies JSON": {
+      "status": "implemented",
+      "evidence": "scripts/custom-api-tests.py; internal/app/catalog_update_test.go",
+      "remaining": "scoped deviations in verification.md/settings-audit.md; physical/frontend acceptance as applicable"
+    },
+    "Custom backups": {
+      "status": "implemented",
+      "evidence": "internal/catalog/custom_test.go; internal/app/rename_test.go",
+      "remaining": "scoped deviations in verification.md/settings-audit.md; physical/frontend acceptance as applicable"
+    },
+    "OTA and cache": {
+      "status": "implemented",
+      "evidence": "scripts/cloud-differential.py; internal/app/ota_test.go; internal/app/cloud_content_test.go",
+      "remaining": "scoped deviations in verification.md/settings-audit.md; physical/frontend acceptance as applicable"
+    },
+    "RTNL logs": {
+      "status": "implemented",
+      "evidence": "scripts/rtnl-differential.py; internal/app/rtnl_test.go",
+      "remaining": "scoped deviations in verification.md/settings-audit.md; physical/frontend acceptance as applicable"
+    },
+    "SSE/stats": {
+      "status": "implemented",
+      "evidence": "testdata/auth-events.json; internal/events/hub_test.go; internal/app/stats.go",
+      "remaining": "scoped deviations in verification.md/settings-audit.md; physical/frontend acceptance as applicable"
+    },
+    "MQTT client/HA": {
+      "status": "implemented",
+      "evidence": "scripts/mqtt-differential.py; internal/mqtt/client_test.go",
+      "remaining": "scoped deviations in verification.md/settings-audit.md; physical/frontend acceptance as applicable"
+    },
+    "MQTT server": {
+      "status": "implemented",
+      "evidence": "scripts/mqtt-differential.py; internal/mqtt/server_test.go",
+      "remaining": "scoped deviations in verification.md/settings-audit.md; physical/frontend acceptance as applicable"
+    },
+    "Firmware": {
+      "status": "implemented",
+      "evidence": "scripts/firmware-api-differential.py; scripts/firmware-fixture.py; internal/firmware",
+      "remaining": "scoped deviations in verification.md/settings-audit.md; physical/frontend acceptance as applicable"
+    },
+    "Reverse proxies": {
+      "status": "implemented",
+      "evidence": "internal/app/reverse_test.go; scripts/cache-api-differential.py",
+      "remaining": "scoped deviations in verification.md/settings-audit.md; physical/frontend acceptance as applicable"
+    },
+    "Security/auth": {
+      "status": "implemented",
+      "evidence": "internal/app/auth_test.go; internal/app/security_test.go; scripts/develop-differential.py",
+      "remaining": "scoped deviations in verification.md/settings-audit.md; physical/frontend acceptance as applicable"
+    },
+    "PCAP/TLS diagnostics": {
+      "status": "implemented",
+      "evidence": "scripts/diagnostics-smoke.py; internal/diagnostics/pcap_test.go; internal/runtime/server_test.go",
+      "remaining": "scoped deviations in verification.md/settings-audit.md; physical/frontend acceptance as applicable"
+    }
+  }
+}

@@ -1,0 +1,212 @@
+[
+  {
+    "name": "custom initial array",
+    "path": "/api/toniesCustomJson",
+    "method": "GET",
+    "body": "",
+    "kind": "json",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "custom upsert object",
+    "path": "/api/toniesCustomJsonUpsert",
+    "method": "POST",
+    "body": "{\"model\": \"SYNTHETIC_CUSTOM\", \"series\": \"Synthetic Series\", \"release\": 2026, \"audio_id\": [123456], \"hash\": [\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"], \"tracks\": [\"One\"], \"extension\": {\"keep\": true}}",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "custom normalized read",
+    "path": "/api/toniesCustomJson",
+    "method": "GET",
+    "body": "",
+    "kind": "json",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "custom search model",
+    "path": "/api/toniesJsonSearch?searchModel=synthetic_custom",
+    "method": "GET",
+    "body": "",
+    "kind": "json",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "custom invalid track",
+    "path": "/api/toniesCustomJsonUpsert",
+    "method": "POST",
+    "body": "{\"model\": \"INVALID_TRACK\", \"series\": \"Synthetic Series\", \"tracks\": [42]}",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "custom duplicate pair rejected",
+    "path": "/api/toniesCustomJsonUpsert",
+    "method": "POST",
+    "body": "{\"model\": \"DUPLICATE_CUSTOM\", \"series\": \"Synthetic Series\", \"release\": 2026, \"audio_id\": [123456], \"hash\": [\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"], \"tracks\": [\"One\"], \"extension\": {\"keep\": true}}",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "custom malformed root",
+    "path": "/api/toniesCustomJsonUpsert",
+    "method": "POST",
+    "body": "true",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "custom invalid delete",
+    "path": "/api/toniesCustomJsonDelete",
+    "method": "POST",
+    "body": "[]",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "custom delete case insensitive",
+    "path": "/api/toniesCustomJsonDelete",
+    "method": "POST",
+    "body": "{\"models\":[\"synthetic_custom\"]}",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "custom final empty array",
+    "path": "/api/toniesCustomJson",
+    "method": "GET",
+    "body": "",
+    "kind": "json",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "custom linked model create",
+    "path": "/api/toniesCustomJsonUpsert",
+    "body": "{\"model\":\"SYNTHETIC_001\",\"series\":\"Synthetic\"}",
+    "kind": "bytes",
+    "method": "POST",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "custom linked model rename",
+    "path": "/api/toniesCustomJsonRename",
+    "body": "{\"fromModel\":\"SYNTHETIC_001\",\"toModel\":\"LINKED\"}",
+    "kind": "bytes",
+    "method": "POST",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "custom renamed catalog read",
+    "path": "/api/toniesCustomJson",
+    "body": "",
+    "kind": "json",
+    "method": "GET",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "custom case-only rename is no-op",
+    "path": "/api/toniesCustomJsonRename",
+    "body": "{\"fromModel\":\"LINKED\",\"toModel\":\"linked\"}",
+    "kind": "bytes",
+    "method": "POST",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "custom rename missing source",
+    "path": "/api/toniesCustomJsonRename",
+    "body": "{\"fromModel\":\"missing\",\"toModel\":\"NEW\"}",
+    "kind": "bytes",
+    "method": "POST",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "custom rename target create",
+    "path": "/api/toniesCustomJsonUpsert",
+    "body": "{\"model\":\"EXISTING\",\"series\":\"Synthetic\"}",
+    "kind": "bytes",
+    "method": "POST",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "custom rename collision",
+    "path": "/api/toniesCustomJsonRename",
+    "body": "{\"fromModel\":\"LINKED\",\"toModel\":\"EXISTING\"}",
+    "kind": "bytes",
+    "method": "POST",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "custom rename opt out",
+    "path": "/api/toniesCustomJsonRename",
+    "body": "{\"fromModel\":\"LINKED\",\"toModel\":\"OPT_OUT\",\"updateContentJson\":false}",
+    "kind": "bytes",
+    "method": "POST",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "custom restore catalog relationship",
+    "path": "/api/toniesCustomJsonRename",
+    "body": "{\"fromModel\":\"OPT_OUT\",\"toModel\":\"LINKED\",\"updateContentJson\":false}",
+    "kind": "bytes",
+    "method": "POST",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "custom restore linked model",
+    "path": "/api/toniesCustomJsonRename",
+    "body": "{\"fromModel\":\"LINKED\",\"toModel\":\"SYNTHETIC_001\"}",
+    "kind": "bytes",
+    "method": "POST",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "custom remove test models",
+    "path": "/api/toniesCustomJsonDelete",
+    "body": "[\"SYNTHETIC_001\",\"EXISTING\"]",
+    "kind": "bytes",
+    "method": "POST",
+    "headers": [
+      "Content-Type"
+    ]
+  }
+]

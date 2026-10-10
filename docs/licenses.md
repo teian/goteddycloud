@@ -1,0 +1,75 @@
+# License and asset inventory
+
+Project code: GPL-2.0-only; the verbatim upstream GPLv2 text is in `LICENSE`.
+`NOTICE` credits the teddyCloud community. Baseline and component revisions are
+recorded in `reference-inventory.json`. This is an inventory of checked local
+source notices; it does not relicense third-party code or assets.
+
+| Component | Observed notice | Location in pinned oracle | Use in Go project |
+| --- | --- | --- | --- |
+| teddyCloud | GNU GPL version 2 | LICENSE | Behavioral reference, attributed schema/logic derivation |
+| Cyclone Common/Crypto/SSL/TCP | GPL-2.0-or-later in source headers | cyclone/*/LICENSE and source headers | Oracle only; not linked or bundled |
+| cJSON | MIT, Dave Gamble and contributors | cJSON/LICENSE | Oracle only |
+| libogg | BSD-style three-clause, Xiph.Org | ogg/COPYING | Oracle only |
+| libopus | BSD-style three-clause plus patent/IPR notices | opus/COPYING, LICENSE_PLEASE_READ.txt | Oracle only; retain notices if ever redistributed |
+| protobuf-c | BSD-2-Clause, Dave Benson and authors | src/proto/protobuf-c.c header | Oracle only; generated Go bindings use their own runtime |
+| FatFs | ChaN permissive one-condition notice | fat/LICENSE.txt, fat/source/ff.c | Oracle only; no C filesystem code copied |
+| emsdk | Not populated or reviewed | .gitmodules pinned revision | Excluded WASM toolchain; not distributed |
+| official frontend | No top-level LICENSE or package.json license field at pinned revision | teddycloud_web@e2f40c2c69a3b2b46093ddc5542773dd0fa0067e | Not copied/bundled; distribution license remains unresolved |
+| frontend fonts | SIL OFL 1.1 noted, per-family notices | src/assets/fonts/teddystudio/LICENSES.md | Not copied/bundled |
+| frontend opening guide | CC BY-NC-SA 3.0 referenced; Tobias Isakeit/iFixit attribution | frontend README Attribution and OpenBoxGuide.tsx | Not copied/bundled |
+| frontend logo/icons | Flaticon links, license terms not included in C README | upstream READMEs Attribution | Not copied/bundled; no replacement rights assumed |
+| frontend flags | country-flag-icons v1.5.18 attribution | frontend README Attribution | Not copied/bundled |
+| npm dependencies | Dependency declarations/lock available; transitive notices not yet installed/reviewed | frontend package.json and lock file | Defer bundling until lock-based license audit |
+| FFmpeg | External executable, not vendored; build-dependent license | installed executable's `-version`/`-L` | Optional runtime process; package-specific notice required if bundled later |
+| Go standard library | Go distribution LICENSE | Go toolchain | Linked according to Go license; include notice in releases |
+
+Before task 6.1 distributes frontend assets, resolve its missing top-level license
+and preserve all per-asset notices; serving an explicitly supplied frontend path
+can be developed without adding those assets to this repository. Do not infer
+frontend licensing from the backend GPL text. No frontend assets or manufacturer
+audio/firmware/client keys are included by this initial implementation.
+
+Any added Go module must be pinned in go.mod/go.sum and added to this inventory
+before release packaging. License inventory is complete for the currently used
+components; frontend redistribution and its transitive asset audit remain an
+explicit task 6.1 prerequisite.
+
+Added Go module: `google.golang.org/protobuf v1.36.12`, observed BSD-3-Clause
+notice, Copyright (c) 2018 The Go Authors. Module LICENSE must accompany packaged
+binaries; Go toolchain notices are supplied by the distribution's source package.
+The comparison runner currently uses its wire decoder; it does not link protobuf-c.
+
+Go Opus packet padding was cross-checked against libopus's repacketizer framing.
+`third_party/libopus-COPYING` retains the Xiph.Org/Jean-Marc Valin attribution and
+BSD-style notice. No C encoder is linked. Generated bindings use protoc 36.2 and
+protoc-gen-go 1.36.12, pinned by scripts/generate-proto.sh with archive SHA256.
+
+Storage tests use `github.com/johannesboyne/gofakes3` at
+`v0.0.0-20260208201424-4c385a1f6a73` (MIT). Its notice is in
+`third_party/gofakes3-LICENSE`. Its in-memory backend also links
+`github.com/ryszard/goskiplist` (Apache-2.0), whose notice is retained in
+`third_party/goskiplist-LICENSE`. These are test-only dependencies and are not linked into the application. Test executables are not release artifacts. The S3 REST client and
+Signature V4 implementation use the Go standard library. AWS SDK v2 is not linked
+because its Apache-2.0 license conflicts with this project's GPL-2.0-only license.
+The signing regression vectors come from the AWS S3 Signature V4 documentation.
+
+Management ACME support links `golang.org/x/crypto v0.58.0` (`acme/autocert`),
+`golang.org/x/net v0.60.0` and `golang.org/x/text v0.43.0` (IDNA handling).
+Their Go Authors BSD-3-Clause notices are retained as `third_party/x-crypto-LICENSE`,
+`third_party/x-net-LICENSE` and `third_party/x-text-LICENSE`, and copied into release
+packages. Versions are pinned in go.mod/go.sum. The tool-only x/tools dependency
+is updated to v0.51.0 by module version selection; it is not linked into the server.
+
+The native CC3200 tool uses `go.bug.st/serial v1.8.0` and
+`golang.org/x/sys v0.49.0` (BSD-3-Clause), with notices retained in
+`third_party/go-serial-LICENSE` and `third_party/x-sys-LICENSE`. These are linked
+into the native CLI and the integrated server subcommand. Port enumeration uses
+the basic serial API and does not require the macOS cgo-only USB metadata API.
+The generated `cc3200-wasm-exec.js` comes from Go 1.26.8; its Go Authors notice
+is preserved and `third_party/Go-LICENSE` accompanies release/container packages.
+
+The protocol port is based on cc3200tool commit
+`c2332898a1ededc0bdd01ec279b23366d213f81e`, GPL-2.0-or-later, used under version 2.
+Allterco Robotics and Team RevvoX attribution is retained in NOTICE. Manufacturer
+loader/firmware binaries remain user-supplied; they are not embedded in Go/WASM.

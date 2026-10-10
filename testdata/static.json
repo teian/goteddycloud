@@ -1,0 +1,75 @@
+[
+  {
+    "name": "static /",
+    "method": "GET",
+    "path": "/",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type",
+      "Location"
+    ]
+  },
+  {
+    "name": "static /web",
+    "method": "GET",
+    "path": "/web",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "static /web/box/settings",
+    "method": "GET",
+    "path": "/web/box/settings",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "static /web/index.html",
+    "method": "GET",
+    "path": "/web/index.html",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "static /legacy.html",
+    "method": "GET",
+    "path": "/legacy.html",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "static /web/app.js",
+    "method": "GET",
+    "path": "/web/app.js",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "static /web/app.css",
+    "method": "GET",
+    "path": "/web/app.css",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type"
+    ]
+  },
+  {
+    "name": "static /api/plugins/get",
+    "method": "GET",
+    "path": "/api/plugins/get",
+    "kind": "json",
+    "headers": [
+      "Content-Type"
+    ]
+  }
+]

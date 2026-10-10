@@ -1,0 +1,48 @@
+[
+  {
+    "name": "cached TAP stored delivery",
+    "method": "GET",
+    "path": "/v1/content/0300000003000000",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type",
+      "Content-Length"
+    ],
+    "expected_status": 200
+  },
+  {
+    "name": "cached TAP metadata",
+    "method": "GET",
+    "path": "/v3/content-meta/0300000003000000",
+    "kind": "json",
+    "headers": [
+      "Content-Type"
+    ],
+    "expected_status": 200
+  },
+  {
+    "name": "cached TAP later chapter",
+    "method": "GET",
+    "path": "/v3/chapter/teddycloud_01_0300000003000000",
+    "kind": "bytes",
+    "headers": [
+      "Content-Type",
+      "Content-Length"
+    ],
+    "expected_status": 200
+  },
+  {
+    "name": "cached TAP range",
+    "method": "GET",
+    "path": "/v1/content/0300000003000000",
+    "kind": "bytes",
+    "headers": [
+      "Content-Range",
+      "Content-Length"
+    ],
+    "request_headers": {
+      "Range": "bytes=4100-4120"
+    },
+    "expected_status": 206
+  }
+]
