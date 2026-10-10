@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-2.0-only
 """Compare live response contracts with the isolated pinned C encoder."""
-import http.client,http.server,json,os,pathlib,signal,socket,struct,subprocess,tempfile,threading,time
+import http.client,http.server,json,os,pathlib,signal,socket,ssl,struct,subprocess,tempfile,threading,time
 workspace=pathlib.Path(__file__).resolve().parents[1]
 def freeport():
  with socket.socket() as sock:sock.bind(('127.0.0.1',0));return sock.getsockname()[1]
@@ -51,7 +51,8 @@ try:
       probe=http.client.HTTPConnection('127.0.0.1',http_port,timeout=1);probe.request('GET','/v1/time');probe.getresponse().read();probe.close();break
      except OSError:time.sleep(.1)
     else:raise AssertionError((name,'readiness'))
-    connection=http.client.HTTPConnection('127.0.0.1',http_port,timeout=20);connection.request('GET','/v1/content/1122334455667788');response=connection.getresponse();data=response.read(8192)
+    connection=http.client.HTTPConnection('127.0.0.1',http_port,timeout=20) if name=='C' else http.client.HTTPSConnection('127.0.0.1',box_port,context=ssl.create_default_context(cafile=str(root/'certs/server/teddy-cert.pem')),timeout=20)
+    connection.request('GET','/v1/content/1122334455667788');response=connection.getresponse();data=response.read(8192)
     assert response.status==200 and len(data)==8192,(name,response.status,len(data))
     fields=taf_header(data[:4096]);assert b'OggS'==data[4096:4100],(name,'missing live Ogg headers')
     assert fields[2]==1048575-4096,(name,'live payload length',fields[2])

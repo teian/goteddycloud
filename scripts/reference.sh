@@ -25,7 +25,9 @@ case "${1:-build}" in
       # The pinned tree includes generated protobuf-c files. Older protoc-c is
       # unnecessary unless schemas are deliberately changed in the oracle.
       # Upstream exposes NO_WARN_FAIL for compilers with new warning defaults.
-      make -C "$reference" -j"${JOBS:-4}" build NO_SANITIZERS=1 NO_WARN_FAIL=1
+      # Mode 2 also keeps libm when Ubuntu's linker uses --as-needed and
+      # upstream places libraries before its object list.
+      make -C "$reference" -j"${JOBS:-4}" build NO_SANITIZERS=2 NO_WARN_FAIL=1
     fi
     ;;
   run)

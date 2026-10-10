@@ -58,7 +58,8 @@ with tempfile.TemporaryDirectory(prefix='goteddycloud-cloud-') as folder:
    log=open(workspace/'.cache'/f'cloud-{name}-server.log','w');process=subprocess.Popen([str(binary),'--base_path',str(root)+'/'],cwd=workspace,stdout=log,stderr=log,start_new_session=True)
    results={};start_record=len(records)
    def request(label,method,path,data=None,json_body=False,auth=True):
-    connection=http.client.HTTPConnection('127.0.0.1',http_port,timeout=15);headers={'Content-Type':'application/json' if path.startswith('/v3/') else 'application/octet-stream'}
+    connection=http.client.HTTPConnection('127.0.0.1',http_port,timeout=15) if name=='C' else http.client.HTTPSConnection('127.0.0.1',box_port,context=ssl.create_default_context(cafile=str(root/'certs/server/teddy-cert.pem')),timeout=15)
+    headers={'Content-Type':'application/json' if path.startswith('/v3/') else 'application/octet-stream'}
     if auth:headers['Authorization']='BD '+('01'*32)
     connection.request(method,path,data,headers);response=connection.getresponse();body=response.read();result=(response.status,response.getheader('Content-Type'),json.loads(body) if json_body and body else body);connection.close();results[label]=result;return result
    def set_value(key,value):

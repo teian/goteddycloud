@@ -211,9 +211,14 @@ func TestACMEIssuanceAndCachedRestart(t *testing.T) {
 			if _, err := leaf.Verify(x509.VerifyOptions{DNSName: "teddy.example.net", Roots: roots}); err != nil {
 				t.Fatal(err)
 			}
-			// Reload the manager and cache, simulating a server restart with no issuer I/O.
-			before := requests.Load()
-			fresh, err := managementTLS(ctx, store.Snapshot(""), issuer.Client().Transport)
+			// Count only the restarted manager's I/O. The original manager may
+			// still fetch /authz asynchronously to clean up pending authorizations.
+			var restartRequests atomic.Int64
+			restartTransport := testRoundTripper(func(r *http.Request) (*http.Response, error) {
+				restartRequests.Add(1)
+				return issuer.Client().Transport.RoundTrip(r)
+			})
+			fresh, err := managementTLS(ctx, store.Snapshot(""), restartTransport)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -221,7 +226,7 @@ func TestACMEIssuanceAndCachedRestart(t *testing.T) {
 			if err != nil || !bytes.Equal(pair.Certificate[0], cached.Certificate[0]) {
 				t.Fatal("cached certificate not reused", err)
 			}
-			if requests.Load() != before {
+			if restartRequests.Load() != 0 {
 				t.Fatal("cached restart contacted issuer")
 			}
 		})

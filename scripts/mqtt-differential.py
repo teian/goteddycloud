@@ -85,7 +85,7 @@ with tempfile.TemporaryDirectory(prefix='goteddycloud-mqtt-') as folder:
   try:
    deadline=time.monotonic()+15
    while True:
-    try:request(http_port,'/v1/time');break
+    try:request(http_port,'/v1/time' if name=='C' else '/api/time');break
     except OSError:
      if process.poll() is not None or time.monotonic()>deadline:raise AssertionError((name,'startup', (base/(name+'.log')).read_text()[-1500:]))
      time.sleep(.1)

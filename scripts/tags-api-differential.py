@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Reference management listing, assignment and safe trigger contracts."""
-import http.client,json
+import http.client,json,ssl
 from pathlib import Path
 from urllib.parse import urlencode
 ports=[18080,18081]
 roots=[Path('.cache/oracle-runtime'),Path('.cache/ci-candidate-runtime')]
 for root in roots: assert (root/'.synthetic-fixture').is_file()
 def req(port,method,path,data=None):
- c=http.client.HTTPConnection('127.0.0.1',port,timeout=30);c.request(method,path,data)
+ c=http.client.HTTPSConnection('127.0.0.1',19444,context=ssl.create_default_context(cafile=str(roots[1]/'certs/server/teddy-cert.pem')),timeout=30) if port==18081 and path.startswith('/v1/') else http.client.HTTPConnection('127.0.0.1',port,timeout=30)
+ c.request(method,path,data)
  r=c.getresponse();result=(r.status,r.getheader('Content-Type'),r.read());c.close();return result
 def check(name,method,path,data=None,as_json=False,status=200):
  results=[req(port,method,path,data) for port in ports]

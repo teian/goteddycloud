@@ -15,7 +15,7 @@ with tempfile.TemporaryDirectory(prefix='goteddycloud-diagnostics-') as folder:
   log=open(workspace/'.cache'/f'diagnostics-{run}.log','w');process=subprocess.Popen([str(workspace/'bin/goteddycloud'),'--base_path',str(root)],stdout=log,stderr=log,start_new_session=True)
   def request(port,tls=False):
    c=http.client.HTTPSConnection('127.0.0.1',port,context=ssl._create_unverified_context(),timeout=5) if tls else http.client.HTTPConnection('127.0.0.1',port,timeout=5)
-   c.request('GET','/v1/time');r=c.getresponse();data=r.read();assert r.status==200 and data.isdigit();c.close()
+   c.request('GET','/v1/time' if port==ports[2] else '/api/time');r=c.getresponse();data=r.read();assert r.status==200 and data.isdigit();c.close()
   try:
    for _ in range(100):
     try:request(ports[0]);break
