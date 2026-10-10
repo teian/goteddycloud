@@ -36,6 +36,7 @@ compatcheck() {
 compatcheck testdata/device-offline.json
 compatcheck testdata/auth-events.json
 compatcheck testdata/static.json
+python3 scripts/plugins-differential.py
 compatcheck testdata/ota-offline.json
 compatcheck testdata/v3-offline.json
 compatcheck testdata/custom-models.json

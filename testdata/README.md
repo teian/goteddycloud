@@ -19,6 +19,9 @@ Generate the reference multi-track TAF after `scripts/reference.sh build`:
 ```
 
 No upstream sandbox audio, firmware image, or manufacturer certificates are copied.
+Plugin discovery is checked by `scripts/plugins-differential.py`: the candidate
+must preserve the reference list and add exactly its built-in CC3200 tool. Other
+static cases retain exact comparisons; user management is not a plugin.
 Future captures must be replaced with synthetic payloads or reviewed for client
 certificates, private keys, authorization, box IDs/IPs, tag identifiers and audio
 before inclusion. Record the baseline commit and generator/recording command.

@@ -62,14 +62,5 @@
     "headers": [
       "Content-Type"
     ]
-  },
-  {
-    "name": "static /api/plugins/get",
-    "method": "GET",
-    "path": "/api/plugins/get",
-    "kind": "json",
-    "headers": [
-      "Content-Type"
-    ]
   }
 ]
