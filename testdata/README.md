@@ -25,6 +25,11 @@ static cases retain exact comparisons; user management is not a plugin.
 Firmware uploads use the verified management TLS listener: the pinned C raw HTTP
 socket buffer can parse binary body bytes as headers when they arrive together.
 The content comparison does not validate that upstream raw HTTP buffering bug.
+The MQTT replay registers the box before enabling the client and waits for the
+discovery burst and QoS handshakes to finish before sending commands. This avoids
+known registration/TX lock stalls in the pinned C client. It asserts the two
+updated Go management-port display names explicitly; other discovery fields and
+state values remain exact comparisons.
 
 Future captures must be replaced with synthetic payloads or reviewed for client
 certificates, private keys, authorization, box IDs/IPs, tag identifiers and audio

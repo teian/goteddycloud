@@ -17,13 +17,18 @@ def load(name,path):
     return module
 
 def main():
-    reference=Path('.cache/teddycloud-reference').resolve()
-    assert subprocess.check_output(['git','-C',str(reference),'rev-parse','HEAD'],text=True).strip()==PIN
-    module=load('upstream_custom_tests',reference/'tests/test_tonies_custom_json_api.py')
+    # The oracle job already clones the develop repository, including history.
+    # Read the original test at its immutable pin without another checkout or
+    # assuming an untracked legacy reference tree exists on the runner.
+    reference=Path('.cache/teddycloud-develop-reference').resolve()
+    source=subprocess.check_output(['git','-C',str(reference),'show',f'{PIN}:tests/test_tonies_custom_json_api.py'])
     native=load('native_smoke',Path('scripts/native-smoke.py'))
     Path('.cache').mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory(prefix='custom-api-',dir='.cache') as directory:
         root=Path(directory).resolve()
+        test_file=root/'upstream_custom_tests.py'
+        test_file.write_bytes(source)
+        module=load('upstream_custom_tests',test_file)
         deployment=root/'deployment'
         binary=root/'goteddycloud'
         subprocess.run(['go','build','-buildvcs=false','-o',str(binary),'./cmd/goteddycloud'],env=dict(os.environ,CGO_ENABLED='0'),check=True)
