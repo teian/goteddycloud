@@ -51,6 +51,11 @@ try:
  for path in ['/api/auth/status','/api/settings/getIndex?internal=true&nolevel=true','/api/fileIndexV2?special=library','/api/getTagInfo?ruid=0000000100000001']:
   results=[req(t[2][0],'GET',path) for t in targets]
   left,right=[json.loads(r[2]) for r in results]
+  if path=='/api/auth/status':
+   # Native roles/areas extend the legacy status response. This replay has
+   # removed its only user, so each added identity field must be empty.
+   for key in ['role','area','areaRole','selectedArea']:
+    assert right.pop(key)=='',(path,key,right)
   if 'getIndex' in path:
    assert all(d['level']!=99 for d in right['options']);continue # documented C-only state defaults differ
   if 'fileIndex' in path:
