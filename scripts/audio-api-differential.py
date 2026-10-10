@@ -3,6 +3,7 @@
 import argparse
 import http.client
 import json
+import ssl
 from pathlib import Path
 import subprocess
 import urllib.parse
@@ -10,14 +11,20 @@ import urllib.parse
 p=argparse.ArgumentParser()
 p.add_argument('--reference-http',type=int,default=18080)
 p.add_argument('--candidate-http',type=int,default=18081)
+p.add_argument('--reference-web',type=int,default=18443)
+p.add_argument('--candidate-web',type=int,default=19443)
 p.add_argument('--reference-root',type=Path,default=Path('.cache/oracle-runtime'))
 p.add_argument('--candidate-root',type=Path,default=Path('.cache/ci-candidate-runtime'))
 a=p.parse_args()
 roots=[a.reference_root.resolve(),a.candidate_root.resolve()]
 ports=[a.reference_http,a.candidate_http]
+web_ports=[a.reference_web,a.candidate_web]
 for root in roots:assert (root/'.synthetic-fixture').is_file()
 def request(port,path,data,kind):
-    c=http.client.HTTPConnection('127.0.0.1',port,timeout=30)
+    # Large binary multipart bodies hit the pinned C raw HTTP buffering bug;
+    # use the verified web TLS listener, as in the firmware content comparison.
+    index=ports.index(port)
+    c=http.client.HTTPSConnection('127.0.0.1',web_ports[index],context=ssl.create_default_context(cafile=str(roots[index]/'certs/server/teddy-cert.pem')),timeout=30) if kind.startswith('multipart/') else http.client.HTTPConnection('127.0.0.1',port,timeout=30)
     c.request('POST',path,body=data,headers={'Content-Type':kind})
     r=c.getresponse();result=(r.status,r.getheader('Content-Type'),r.read());c.close();return result
 
