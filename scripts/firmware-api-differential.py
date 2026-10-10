@@ -1,28 +1,16 @@
 #!/usr/bin/env python3
 """Compare synthetic certificate and ESP32 workflows, preserving source images."""
-import base64,hashlib,http.client,json,subprocess
+import base64,hashlib,http.client,json,ssl,subprocess
 from pathlib import Path
-ports=[18080,18081];roots=[Path('.cache/oracle-runtime').resolve(),Path('.cache/ci-candidate-runtime').resolve()]
+ports=[18443,19443];roots=[Path('.cache/oracle-runtime').resolve(),Path('.cache/ci-candidate-runtime').resolve()]
 for root in roots:assert (root/'.synthetic-fixture').is_file()
 
-class UploadConnection(http.client.HTTPConnection):
- # The pinned C multipart parser loops in PARSE_HEADER when its first read
- # contains only a partial boundary. Coalesce headers and the already bounded
- # fixture body in one send so this content comparison avoids that upstream bug.
- # This is not a test of the reference parser's fragmentation handling.
- def request(self,*args,**kwargs):
-  self.pending=[]
-  try:
-   super().request(*args,**kwargs)
-   packet=b''.join(self.pending)
-  finally:self.pending=None
-  super().send(packet)
- def send(self,data):
-  if getattr(self,'pending',None) is None:return super().send(data)
-  self.pending.append(data)
+# The pinned C raw HTTP socket buffer can parse binary upload bytes as headers
+# when a receive coalesces headers with the body. Use its supported web TLS
+# listener for these content comparisons; verify each fixture certificate.
 
 def req(port,method,path,data=None,kind=None):
- c=UploadConnection('127.0.0.1',port,timeout=30)
+ c=http.client.HTTPSConnection('127.0.0.1',port,context=ssl.create_default_context(cafile=str(roots[ports.index(port)]/'certs/server/teddy-cert.pem')),timeout=30)
  try:
   c.request(method,path,data,{'Content-Type':kind} if kind else {})
   r=c.getresponse();return r.status,r.getheader('Content-Type'),r.read()

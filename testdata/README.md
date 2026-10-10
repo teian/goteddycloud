@@ -22,9 +22,10 @@ No upstream sandbox audio, firmware image, or manufacturer certificates are copi
 Plugin discovery is checked by `scripts/plugins-differential.py`: the candidate
 must preserve the reference list and add exactly its built-in CC3200 tool. Other
 static cases retain exact comparisons; user management is not a plugin.
-The firmware uploader coalesces the bounded fixture request into one send: the
-pinned C multipart parser can loop when its initial boundary arrives fragmented.
-This comparison validates uploaded content, not reference transport fragmentation.
+Firmware uploads use the verified management TLS listener: the pinned C raw HTTP
+socket buffer can parse binary body bytes as headers when they arrive together.
+The content comparison does not validate that upstream raw HTTP buffering bug.
+
 Future captures must be replaced with synthetic payloads or reviewed for client
 certificates, private keys, authorization, box IDs/IPs, tag identifiers and audio
 before inclusion. Record the baseline commit and generator/recording command.
