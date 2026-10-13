@@ -576,8 +576,8 @@
   {
     "ID": "core.boxCertAuth",
     "shortname": "core.boxCertAuth",
-    "description": "Client certificates are required for access to the HTTPS API for the boxes",
-    "label": "HTTPS box cert auth",
+    "description": "Legacy compatibility setting. Box API and RTNL always require an exact locally imported client certificate; false no longer disables authentication.",
+    "label": "Box certificate auth (always required)",
     "internal": false,
     "level": 3,
     "type": "bool",
@@ -596,7 +596,7 @@
   {
     "ID": "core.allowNewBox",
     "shortname": "core.allowNewBox",
-    "description": "Allow new boxes to be added, if they try to connect",
+    "description": "Allow boxes with an already imported, exactly matching client certificate to create an overlay when connecting. Unknown certificates are always rejected.",
     "label": "Allow new boxes",
     "internal": false,
     "level": 1,

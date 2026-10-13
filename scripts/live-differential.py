@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-2.0-only
 """Compare live response contracts with the isolated pinned C encoder."""
+from fixture_tls import client_context
 import http.client,http.server,json,os,pathlib,signal,socket,ssl,struct,subprocess,tempfile,threading,time
 workspace=pathlib.Path(__file__).resolve().parents[1]
 def freeport():
@@ -38,7 +39,7 @@ results=[]
 try:
  with tempfile.TemporaryDirectory(prefix='goteddycloud-live-') as folder:
   base=pathlib.Path(folder)
-  for name,binary in [('C',workspace/'.cache/teddycloud-develop-reference/bin/teddycloud'),('Go',workspace/'bin/goteddycloud')]:
+  for name,binary in [('C',workspace/'.cache/teddycloud-develop-reference/bin/teddycloud'),('Go',workspace/os.environ.get('GOTEDDYCLOUD_BINARY','bin/goteddycloud'))]:
    root=base/name;subprocess.run(['go','run','-buildvcs=false','./cmd/fixturegen','-output',str(root)],cwd=workspace,check=True,capture_output=True)
    http_port,web_port,box_port=freeport(),freeport(),freeport()
    config=root/'config/config.ini';config.write_text(config.read_text()+f'core.server.http_port={http_port}\ncore.server.https_web_port={web_port}\ncore.server.https_api_port={box_port}\nencode.ffmpeg_sweep_startup_buffer=false\nencode.ffmpeg_stream_buffer_ms=0\nencode.stream_max_size=1048575\n')
@@ -51,7 +52,7 @@ try:
       probe=http.client.HTTPConnection('127.0.0.1',http_port,timeout=1);probe.request('GET','/v1/time');probe.getresponse().read();probe.close();break
      except OSError:time.sleep(.1)
     else:raise AssertionError((name,'readiness'))
-    connection=http.client.HTTPConnection('127.0.0.1',http_port,timeout=20) if name=='C' else http.client.HTTPSConnection('127.0.0.1',box_port,context=ssl.create_default_context(cafile=str(root/'certs/server/teddy-cert.pem')),timeout=20)
+    connection=http.client.HTTPSConnection('127.0.0.1',box_port,context=client_context(root),timeout=20)
     connection.request('GET','/v1/content/1122334455667788');response=connection.getresponse();data=response.read(8192)
     assert response.status==200 and len(data)==8192,(name,response.status,len(data))
     fields=taf_header(data[:4096]);assert b'OggS'==data[4096:4100],(name,'missing live Ogg headers')

@@ -19,7 +19,9 @@ import (
 	"time"
 
 	"goteddycloud/internal/boxtransport"
+	"goteddycloud/internal/config"
 	"goteddycloud/internal/devicehttp"
+	"goteddycloud/internal/identity"
 )
 
 // The HTTP server accepts dispatched HTTP sockets from the same TLS acceptor.
@@ -79,7 +81,13 @@ func run(root, addr string) error {
 	if err != nil {
 		return err
 	}
-	config, err := boxtransport.TLSConfig(tb1, tb2)
+	settings, err := config.OpenReadOnly(root)
+	if err != nil {
+		return err
+	}
+	defer settings.Close()
+	policy := &identity.Policy{Store: settings}
+	config, err := boxtransport.TLSConfig(tb1, tb2, policy.VerifyCertificate)
 	if err != nil {
 		return err
 	}

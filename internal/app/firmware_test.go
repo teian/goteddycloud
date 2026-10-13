@@ -7,12 +7,10 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"goteddycloud/internal/certificates"
 	"goteddycloud/internal/firmware"
-	"goteddycloud/internal/runtime"
 )
 
 func TestFirmwareWorkflowUsesCopiesAndPreflightsCertificateConflicts(t *testing.T) {
@@ -108,15 +106,12 @@ func TestFirmwareWorkflowUsesCopiesAndPreflightsCertificateConflicts(t *testing.
 
 func TestDevelopCertificateUploadSelectsPrivateBoxDirectory(t *testing.T) {
 	s := fixtureApp(t)
-	id := "DEADBEEF0030"
-	_, authenticated, err := s.Identity.Resolve(runtime.Peer{Box: true, CommonName: id, Subject: "TeddyCloud test"})
-	if err != nil || !authenticated {
-		t.Fatal(authenticated, err)
+	id := "001122334455"
+	path := filepath.Join(s.Settings.String("", "core.certdir"), "001122334455")
+	if err := s.Settings.Set(id, "core.certdir", path); err != nil {
+		t.Fatal(err)
 	}
 	snap := s.Settings.Snapshot(id)
-	if !strings.HasSuffix(filepath.ToSlash(snap.String("core.certdir")), "/deadbeef0030") {
-		t.Fatal(snap.String("core.certdir"))
-	}
 	material, err := os.ReadFile(filepath.Join(s.Settings.Snapshot("").String("internal.certdirfull"), "001122334455/teddy-cert.pem"))
 	if err != nil {
 		t.Fatal(err)
@@ -125,7 +120,7 @@ func TestDevelopCertificateUploadSelectsPrivateBoxDirectory(t *testing.T) {
 	if result.Code != 200 {
 		t.Fatal(result.Code, result.Body.String())
 	}
-	path := filepath.Join(snap.String("internal.certdirfull"), "client.der")
+	path = filepath.Join(snap.String("internal.certdirfull"), "client.der")
 	info, err := os.Stat(path)
 	if err != nil || info.Mode().Perm() != 0600 {
 		t.Fatal(info, err)

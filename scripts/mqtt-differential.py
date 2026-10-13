@@ -81,12 +81,13 @@ def request(port,path,body=None):
  conn=http.client.HTTPConnection('127.0.0.1',port,timeout=5);conn.request('GET' if body is None else 'POST',path,body);res=conn.getresponse();data=res.read();conn.close();assert res.status==200,(path,res.status,data);return data
 with tempfile.TemporaryDirectory(prefix='goteddycloud-mqtt-') as folder:
  base=pathlib.Path(folder);identity=base/'identity';identity.mkdir();identity_base=base/'signer'
- subprocess.run([str(workspace/'bin/goteddycloud'),'-b',str(identity_base),'-c001122334455','-d',str(identity)],check=True,capture_output=True)
+ subprocess.run([str(workspace/os.environ.get('GOTEDDYCLOUD_BINARY','bin/goteddycloud')),'-b',str(identity_base),'-c001122334455','-d',str(identity)],check=True,capture_output=True)
  for source,destination,kind in [('client.der','client.pem','x509'),('private.der','private.pem','pkey')]:subprocess.run(['openssl',kind,'-inform','DER','-in',str(identity/source),'-out',str(identity/destination)],check=True,capture_output=True)
  captures=[];desired_captures=[]
- for name,binary in [('C',workspace/'.cache/teddycloud-develop-reference/bin/teddycloud'),('Go',workspace/'bin/goteddycloud')]:
+ for name,binary in [('C',workspace/'.cache/teddycloud-develop-reference/bin/teddycloud'),('Go',workspace/os.environ.get('GOTEDDYCLOUD_BINARY','bin/goteddycloud'))]:
   root=base/name;subprocess.run(['go','run','-buildvcs=false','./cmd/fixturegen','-output',str(root)],cwd=workspace,check=True,capture_output=True)
   http_port,web_port,box_port,mqtt_port=freeport(),freeport(),freeport(),freeport();broker=Broker()
+  overlay=root/'config/config.overlay.ini';overlay.write_text(overlay.read_text()+f'overlay.001122334455.core.client_cert.file.crt={identity / "client.pem"}\n')
   options={'log.level':'5','mqtt.enabled':'false','mqtt.hostname':'127.0.0.1','mqtt.port':str(broker.port),'mqtt.identification':'synthetic-oracle','mqtt.topic':'synthetic','mqtt.qosLevel':os.environ.get('MQTT_TEST_QOS','2'),'mqtt.tls_enabled':'false','mqtt_server.enabled':'true','mqtt_server.port':str(mqtt_port),'mqtt_server.cert.crt':'certs/server_tb2/teddy-cert.pem','mqtt_server.cert.key':'certs/server_tb2/teddy-key.pem','core.server.bind_ip':'127.0.0.1','core.server.http_port':str(http_port),'core.server.https_web_port':str(web_port),'core.server.https_api_port':str(box_port),'core.host_url':'http://synthetic.invalid'}
   config=root/'config/config.ini';config.write_text(config.read_text()+''.join(f'{key}={value}\n' for key,value in options.items()))
   log=open(base/(name+'.log'),'w');process=subprocess.Popen([str(binary),'--base_path',str(root)+'/'],cwd=workspace,stdout=log,stderr=log)
@@ -113,7 +114,7 @@ with tempfile.TemporaryDirectory(prefix='goteddycloud-mqtt-') as folder:
 
    # Register while the external MQTT client is disabled. The pinned C
    # client can deadlock when registration subscribes during its connect loop.
-   # A recognized name-based identity routes the synthetic RTNL frame to its overlay.
+   # An explicitly imported client certificate routes RTNL to its overlay.
    context=ssl.create_default_context(cafile=str(root/'certs/server/teddy-cert.pem'));context.maximum_version=ssl.TLSVersion.TLSv1_2;context.load_cert_chain(str(identity/'client.pem'),str(identity/'private.pem'))
    payload=struct.pack('<Iii',0,-40,2)
    log2=b'\x09'+struct.pack('<Q',1234)+b'\x10\x01\x18\x00\x20\x1b\x28\xe0\x43\x32'+bytes([len(payload)])+payload+b'\x4a\x01\x0a'
@@ -159,8 +160,17 @@ with tempfile.TemporaryDirectory(prefix='goteddycloud-mqtt-') as folder:
   assert a[topic]['name']==f'{key} - {scheme} port for the webinterface'
   assert b[topic]['name']==f'{key} - {scheme} port for Web UI and management API'
   b[topic]['name']=a[topic]['name']
+ # The hardened certificate policy also changes these exact discovery labels.
+ for key,old,new in [
+  ('core.boxCertAuth','Client certificates are required for access to the HTTPS API for the boxes','Legacy compatibility setting. Box API and RTNL always require an exact locally imported client certificate; false no longer disables authentication.'),
+  ('core.allowNewBox','Allow new boxes to be added, if they try to connect','Allow boxes with an already imported, exactly matching client certificate to create an overlay when connecting. Unknown certificates are always rejected.'),
+ ]:
+  topic='homeassistant/switch/teddyCloud_Server/'+key.replace('.','-')+'/config'
+  assert a[topic]['name']==f'{key} - {old}'
+  assert b[topic]['name']==f'{key} - {new}'
+  b[topic]['name']=a[topic]['name']
  mismatches={key:[a[key],b[key]] for key in a if a[key]!=b[key]}
  assert not mismatches,json.dumps(mismatches,indent=2)
  for topic in ['synthetic/box/001122334455/VolumeLevel','synthetic/box/001122334455/VolumedB','synthetic/box/001122334455/CmdVolLimitSpk','synthetic/status']:
   assert reference[topic]==candidate[topic],(topic,reference.get(topic),candidate.get(topic))
- print(f'MQTT differential: {len(a)} discovery documents and 4 state topics match with two asserted management-port labels; valid/invalid commands and embedded TLS/settings/ping verified on both servers')
+ print(f'MQTT differential: {len(a)} discovery documents and 4 state topics match with four asserted management/security labels; valid/invalid commands and embedded TLS/settings/ping verified on both servers')

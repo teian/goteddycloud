@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -39,7 +40,15 @@ func TestConfiguredIdentityVerificationHeadersAndCancellation(t *testing.T) {
 		t.Fatal(err)
 	}
 	roots := x509.NewCertPool()
-	roots.AddCert(cert)
+	caData, err := os.ReadFile(filepath.Join(base, "certs/client/001122334455/ca.der"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	ca, err := x509.ParseCertificate(caData)
+	if err != nil {
+		t.Fatal(err)
+	}
+	roots.AddCert(ca)
 	seen := make(chan http.Header, 4)
 	server := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if len(r.TLS.PeerCertificates) != 1 || r.TLS.PeerCertificates[0].Subject.CommonName != "001122334455" {

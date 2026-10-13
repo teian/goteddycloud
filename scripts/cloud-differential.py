@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-2.0-only
 """Mutual-TLS mock cloud replay against pinned C and Go, with no public targets."""
+from fixture_tls import client_context
 import contextlib,http.client,http.server,json,os,pathlib,signal,socket,ssl,struct,subprocess,tempfile,threading,time,urllib.parse
 workspace=pathlib.Path(__file__).resolve().parents[1]
 def freeport():
@@ -46,10 +47,12 @@ with tempfile.TemporaryDirectory(prefix='goteddycloud-cloud-') as folder:
  cloud=http.server.ThreadingHTTPServer(('127.0.0.1',0),Cloud);policy=ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER);policy.load_cert_chain(str(common/'certs/server/teddy-cert.pem'),str(common/'certs/server/teddy-key.pem'));policy.verify_mode=ssl.CERT_REQUIRED;policy.load_verify_locations(str(common/'certs/client/001122334455/ca-root.pem'));cloud.socket=policy.wrap_socket(cloud.socket,server_side=True);thread=threading.Thread(target=cloud.serve_forever,daemon=True);thread.start()
  runs=[]
  try:
-  for name,binary in [('C',workspace/'.cache/teddycloud-develop-reference/bin/teddycloud'),('Go',workspace/'bin/goteddycloud')]:
+  for name,binary in [('C',workspace/'.cache/teddycloud-develop-reference/bin/teddycloud'),('Go',workspace/os.environ.get('GOTEDDYCLOUD_BINARY','bin/goteddycloud'))]:
    root=base/name;subprocess.run(['go','run','-buildvcs=false','./cmd/fixturegen','-output',str(root)],cwd=workspace,check=True,capture_output=True);(root/'data/library/synthetic.taf').write_bytes(taf)
    http_port,web_port,box_port=freeport(),freeport(),freeport()
    options={'cloud.enabled':'true','cloud.remote_hostname':'127.0.0.1','cloud.remote_hostname_tb2':'127.0.0.1','cloud.remote_port':str(cloud.server_port),'cloud.remote_port_tb2':str(cloud.server_port),'cloud.markCustomTagByUid':'false','cloud.markCustomTagByPass':'false','cloud.cacheContent':'true','cloud.cacheToLibrary':'false','cloud.cacheOta':'true','cloud.localOta':'true','cloud.enableV1Time':'true','cloud.enableV1Log':'true','cloud.enableV1CloudReset':'true','cloud.enableV1Ota':'true','core.client_cert.file.ca':str(common/'certs/server/teddy-cert.pem'),'core.client_cert.file.crt':str(common/'certs/client/001122334455/teddy-cert.pem'),'core.client_cert.file.key':str(common/'certs/client/001122334455/teddy-key.pem'),'core.server.http_port':str(http_port),'core.server.https_web_port':str(web_port),'core.server.https_api_port':str(box_port)}
+   (root/'certs/client/001122334455/teddy-cert.pem').write_bytes((common/'certs/client/001122334455/teddy-cert.pem').read_bytes())
+   (root/'certs/client/001122334455/teddy-key.pem').write_bytes((common/'certs/client/001122334455/teddy-key.pem').read_bytes())
    config=root/'config/config.ini';config.write_text(config.read_text()+''.join(f'{key}={value}\n' for key,value in options.items()))
    def metadata(ruid,value):
     target=root/'data/content/default'/ruid[:8].upper()/(ruid[8:].upper()+'.json');target.parent.mkdir(parents=True,exist_ok=True);target.write_text(json.dumps(value))
@@ -58,7 +61,7 @@ with tempfile.TemporaryDirectory(prefix='goteddycloud-cloud-') as folder:
    log=open(workspace/'.cache'/f'cloud-{name}-server.log','w');process=subprocess.Popen([str(binary),'--base_path',str(root)+'/'],cwd=workspace,stdout=log,stderr=log,start_new_session=True)
    results={};start_record=len(records)
    def request(label,method,path,data=None,json_body=False,auth=True):
-    connection=http.client.HTTPConnection('127.0.0.1',http_port,timeout=15) if name=='C' else http.client.HTTPSConnection('127.0.0.1',box_port,context=ssl.create_default_context(cafile=str(root/'certs/server/teddy-cert.pem')),timeout=15)
+    connection=http.client.HTTPSConnection('127.0.0.1',box_port,context=client_context(root),timeout=15)
     headers={'Content-Type':'application/json' if path.startswith('/v3/') else 'application/octet-stream'}
     if auth:headers['Authorization']='BD '+('01'*32)
     connection.request(method,path,data,headers);response=connection.getresponse();body=response.read();result=(response.status,response.getheader('Content-Type'),json.loads(body) if json_body and body else body);connection.close();results[label]=result;return result

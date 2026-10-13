@@ -3,9 +3,11 @@ package runtime
 
 import (
 	"context"
+	"crypto/sha256"
 	"crypto/subtle"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/hex"
 	"encoding/json"
 	"encoding/pem"
 	"errors"
@@ -26,6 +28,7 @@ const headerPrefix = "X-Goteddy-"
 
 type Peer struct {
 	CommonName, Issuer, Subject, RemoteAddr string
+	CertificateSHA256                       string
 	Box, Binary                             bool
 }
 type peerKey struct{}
@@ -95,6 +98,7 @@ func forwardPeer(h http.Header, peer Peer, token string) {
 	h.Set(headerPrefix+"Issuer", peer.Issuer)
 	h.Set(headerPrefix+"Subject", peer.Subject)
 	h.Set(headerPrefix+"Remote", peer.RemoteAddr)
+	h.Set(headerPrefix+"Certificate-SHA256", peer.CertificateSHA256)
 	if peer.Binary {
 		h.Set(headerPrefix+"Binary", "true")
 	}
@@ -106,6 +110,8 @@ func peerFromState(ctx context.Context) Peer {
 		p.CommonName = c.Subject.CommonName
 		p.Issuer = c.Issuer.CommonName
 		p.Subject = c.Subject.CommonName
+		hash := sha256.Sum256(c.Raw)
+		p.CertificateSHA256 = hex.EncodeToString(hash[:])
 	}
 	return p
 }
@@ -131,7 +137,24 @@ func Worker(ctx context.Context, input io.Reader, output io.Writer) error {
 	if err != nil {
 		return err
 	}
-	policy, err := boxtransport.TLSConfig(tb1, tb2)
+	verifyClient := &http.Client{Timeout: 3 * time.Second, Transport: &http.Transport{Proxy: nil, MaxConnsPerHost: 16, MaxIdleConnsPerHost: 16, IdleConnTimeout: 30 * time.Second}, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
+	defer verifyClient.CloseIdleConnections()
+	policy, err := boxtransport.TLSConfig(tb1, tb2, func(raw []byte) error {
+		req, err := http.NewRequestWithContext(ctx, http.MethodPost, options.Target+"/_verify-box", strings.NewReader(string(raw)))
+		if err != nil {
+			return err
+		}
+		req.Header.Set(headerPrefix+"Token", options.Token)
+		res, err := verifyClient.Do(req)
+		if err != nil {
+			return errors.New("box certificate verification unavailable")
+		}
+		defer res.Body.Close()
+		if res.StatusCode != http.StatusNoContent {
+			return errors.New("untrusted box certificate")
+		}
+		return nil
+	})
 	if err != nil {
 		return err
 	}
@@ -182,13 +205,27 @@ func Worker(ctx context.Context, input io.Reader, output io.Writer) error {
 		return nil
 	})
 }
-func privateHandler(token string, device http.Handler) http.Handler {
+func privateHandler(token string, verify func([]byte) error, device http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if subtle.ConstantTimeCompare([]byte(r.Header.Get(headerPrefix+"Token")), []byte(token)) != 1 {
 			http.Error(w, "unauthorized", http.StatusUnauthorized)
 			return
 		}
+		if r.URL.Path == "/_verify-box" {
+			if r.Method != http.MethodPost || verify == nil {
+				http.Error(w, "untrusted box certificate", http.StatusForbidden)
+				return
+			}
+			raw, err := io.ReadAll(io.LimitReader(r.Body, (64<<10)+1))
+			if err != nil || len(raw) > 64<<10 || verify(raw) != nil {
+				http.Error(w, "untrusted box certificate", http.StatusForbidden)
+				return
+			}
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
 		p := Peer{Box: true, CommonName: r.Header.Get(headerPrefix + "CN"), Issuer: r.Header.Get(headerPrefix + "Issuer"), Subject: r.Header.Get(headerPrefix + "Subject"), RemoteAddr: r.Header.Get(headerPrefix + "Remote"), Binary: r.Header.Get(headerPrefix+"Binary") == "true"}
+		p.CertificateSHA256 = r.Header.Get(headerPrefix + "Certificate-SHA256")
 		stripInternalHeaders(r.Header)
 		device.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), peerKey{}, p)))
 	})

@@ -46,7 +46,7 @@ cloud.remote_hostname_tb2=127.0.0.1
 mqtt.enabled=false
 mqtt_server.enabled=false
 core.allowNewBox=true
-core.boxCertAuth=false
+core.boxCertAuth=true
 core.contentdir=default
 core.librarydir=library
 core.host_url=http://127.0.0.1:18080
@@ -56,10 +56,12 @@ tonie_json.cache_images=false
 tonie_json.cache_preload=false
 `
 	overlay := `overlay.001122334455.commonName=001122334455
+overlay.001122334455.core.client_cert.file.crt=certs/client/001122334455/teddy-cert.pem
 overlay.001122334455.boxName=Synthetic Box One
 overlay.001122334455.toniebox.max_vol_spk=1
 overlay.001122334455.toniebox.led=2
 overlay.AABBCCDDEEFF.commonName=AABBCCDDEEFF
+overlay.AABBCCDDEEFF.core.client_cert.file.crt=certs/client/AABBCCDDEEFF/teddy-cert.pem
 overlay.AABBCCDDEEFF.boxName=Synthetic Box Two
 overlay.AABBCCDDEEFF.toniebox.max_vol_spk=3
 overlay.AABBCCDDEEFF.toniebox.led=0
@@ -139,13 +141,32 @@ func certificate(write func(string, []byte, os.FileMode) error, dir, cn string, 
 	} else {
 		cert.ExtKeyUsage = []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth}
 	}
-	der, err := x509.CreateCertificate(rand.Reader, cert, cert, &key.PublicKey, key)
+	parent := cert
+	var caDER []byte
+	if !server {
+		root := *cert
+		root.Subject = pkix.Name{CommonName: "TeddyCloud Synthetic Client CA"}
+		root.ExtKeyUsage = nil
+		caDER, err = x509.CreateCertificate(rand.Reader, &root, &root, &key.PublicKey, key)
+		if err != nil {
+			return err
+		}
+		parent, err = x509.ParseCertificate(caDER)
+		if err != nil {
+			return err
+		}
+	}
+	der, err := x509.CreateCertificate(rand.Reader, cert, parent, &key.PublicKey, key)
 	if err != nil {
 		return err
 	}
 	crt := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: der})
+	if server {
+		caDER = der
+	}
+	caPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: caDER})
 	private := pem.EncodeToMemory(&pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(key)})
-	for name, data := range map[string][]byte{"teddy-cert.pem": crt, "teddy-key.pem": private, "ca-root.pem": crt, "ca-key.pem": private, "ca.der": der} {
+	for name, data := range map[string][]byte{"teddy-cert.pem": crt, "teddy-key.pem": private, "ca-root.pem": caPEM, "ca-key.pem": private, "ca.der": caDER} {
 		if err := write(filepath.Join(dir, name), data, 0600); err != nil {
 			return err
 		}

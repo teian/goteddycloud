@@ -129,19 +129,20 @@ func startServer(settings *config.Store, options serverOptions) error {
 		keylogWriter = keylog
 	}
 	err = serverruntime.Run(ctx, serverruntime.Options{
-		HTTP:          options.httpAddress,
-		Web:           options.httpSecureAddress,
-		WebTLS:        webTLS,
-		HTTPChallenge: challenge,
-		Box:           options.boxAddress,
-		TB1:           tb1,
-		TB2:           tb2,
-		Management:    management,
-		Device:        device,
-		KeyLogWriter:  keylogWriter,
-		KeyLogBase:    snap.Base,
-		KeyLogPath:    snap.String("core.sslkeylogfile"),
-		Stderr:        os.Stderr,
+		HTTP:                 options.httpAddress,
+		Web:                  options.httpSecureAddress,
+		WebTLS:               webTLS,
+		HTTPChallenge:        challenge,
+		Box:                  options.boxAddress,
+		TB1:                  tb1,
+		TB2:                  tb2,
+		Management:           management,
+		Device:               device,
+		VerifyBoxCertificate: application.Identity.VerifyCertificate,
+		KeyLogWriter:         keylogWriter,
+		KeyLogBase:           snap.Base,
+		KeyLogPath:           snap.String("core.sslkeylogfile"),
+		Stderr:               os.Stderr,
 		Ready: func(addresses map[string]string) {
 			slog.Info("listeners ready", "addresses", addresses, "base_path", snap.Base)
 			if options.dockerTest {

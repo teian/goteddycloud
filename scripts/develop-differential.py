@@ -83,6 +83,8 @@ try:
    subprocess.run(['openssl','x509','-inform','DER','-in',str(identity/'client.der'),'-out',str(identity/'client.pem')],check=True,capture_output=True)
    subprocess.run(['openssl','rsa','-inform','DER','-in',str(identity/'private.der'),'-out',str(identity/'private.pem')],check=True,capture_output=True)
    env['TEDDYCLOUD_CLIENT_CERT']=str(identity/'client.pem');env['TEDDYCLOUD_CLIENT_KEY']=str(identity/'private.pem')
+   if name=='Go':
+    trusted=root/'certs/client/deadbeef00ff';trusted.mkdir(parents=True,exist_ok=True);shutil.copyfile(identity/'client.der',trusted/'client.der')
   if args.hardening_only:tests=['test_auth_pool_reuse.py','test_hardening.py::Settings528','test_hardening.py::Secrets505','test_hardening.py::PrivateFetch']
   env['PYTHONPATH']=str(workspace/'scripts')
   env['PYTEST_PLUGINS']='develop_pytest_policy' if name=='Go' else 'develop_reference_policy'

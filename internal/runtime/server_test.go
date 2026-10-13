@@ -2,13 +2,18 @@
 package runtime
 
 import (
+	"bytes"
 	"context"
+	"crypto/sha256"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/hex"
+	"errors"
 	"fmt"
 	"io"
 	"net"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
@@ -29,7 +34,13 @@ func TestWorkerHelper(t *testing.T) {
 	}
 	os.Exit(0)
 }
-func testOptions(t *testing.T) Options {
+
+type testRuntimeOptions struct {
+	Options
+	Client tls.Certificate
+}
+
+func testOptions(t *testing.T) testRuntimeOptions {
 	t.Helper()
 	root := filepath.Join(t.TempDir(), "fixture")
 	if err := fixtures.Generate(root); err != nil {
@@ -43,7 +54,13 @@ func testOptions(t *testing.T) Options {
 		return p
 	}
 	t.Setenv("GOTEDDY_WORKER_TEST", "1")
-	return Options{HTTP: "127.0.0.1:0", Web: "127.0.0.1:0", Box: "127.0.0.1:0", TB1: load("certs/server"), TB2: load("certs/server_tb2"), WorkerCommand: []string{os.Args[0], "-test.run=^TestWorkerHelper$"}, Stderr: os.Stderr,
+	clientPair := load("certs/client/001122334455")
+	return testRuntimeOptions{Client: clientPair, Options: Options{HTTP: "127.0.0.1:0", Web: "127.0.0.1:0", Box: "127.0.0.1:0", TB1: load("certs/server"), TB2: load("certs/server_tb2"), VerifyBoxCertificate: func(raw []byte) error {
+		if !bytes.Equal(raw, clientPair.Certificate[0]) {
+			return errors.New("untrusted")
+		}
+		return nil
+	}, WorkerCommand: []string{os.Args[0], "-test.run=^TestWorkerHelper$"}, Stderr: os.Stderr,
 		Management: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { fmt.Fprint(w, "management") }), Device: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			p := RequestPeer(r.Context())
 			if p.Binary {
@@ -51,7 +68,7 @@ func testOptions(t *testing.T) Options {
 				return
 			}
 			fmt.Fprintf(w, "box=%t cn=%s forged=%s", p.Box, p.CommonName, r.Header.Get(headerPrefix+"CN"))
-		})}
+		})}}
 }
 func TestListenersIdentityIsolationAndShutdown(t *testing.T) {
 	o := testOptions(t)
@@ -68,7 +85,7 @@ func TestListenersIdentityIsolationAndShutdown(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	done := make(chan error, 1)
-	go func() { done <- Run(ctx, o) }()
+	go func() { done <- Run(ctx, o.Options) }()
 	var addresses map[string]string
 	select {
 	case addresses = <-ready:
@@ -97,7 +114,7 @@ func TestListenersIdentityIsolationAndShutdown(t *testing.T) {
 	if string(body) != "management" {
 		t.Fatal(string(body))
 	}
-	transport := &http.Transport{TLSClientConfig: &tls.Config{RootCAs: roots, MinVersion: tls.VersionTLS12}}
+	transport := &http.Transport{TLSClientConfig: &tls.Config{RootCAs: roots, MinVersion: tls.VersionTLS12, Certificates: []tls.Certificate{o.Client}}}
 	defer transport.CloseIdleConnections()
 	client := &http.Client{Transport: transport, Timeout: 3 * time.Second}
 	request, _ := http.NewRequest("GET", "https://"+addresses["box"]+"/v1/time", nil)
@@ -108,7 +125,7 @@ func TestListenersIdentityIsolationAndShutdown(t *testing.T) {
 	}
 	body, _ = io.ReadAll(response.Body)
 	response.Body.Close()
-	if string(body) != "box=true cn= forged=" {
+	if string(body) != "box=true cn=001122334455 forged=" {
 		t.Fatal(string(body))
 	}
 	response, err = client.Get("https://" + addresses["web"] + "/api/settings/getIndex")
@@ -171,7 +188,7 @@ func TestBindFailureReleasesEarlierListeners(t *testing.T) {
 	defer occupied.Close()
 	o.HTTP = address
 	o.Web = occupied.Addr().String()
-	if err := Run(context.Background(), o); err == nil {
+	if err := Run(context.Background(), o.Options); err == nil {
 		t.Fatal("expected web bind failure")
 	}
 	l, err := net.Listen("tcp", address)
@@ -181,7 +198,7 @@ func TestBindFailureReleasesEarlierListeners(t *testing.T) {
 	l.Close()
 	o.Web = ""
 	o.Box = occupied.Addr().String()
-	if err := Run(context.Background(), o); err == nil {
+	if err := Run(context.Background(), o.Options); err == nil {
 		t.Fatal("expected child bind failure")
 	}
 	l, err = net.Listen("tcp", address)
@@ -205,11 +222,15 @@ func TestCertificateIdentityUsesOnlyCommonNames(t *testing.T) {
 	options.Ready = func(addresses map[string]string) { ready <- addresses }
 	options.Device = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		peer := RequestPeer(r.Context())
+		expected := sha256.Sum256(options.Client.Certificate[0])
+		if peer.CertificateSHA256 != hex.EncodeToString(expected[:]) {
+			t.Error("incorrect authenticated fingerprint")
+		}
 		fmt.Fprintf(w, "%s|%s|%s", peer.CommonName, peer.Issuer, peer.Subject)
 	})
 	ctx, cancel := context.WithCancel(context.Background())
 	done := make(chan error, 1)
-	go func() { done <- Run(ctx, options) }()
+	go func() { done <- Run(ctx, options.Options) }()
 	defer func() { cancel(); <-done }()
 	var addresses map[string]string
 	select {
@@ -226,7 +247,7 @@ func TestCertificateIdentityUsesOnlyCommonNames(t *testing.T) {
 		t.Fatal(err)
 	}
 	roots.AddCert(cert)
-	transport := &http.Transport{TLSClientConfig: &tls.Config{RootCAs: roots, Certificates: []tls.Certificate{options.TB1}, MinVersion: tls.VersionTLS12}}
+	transport := &http.Transport{TLSClientConfig: &tls.Config{RootCAs: roots, Certificates: []tls.Certificate{options.Client}, MinVersion: tls.VersionTLS12}}
 	defer transport.CloseIdleConnections()
 	client := &http.Client{Transport: transport, Timeout: 3 * time.Second}
 	response, err := client.Get("https://" + addresses["box"] + "/v1/time")
@@ -238,7 +259,7 @@ func TestCertificateIdentityUsesOnlyCommonNames(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if string(body) != "Synthetic TB1|Synthetic TB1|Synthetic TB1" {
+	if string(body) != "001122334455|TeddyCloud Synthetic Client CA|001122334455" {
 		t.Fatalf("identity included distinguished-name fields: %s", body)
 	}
 }
@@ -263,7 +284,7 @@ func TestIndependentManagementTLSAndHTTPChallenge(t *testing.T) {
 	o.Ready = func(a map[string]string) { ready <- a }
 	ctx, cancel := context.WithCancel(context.Background())
 	done := make(chan error, 1)
-	go func() { done <- Run(ctx, o) }()
+	go func() { done <- Run(ctx, o.Options) }()
 	defer func() {
 		cancel()
 		select {
@@ -307,5 +328,35 @@ func TestIndependentManagementTLSAndHTTPChallenge(t *testing.T) {
 			t.Fatal(tc.url, string(data), err)
 		}
 
+	}
+}
+
+func TestPrivateCertificateVerifierRequiresWorkerToken(t *testing.T) {
+	calls := 0
+	verify := func(raw []byte) error {
+		calls++
+		if string(raw) != "known" {
+			return errors.New("untrusted")
+		}
+		return nil
+	}
+	handler := privateHandler("secret", verify, http.HandlerFunc(func(http.ResponseWriter, *http.Request) { t.Error("verification escaped into device handler") }))
+	for _, tc := range []struct {
+		token, method, body string
+		status              int
+	}{
+		{"", "POST", "known", 401}, {"forged", "POST", "known", 401}, {"secret", "GET", "known", 403},
+		{"secret", "POST", strings.Repeat("x", (64<<10)+1), 403}, {"secret", "POST", "unknown", 403}, {"secret", "POST", "known", 204},
+	} {
+		req := httptest.NewRequest(tc.method, "http://127.0.0.1/_verify-box", strings.NewReader(tc.body))
+		req.Header.Set(headerPrefix+"Token", tc.token)
+		res := httptest.NewRecorder()
+		handler.ServeHTTP(res, req)
+		if res.Code != tc.status {
+			t.Fatalf("status=%d, want=%d", res.Code, tc.status)
+		}
+	}
+	if calls != 2 {
+		t.Fatal("unauthorized or oversized verification reached policy", calls)
 	}
 }

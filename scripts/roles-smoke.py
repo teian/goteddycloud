@@ -5,6 +5,7 @@ import importlib.util
 import json
 from pathlib import Path
 import ssl
+import os
 import subprocess
 import tempfile
 import urllib.error
@@ -32,13 +33,13 @@ def call(address, path, payload=None, token='', status=200, context=None):
 
 
 def main():
-    binary = Path('bin/goteddycloud').resolve()
+    binary = Path(os.environ.get('GOTEDDYCLOUD_BINARY','bin/goteddycloud')).resolve()
     with tempfile.TemporaryDirectory(prefix='roles-smoke-', dir='.cache') as temporary:
         root = Path(temporary).resolve() / 'fixture'
         subprocess.run(['go', 'run', '-buildvcs=false', './cmd/fixturegen', '-output', str(root)], check=True)
         context = ssl.create_default_context(cafile=str(root / 'certs/server/teddy-cert.pem'))
         client = root / 'certs/client/001122334455'
-        # Exercise the existing name-based identity policy with a synthetic CA.
+        # Explicitly import both replacement synthetic client identities.
         for command in [
             ['req', '-x509', '-newkey', 'rsa:2048', '-nodes', '-days', '1', '-subj', '/CN=TeddyCloud test CA', '-keyout', str(root / 'test-ca.key'), '-out', str(root / 'test-ca.pem')],
             ['req', '-new', '-key', str(client / 'teddy-key.pem'), '-subj', '/CN=001122334455', '-out', str(root / 'client.csr')],
@@ -54,6 +55,8 @@ def main():
             subprocess.run(['openssl', *command], check=True, capture_output=True)
         shared_context = ssl.create_default_context(cafile=str(root / 'certs/server/teddy-cert.pem'))
         shared_context.load_cert_chain(root / 'shared-client.pem', shared_client / 'teddy-key.pem')
+        overlay = root / 'config/config.overlay.ini'
+        overlay.write_text(overlay.read_text() + f'overlay.001122334455.core.client_cert.file.crt={root / "test-client.pem"}\noverlay.AABBCCDDEEFF.core.client_cert.file.crt={root / "shared-client.pem"}\n')
         for restart in range(2):
             process, addresses = native.start(binary, root)
             address = 'http://' + addresses['http']

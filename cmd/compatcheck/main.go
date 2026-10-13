@@ -19,6 +19,9 @@ import (
 func main() {
 	reference := flag.String("reference", "http://127.0.0.1:18080", "reference origin")
 	candidate := flag.String("candidate", "http://127.0.0.1:18081", "candidate origin")
+	referenceDevice := flag.String("reference-device", "", "reference box API origin")
+	clientCert := flag.String("client-cert", "", "PEM client certificate for box API requests")
+	clientKey := flag.String("client-key", "", "PEM client private key for box API requests")
 	candidateDevice := flag.String("candidate-device", "", "candidate box API origin for /v1, /v2 and /v3 requests")
 	candidateCA := flag.String("candidate-ca", "", "PEM trust roots for the candidate box API")
 	manifest := flag.String("cases", "testdata/compatibility.json", "case manifest")
@@ -49,15 +52,28 @@ func main() {
 		}
 		transport := http.DefaultTransport.(*http.Transport).Clone()
 		transport.TLSClientConfig = &tls.Config{MinVersion: tls.VersionTLS12, RootCAs: roots}
+		if *clientCert != "" || *clientKey != "" {
+			pair, err := tls.LoadX509KeyPair(*clientCert, *clientKey)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, "cannot load client identity")
+				os.Exit(2)
+			}
+			transport.TLSClientConfig.Certificates = []tls.Certificate{pair}
+		}
 		client.Transport = transport
 	}
 	failed := false
 	for _, c := range cases {
 		origin := *candidate
+		referenceOrigin := *reference
+		device := strings.HasPrefix(c.Path, "/v1/") || strings.HasPrefix(c.Path, "/v2/") || strings.HasPrefix(c.Path, "/v3/")
+		if *referenceDevice != "" && device {
+			referenceOrigin = *referenceDevice
+		}
 		if *candidateDevice != "" && (strings.HasPrefix(c.Path, "/v1/") || strings.HasPrefix(c.Path, "/v2/") || strings.HasPrefix(c.Path, "/v3/")) {
 			origin = *candidateDevice
 		}
-		if err := compat.Run(context.Background(), client, *reference, origin, *referenceRoot, *candidateRoot, c); err != nil {
+		if err := compat.Run(context.Background(), client, referenceOrigin, origin, *referenceRoot, *candidateRoot, c); err != nil {
 			fmt.Printf("FAIL %s: %v\n", c.Name, err)
 			failed = true
 		} else {

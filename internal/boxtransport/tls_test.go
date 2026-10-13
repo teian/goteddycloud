@@ -2,8 +2,10 @@
 package boxtransport
 
 import (
+	"bytes"
 	"crypto/tls"
 	"crypto/x509"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -15,7 +17,7 @@ import (
 	"goteddycloud/internal/fixtures"
 )
 
-func TestTLSIdentityOptionalCertificateAndResumption(t *testing.T) {
+func TestTLSIdentityPinnedCertificateAndResumption(t *testing.T) {
 	root := filepath.Join(t.TempDir(), "deployment")
 	if err := fixtures.Generate(root); err != nil {
 		t.Fatal(err)
@@ -28,7 +30,12 @@ func TestTLSIdentityOptionalCertificateAndResumption(t *testing.T) {
 		return cert
 	}
 	tb1, tb2 := load("certs/server"), load("certs/server_tb2")
-	config, err := TLSConfig(tb1, tb2)
+	config, err := TLSConfig(tb1, tb2, func(raw []byte) error {
+		if !bytes.Equal(raw, load("certs/client/001122334455").Certificate[0]) {
+			return errors.New("untrusted")
+		}
+		return nil
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -74,7 +81,7 @@ func TestTLSIdentityOptionalCertificateAndResumption(t *testing.T) {
 		sni, expected string
 		client        bool
 		suite         uint16
-	}{{"", "Synthetic TB1", false, tls.TLS_RSA_WITH_AES_128_CBC_SHA}, {"box.test", "Synthetic TB2", false, tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256}, {"box.test", "Synthetic TB2", false, tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256}, {"localhost", "Synthetic TB2", true, tls.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA}} {
+	}{{"", "Synthetic TB1", true, tls.TLS_RSA_WITH_AES_128_CBC_SHA}, {"box.test", "Synthetic TB2", true, tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256}, {"box.test", "Synthetic TB2", true, tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256}, {"localhost", "Synthetic TB2", true, tls.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA}} {
 		clientConfig := &tls.Config{MinVersion: tls.VersionTLS12, MaxVersion: tls.VersionTLS12, RootCAs: roots, ServerName: tc.sni, CipherSuites: []uint16{tc.suite}, ClientSessionCache: cache}
 		if tc.client {
 			clientConfig.Certificates = []tls.Certificate{load("certs/client/001122334455")}

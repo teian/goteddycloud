@@ -94,6 +94,8 @@ so raw reverse requests return 502 and the cloud indicator stays offline. Import
 valid identity for cloud access, or disable `cloud.enabled` in Settings for offline
 operation. Web HTTPS certificates serve a separate purpose.
 
+The box API and RTNL require [explicitly imported box client certificates](docs/box-certificate-auth.md). Unknown certificates are rejected during TLS, including certificates which copy a known box name or issuer. Existing deployments must import the actual box identities before upgrading to this policy.
+
 ## Native build and usage
 
 Requires Go 1.26.8. The backend builds with `CGO_ENABLED=0`. External FFmpeg is

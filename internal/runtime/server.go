@@ -27,6 +27,7 @@ type Options struct {
 	WebTLS                 *tls.Config
 	HTTPChallenge          func(http.Handler) http.Handler
 	Management, Device     http.Handler
+	VerifyBoxCertificate   func([]byte) error
 	WorkerCommand          []string
 	Ready                  func(map[string]string)
 	Stderr                 io.Writer
@@ -131,6 +132,9 @@ func Run(ctx context.Context, o Options) (runErr error) {
 	if o.Management == nil || o.Device == nil {
 		return errors.New("both request handlers are required")
 	}
+	if o.Box != "" && o.VerifyBoxCertificate == nil {
+		return errors.New("box certificate verifier is required")
+	}
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	var listeners []net.Listener
@@ -198,7 +202,7 @@ func Run(ctx context.Context, o Options) (runErr error) {
 			return err
 		}
 		token = hex.EncodeToString(secret)
-		endpoints = append(endpoints, endpoint{private, privateHandler(token, diagnosticHandler(o.KeyLogWriter, o.Device))})
+		endpoints = append(endpoints, endpoint{private, privateHandler(token, o.VerifyBoxCertificate, diagnosticHandler(o.KeyLogWriter, o.Device))})
 	}
 	failures := make(chan error, len(endpoints))
 	for _, e := range endpoints {

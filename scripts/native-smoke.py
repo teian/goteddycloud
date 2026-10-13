@@ -71,6 +71,7 @@ def main():
         subprocess.run(['go', 'run', '-buildvcs=false', './cmd/fixturegen', '-output', str(root)], check=True)
         cert_hashes = {str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest() for p in (root / 'certs').rglob('*') if p.is_file()}
         context = ssl.create_default_context(cafile=str(root / 'certs/server/teddy-cert.pem'))
+        context.load_cert_chain(root / 'certs/client/001122334455/teddy-cert.pem', root / 'certs/client/001122334455/teddy-key.pem')
         for restart in range(2):
             process, addresses = start(binary, root)
             try:

@@ -3,20 +3,29 @@ package boxtransport
 
 import (
 	"crypto/tls"
+	"crypto/x509"
 	"errors"
 )
 
-// TLSConfig configures the isolated box listener with optional client
-// certificates and legacy AES suites. The caller validates box identity and
-// access policy after each handshake; TLS session resumption is disabled.
-func TLSConfig(tb1, tb2 tls.Certificate) (*tls.Config, error) {
+// TLSConfig requires a pinned client certificate and TLS proof of its private
+// key, retaining legacy AES suites only on the isolated box listener.
+func TLSConfig(tb1, tb2 tls.Certificate, verify func([]byte) error) (*tls.Config, error) {
 	if len(tb1.Certificate) == 0 || len(tb2.Certificate) == 0 {
 		return nil, errors.New("both box certificate identities are required")
+	}
+	if verify == nil {
+		return nil, errors.New("box certificate verifier is required")
 	}
 	return &tls.Config{
 		SessionTicketsDisabled: true,
 		MinVersion:             tls.VersionTLS12, MaxVersion: tls.VersionTLS12,
-		ClientAuth: tls.RequestClientCert,
+		ClientAuth: tls.RequireAnyClientCert,
+		VerifyPeerCertificate: func(raw [][]byte, _ [][]*x509.Certificate) error {
+			if len(raw) == 0 || len(raw[0]) > 64<<10 {
+				return errors.New("invalid box certificate")
+			}
+			return verify(raw[0])
+		},
 		// Legacy RSA/CBC suites are explicit and limited to this box listener. No
 		// verification settings are changed for web HTTPS or upstream connections.
 		CipherSuites: []uint16{

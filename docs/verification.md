@@ -1034,3 +1034,33 @@ Physical UART/gateway acceptance remains pending because no CC3200 box is
 available. Live CC32xx flashing is unsupported. See `docs/cc3200-tool.md` for
 commands and offline layout restrictions. The user-managed debug server was not
 restarted or reconfigured; rebuild and restart it to serve the new embedded tool.
+
+### Mandatory box certificate pins (2026-10-13)
+
+Box TLS now requires an exact, locally imported leaf certificate and proof of
+its private key. The parent validates trust through a bounded, authenticated
+worker endpoint and rechecks its fingerprint before each HTTP request or RTNL
+frame. Name-based issuer acceptance and the `core.boxCertAuth=false` bypass are
+removed. MAC case normalization retains existing ownership/access policy;
+ambiguous duplicate overlays fail closed. Migration and revocation behavior are
+specified in [box certificate trust](box-certificate-auth.md).
+
+Local Go 1.26.8 race tests and vet pass across the full repository; Staticcheck
+v0.8.1 and module-tidy checks pass. Focused real TLS tests reject missing, forged,
+same-key/reissued and wrong-private-key identities, spoofed internal headers,
+and disabled boxes. Established HTTP connections return 401 after revocation;
+RTNL closes without ingesting the rejected frame. PEM/DER imports and immediate
+pin rotation are tested on the filesystem and the isolated S3 emulator. The
+private verifier rejects unauthenticated requests, wrong methods and oversized
+certificate bodies.
+
+Native startup/restart/shutdown, private/shared user areas, the 24-check mutual
+TLS cloud replay, live TAF streaming, and 164 MQTT discovery documents/four state
+topics pass. The pinned develop simulator reports C 37 passed/33 skipped and Go
+36 passed/33 skipped/one existing cipher expected failure. Both hardening
+replays pass five tests/five authentication-pool subtests. The owned Go adapter
+explicitly imports generated simulator certificates and asserts TLS rejection
+where C expects an HTTP 401; it does not enable unknown production certificates.
+Only the four exact owned MQTT management/security display labels are normalized
+for comparison. Physical box interoperability and complete SHA1-only handshakes
+remain unverified; cipher compatibility policy is unchanged.

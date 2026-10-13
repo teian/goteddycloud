@@ -2,6 +2,7 @@
 package boxtransport
 
 import (
+	"bytes"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
@@ -9,6 +10,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"errors"
 	"io"
 	"math/big"
 	"net"
@@ -54,7 +56,12 @@ func TestTISDKCipherHandshakes(t *testing.T) {
 				t.Fatal(err)
 			}
 			cert := tls.Certificate{Certificate: [][]byte{der}, PrivateKey: key}
-			config, err := TLSConfig(cert, cert)
+			config, err := TLSConfig(cert, cert, func(raw []byte) error {
+				if !bytes.Equal(raw, der) {
+					return errors.New("untrusted")
+				}
+				return nil
+			})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -81,7 +88,7 @@ func TestTISDKCipherHandshakes(t *testing.T) {
 				t.Fatal(err)
 			}
 			roots.AddCert(parsed)
-			conn, err := tls.DialWithDialer(&net.Dialer{Timeout: 3 * time.Second}, "tcp", listener.Addr().String(), &tls.Config{MinVersion: tls.VersionTLS12, MaxVersion: tls.VersionTLS12, RootCAs: roots, ServerName: "box.test", CipherSuites: []uint16{tc.suite}})
+			conn, err := tls.DialWithDialer(&net.Dialer{Timeout: 3 * time.Second}, "tcp", listener.Addr().String(), &tls.Config{MinVersion: tls.VersionTLS12, MaxVersion: tls.VersionTLS12, RootCAs: roots, Certificates: []tls.Certificate{cert}, ServerName: "box.test", CipherSuites: []uint16{tc.suite}})
 			if tc.reject {
 				if err == nil {
 					conn.Close()

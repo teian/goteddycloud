@@ -1,3 +1,5 @@
+Current policy: box client certificates are mandatory and pinned; session tickets are disabled. Earlier optional-certificate feasibility results below are historical.
+
 Current develop policy: box/embedded MQTT session tickets are disabled; web TLS remains separate. See [development port](develop-port.md). The following baseline feasibility record is historical.
 
 # TLS feasibility: legacy signature negotiation
@@ -66,10 +68,12 @@ and cleanup after parent or child bind failures. `internal/certificates` tests
 verify RSA TB1 and ECDSA TB2 generation, trusted server chains, restart preservation,
 disabled generation, and refusal to overwrite invalid existing material.
 
-The inherited legacy box identity policy accepts recognized issuer/subject names
-and normalizes `b'MAC'` CNs before overlay lookup. This reproduces the reference's
-name-based policy; it is not cryptographic certificate-chain verification. Web
-requests never acquire a box identity through these headers or certificates.
+The current box identity policy requires an exact locally imported client
+certificate and private-key proof during TLS. It checks the pin again on each
+HTTP request and RTNL frame; issuer names alone are never trusted. This is an
+intentional security deviation from the pinned C oracle's name-based policy.
+See [box certificate trust and migration](box-certificate-auth.md).
+Web requests never acquire a box identity through forwarded headers.
 
 Complete SHA1-only handshake and physical-device interoperability remain separate
 validation gaps. The target identified by the user is CC3200; no box is currently

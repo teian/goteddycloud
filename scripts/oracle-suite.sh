@@ -35,7 +35,7 @@ for port in 18080 18081; do
  "$ready" || { echo 'Listener readiness timeout' >&2; cat .cache/ci-reference.log .cache/ci-candidate.log >&2; exit 1; }
 done
 compatcheck() {
- go run -buildvcs=false ./cmd/compatcheck -candidate-device https://127.0.0.1:19444 -candidate-ca "$root/certs/server/teddy-cert.pem" -cases "$1"
+ go run -buildvcs=false ./cmd/compatcheck -reference-device https://127.0.0.1:18444 -candidate-device https://127.0.0.1:19444 -client-cert "$root/certs/client/001122334455/teddy-cert.pem" -client-key "$root/certs/client/001122334455/teddy-key.pem" -candidate-ca "$root/certs/server/teddy-cert.pem" -cases "$1"
 }
 compatcheck testdata/device-offline.json
 compatcheck testdata/auth-events.json

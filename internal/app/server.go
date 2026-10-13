@@ -193,19 +193,24 @@ func response(w http.ResponseWriter, status int, kind string, data []byte) {
 	_, _ = w.Write(data)
 }
 func (s *Server) Device(w http.ResponseWriter, r *http.Request) {
-	// Deployment security policy is enforced once, before ownership dispatch.
-	if s.parent == nil {
-		s.allowOrigin(w)
-		if s.securityCheck(w, r) {
-			return
-		}
-	}
 	s.connections.Add(1)
 	peer := runtime.RequestPeer(r.Context())
 	id, authenticated, err := s.Identity.Resolve(peer)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
+	}
+	// Mandatory pinning also revokes access on already-open HTTP/RTNL sessions.
+	if peer.Box && !authenticated {
+		response(w, 401, "", nil)
+		return
+	}
+	// Deployment security policy is enforced once, before ownership dispatch.
+	if s.parent == nil {
+		s.allowOrigin(w)
+		if s.securityCheck(w, r) {
+			return
+		}
 	}
 	if s.parent == nil && id != "" {
 		if owner, ok := s.boxOwner(id); ok {
@@ -222,10 +227,6 @@ func (s *Server) Device(w http.ResponseWriter, r *http.Request) {
 		s.boxUserAgent(id, r.UserAgent())
 	}
 	snap := s.Settings.Snapshot(id)
-	if peer.Box && snap.Bool("core.boxCertAuth") && !authenticated {
-		response(w, 401, "", nil)
-		return
-	}
 	get := strings.EqualFold(r.Method, "GET")
 	post := strings.EqualFold(r.Method, "POST")
 	path := r.URL.Path
