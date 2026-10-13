@@ -100,8 +100,11 @@ docker buildx build --platform linux/arm/v7 --target runtime --load -t goteddycl
 docker buildx build --platform linux/amd64 --target ffmpeg --load -t goteddycloud:local-ffmpeg .
 ```
 
-The runtime target works without FFmpeg; the ffmpeg target installs the external
-codec package. GHCR release images use the `ffmpeg` target and contain
+All project image stages use digest-pinned Alpine 3.24 variants. The runtime
+target contains the static Go server, bundled UI, notices and system CA trust;
+the ffmpeg target adds Alpine's FFmpeg package and its required shared libraries.
+No Go/Node toolchain, Python, Git, development headers or build cache is shipped.
+GHCR release images use the `ffmpeg` target and contain
 linux/amd64, linux/arm/v7 and linux/arm64 in one image index. Both targets build
 the pinned frontend and owned overlay in a Node.js build stage. The resulting
 Web UI is included at `/usr/share/goteddycloud/www/web`, outside the data mount;
@@ -133,6 +136,28 @@ Release CI builds a second native image with a changed application version and
 compares the actual compressed OCI layer digests with the release build using
 `scripts/check-container-layers.py`. Publication requires exactly the executable
 layer to change; the FFmpeg, OS, UI, notices and data layers must match.
+
+Local Alpine verification (2026-10-13) built both targets for all three platforms,
+checked Alpine contents and executable architectures, started the three listeners,
+and converted WAV to a validated TAF/Opus file. amd64 ran natively; ARMv7 and arm64
+ran under QEMU. Native Web UI/assets, custom overrides and restart checks passed
+for both targets. These checks do not establish physical ARM hardware acceptance.
+Sizes below are MiB (1,048,576 bytes); downloads sum compressed OCI layers and
+exclude small manifests/attestations. Docker image sizes were measured after
+unpacking each platform locally.
+
+| Target | Platform | Download | Docker image size |
+| --- | --- | ---: | ---: |
+| runtime | amd64 | 24.0 | 73.6 |
+| runtime | ARMv7 | 23.1 | 69.3 |
+| runtime | arm64 | 23.8 | 72.7 |
+| ffmpeg | amd64 | 73.3 | 252.7 |
+| ffmpeg | ARMv7 | 59.6 | 176.3 |
+| ffmpeg | arm64 | 70.3 | 226.0 |
+
+The native server-only variant reused 7/8 compressed layers and changed only its
+7.8 MiB executable layer. A UI-only variant reused 7/8 layers and changed only
+its 12.1 MiB frontend layer. No compiler, Node, Python or Git runtime was present.
 
 ```sh
 docker run --name goteddycloud -v goteddycloud-data:/data \

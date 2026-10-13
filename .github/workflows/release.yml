@@ -196,7 +196,7 @@ jobs:
           provenance: mode=max
           sbom: true
       - name: Verify the executables match the platform manifests
-        run: python3 scripts/check-container-architectures.py "$RUNNER_TEMP/release-images.tar"
+        run: python3 scripts/check-container-architectures.py "$RUNNER_TEMP/release-images.tar" --require-ffmpeg
       - name: Load the native image for a startup test
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
