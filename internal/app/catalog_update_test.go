@@ -17,6 +17,41 @@ type metadataTransport func(*http.Request) (*http.Response, error)
 
 func (f metadataTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 
+func TestMetadataCatalogMirrorRedirectPolicy(t *testing.T) {
+	client := metadataClient(nil)
+	const origin = "https://api.revvox.de/tonies.json?source=teddyCloud&version=goteddycloud"
+	const mirror = "https://raw.githubusercontent.com/toniebox-reverse-engineering/tonies-json/release/"
+	for _, test := range []struct {
+		name, from, to string
+		allowed        bool
+	}{
+		{"official catalog mirror", origin, mirror + "tonies.json", true},
+		{"box catalog mirror", "https://api.revvox.de/tonieboxes.json", mirror + "tonieboxes.json", true},
+		{"same host", origin, "https://api.revvox.de/tonies.json?updated=1", true},
+		{"different mirror file", origin, mirror + "tonieboxes.json", false},
+		{"different repository", origin, "https://raw.githubusercontent.com/other/repository/release/tonies.json", false},
+		{"untrusted target", origin, "https://untrusted.invalid/tonies.json", false},
+		{"private target", origin, "https://127.0.0.1/tonies.json", false},
+		{"TLS downgrade", origin, "http://api.revvox.de/tonies.json", false},
+		{"credentials", origin, "https://user:password@api.revvox.de/tonies.json", false},
+		{"unrelated source", "https://images.invalid/tonies.json", mirror + "tonies.json", false},
+		{"unrelated metadata path", "https://api.revvox.de/image.png", mirror + "image.png", false},
+		{"mirror query", origin, mirror + "tonies.json?other=1", false},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			from, _ := http.NewRequest("GET", test.from, nil)
+			to, _ := http.NewRequest("GET", test.to, nil)
+			err := client.CheckRedirect(to, []*http.Request{from})
+			if (err == nil) != test.allowed {
+				t.Fatalf("allowed=%v, error=%v", test.allowed, err)
+			}
+			if err := client.CheckRedirect(to, []*http.Request{from, from, from, from, from}); err != http.ErrUseLastResponse {
+				t.Fatal("redirect limit not enforced", err)
+			}
+		})
+	}
+}
+
 func TestMetadataUpdatePublishesValidatedRawBytesAndRetainsFailures(t *testing.T) {
 	s := fixtureApp(t)
 	root := s.Settings.Snapshot("").String("internal.configdirfull")
@@ -29,7 +64,7 @@ func TestMetadataUpdatePublishesValidatedRawBytesAndRetainsFailures(t *testing.T
 	length := int64(len(payload))
 	fail := false
 	s.MetadataHTTP = &http.Client{Transport: metadataTransport(func(r *http.Request) (*http.Response, error) {
-		if r.URL.String() != "https://api.revvox.de/tonies.json?source=teddyCloud&version=goteddycloud" || r.Header.Get("Authorization") != "" || r.Method != "GET" {
+		if r.URL.String() != "https://api.revvox.de/tonies.json?source=teddyCloud&version=goteddycloud" || r.Header.Get("Authorization") != "" || r.Method != "GET" || r.Header.Get("User-Agent") != "teddyCloud/goteddycloud" {
 			t.Errorf("unexpected metadata request %v", r)
 		}
 		if fail {
@@ -45,8 +80,8 @@ func TestMetadataUpdatePublishesValidatedRawBytesAndRetainsFailures(t *testing.T
 		}
 	}
 	status = 503
-	if err := s.updateCatalog(context.Background()); err == nil {
-		t.Fatal("accepted failed status")
+	if err := s.updateCatalog(context.Background()); err == nil || err.Error() != "metadata source rejected request: HTTP 503" {
+		t.Fatal("missing failed status", err)
 	}
 	assertUnchanged(before)
 	status = 200
@@ -128,8 +163,8 @@ func TestStartupCatalogUpdatesAndCORS(t *testing.T) {
 	calls := make(chan string, 2)
 	s.MetadataHTTP = &http.Client{Transport: metadataTransport(func(r *http.Request) (*http.Response, error) {
 		calls <- r.URL.Path
-		if r.Header.Get("Authorization") != "" {
-			t.Error("metadata received credentials")
+		if r.Header.Get("Authorization") != "" || r.Header.Get("User-Agent") != "teddyCloud/goteddycloud" {
+			t.Error("unexpected metadata headers")
 		}
 		payload := []byte(`[{"model":"STARTUP","unknown":42}]`)
 		return &http.Response{StatusCode: 200, ContentLength: int64(len(payload)), Header: make(http.Header), Body: io.NopCloser(bytes.NewReader(payload))}, nil

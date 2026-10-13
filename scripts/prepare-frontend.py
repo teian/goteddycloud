@@ -57,6 +57,41 @@ for name, path, label in [('settings/SettingsSubNav.tsx', '/settings/users', 'us
 # Keep the UI clock on the management listener; /v1/time belongs to devices.
 edit('api/apis/BoxineApi.ts', 'path: `/v1/time`,', 'path: `/api/time`,')
 
+# A missing cloud identity cannot recover during a burst of ten retries. Keep
+# the cloud status probe separate from the working local management clock.
+edit('components/common/header/ServerStatus.tsx',
+     'const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));\n', '')
+edit('components/common/header/ServerStatus.tsx', '''    const fetchBoxineStatusWithRetries = useCallback(async () => {
+        const maxRetries = 10;
+
+        for (let attempt = 0; attempt < maxRetries; attempt++) {
+            try {
+                const timeRequest = (await boxineForcedApi.reverseV1TimeGet()) as string;
+                if (timeRequest.length === 10) {
+                    setBoxineStatus(true);
+                    return;
+                }
+            } catch {
+                setBoxineStatus(false);
+                if (attempt < maxRetries - 1) {
+                    await delay(500);
+                }
+            }
+        }
+    }, []);''', '''    const fetchBoxineStatus = useCallback(async () => {
+        try {
+            const timeRequest = (await boxineForcedApi.reverseV1TimeGet()) as string;
+            setBoxineStatus(timeRequest.length === 10);
+        } catch {
+            setBoxineStatus(false);
+        }
+    }, []);''')
+edit('components/common/header/ServerStatus.tsx',
+     'await fetchBoxineStatusWithRetries();', 'await fetchBoxineStatus();')
+edit('components/common/header/ServerStatus.tsx',
+     '[fetchBoxineEnabledStatus, fetchTeddyStatus, fetchBoxineStatusWithRetries]',
+     '[fetchBoxineEnabledStatus, fetchTeddyStatus, fetchBoxineStatus]')
+
 edit('provider/TeddyCloudProvider.tsx', 'from "../hooks/useBoxModels";', 'from "../goteddycloud/useBoxModels";')
 edit('provider/TeddyCloudProvider.tsx', '    boxModelImagesLoading: boolean;', '    boxModelImagesLoading: boolean;\n    boxModelImagesError: boolean;')
 edit('provider/TeddyCloudProvider.tsx', '    boxModelImagesLoading: false,', '    boxModelImagesLoading: false,\n    boxModelImagesError: false,')

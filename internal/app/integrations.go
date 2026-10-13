@@ -93,11 +93,11 @@ func (s *Server) StartIntegrations(parent context.Context, version string) error
 		go func() {
 			defer s.integrations.Done()
 			if err := s.updateCatalog(ctx); err != nil && ctx.Err() == nil {
-				slog.Warn("startup metadata update failed; previous catalog retained")
+				slog.Warn("startup metadata update failed; previous catalog retained", "error", err)
 			}
 			if ctx.Err() == nil {
 				if err := s.updateBoxCatalog(ctx); err != nil && ctx.Err() == nil {
-					slog.Warn("startup box metadata update failed; previous catalog retained")
+					slog.Warn("startup box metadata update failed; previous catalog retained", "error", err)
 				}
 			}
 		}()

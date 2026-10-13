@@ -42,7 +42,7 @@ func (s *Server) reverseAPI(w http.ResponseWriter, r *http.Request) bool {
 	snap := s.Settings.Snapshot("")
 	res, err := s.doCloud(r.Context(), snap, snap, "GET", path, r.URL.RawQuery, headers, nil)
 	if err != nil {
-		response(w, 502, "", nil)
+		response(w, 502, "text/plain; charset=utf-8", []byte("Tonie cloud unavailable; check cloud.enabled, upstream client certificates and network access."))
 		return true
 	}
 	defer res.Body.Close()

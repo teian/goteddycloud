@@ -30,7 +30,7 @@ func (s *Server) catalogAPI(w http.ResponseWriter, r *http.Request) bool {
 			f.Flush()
 		}
 		if err := s.updateCatalog(r.Context()); err != nil {
-			slog.Warn("metadata update failed; previous catalog retained")
+			slog.Warn("metadata update failed; previous catalog retained", "error", err)
 		}
 	case strings.HasPrefix(r.URL.Path, "/api/toniesJsonReload"):
 		if err := s.Catalog.Reload(); err != nil {

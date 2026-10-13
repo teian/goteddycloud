@@ -80,6 +80,18 @@ use `docker build --target ffmpeg -t goteddycloud:local .`, then run Compose wit
 `GOTEDDYCLOUD_IMAGE=goteddycloud:local`. See [release packaging](docs/packaging.md)
 and [reverse proxy setup](docs/reverse-proxy.md) for more options.
 
+Startup downloads the Tonie and box model catalogs from `api.revvox.de`, including
+its redirects to the official GitHub mirror. Failed updates retain existing
+catalogs; a fresh deployment has none until a download succeeds. The warning's
+`error` field distinguishes a rejected HTTP response from transfer or catalog errors.
+
+`/reverse/v1/time` checks the upstream Tonie cloud, separately from the local
+`/api/time` clock. It needs a complete upstream CA/client certificate/key identity
+in `core.client_cert.*`. A fresh deployment has no manufacturer client identity,
+so this check returns 502 and the cloud indicator stays offline. Import your own
+valid identity for cloud access, or disable `cloud.enabled` in Settings for offline
+operation. Web HTTPS certificates serve a separate purpose.
+
 ## Native build and usage
 
 Requires Go 1.26.8. The backend builds with `CGO_ENABLED=0`. External FFmpeg is
