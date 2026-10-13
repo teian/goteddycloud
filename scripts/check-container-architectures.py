@@ -12,7 +12,7 @@ def main():
     parser.add_argument('archive')
     args = parser.parse_args()
     expected = {('linux', 'amd64'): (2, 62), ('linux', 'arm'): (1, 40), ('linux', 'arm64'): (2, 183)}
-    found = set()
+    found = {}
     with tarfile.open(args.archive) as archive:
         def blob(digest):
             algorithm, value = digest.split(':', 1)
@@ -30,11 +30,17 @@ def main():
                 return
             config = json.loads(blob(manifest['config']['digest']))
             platform = (config['os'], config['architecture'])
-            assert platform in expected and platform not in found, platform
+            assert platform in expected, platform
             metadata = descriptor.get('platform', {})
             assert (metadata.get('os'), metadata.get('architecture')) == platform, 'manifest/config platform mismatch'
             if platform[1] == 'arm':
                 assert metadata.get('variant', config.get('variant')) == 'v7', 'ARM must be ARMv7'
+            if platform in found:
+                # OCI exports can reference one image index once per tag (for
+                # example v0.1.0 and latest). Accept identical manifest aliases,
+                # while still rejecting two different images for one platform.
+                assert found[platform] == descriptor['digest'], 'conflicting platform manifests'
+                return
             executable = None
             for layer in manifest['layers']:
                 with tarfile.open(fileobj=io.BytesIO(blob(layer['digest']))) as files:
@@ -46,12 +52,12 @@ def main():
             assert executable[5] == 1, 'expected little-endian ELF'
             actual = (executable[4], struct.unpack_from('<H', executable, 18)[0])
             assert actual == expected[platform], f'{platform}: executable {actual} != {expected[platform]}'
-            found.add(platform)
+            found[platform] = descriptor['digest']
             print('VERIFIED', '/'.join(platform), 'ELF class/machine', actual)
 
         for descriptor in json.load(archive.extractfile('index.json'))['manifests']:
             inspect(descriptor)
-    assert found == set(expected), 'missing platform images'
+    assert set(found) == set(expected), 'missing platform images'
     print('PASS all three container image architectures match their executables')
 
 

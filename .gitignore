@@ -5,6 +5,7 @@
 /.codex/
 /.claude/
 /.pytest_cache/
+/.env
 __pycache__/
 *.py[cod]
 /internal/cc3200cli/loader/rbtl3100s.dll

@@ -1,0 +1,19 @@
+services:
+  goteddycloud:
+    image: ${GOTEDDYCLOUD_IMAGE:-ghcr.io/teian/goteddycloud:v0.1.0}
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 15s
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "127.0.0.1:${HTTP_PORT:-18081}:18080"
+      - "127.0.0.1:${HTTPS_PORT:-19443}:18443"
+      - "${BOX_BIND_IP:-127.0.0.1}:${BOX_PORT:-19444}:18444"
+    volumes:
+      - goteddycloud-data:/data
+
+volumes:
+  goteddycloud-data:

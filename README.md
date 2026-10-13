@@ -9,6 +9,75 @@ Licensed under the [GNU General Public License version 2](LICENSE)
 (`GPL-2.0-only`), matching teddyCloud's project license. See [NOTICE](NOTICE)
 for upstream attribution and [third-party license notices](docs/licenses.md).
 
+## Docker Compose usage
+
+The [Compose example](docker-compose.yml) uses the versioned GHCR image. Docker
+selects amd64, ARMv7 or arm64 automatically. Configuration, certificates, web
+assets and audio persist in a named volume. The image runs as UID/GID 65532 and
+includes FFmpeg.
+
+```sh
+cp .env.example .env
+docker compose pull
+docker compose up -d
+docker compose logs -f goteddycloud
+```
+
+Management HTTP is at `http://127.0.0.1:18081`; management HTTPS is on 19443.
+The box port is **19444**, matching the prepared `tc.gehann.it` port patch.
+All three host bindings default to loopback. For a box on your LAN, bind its
+port to this computer's actual LAN IP, for example:
+
+```sh
+BOX_BIND_IP=192.168.1.10 docker compose up -d
+```
+
+Keep that address in a local `.env` file to reuse it. `HTTP_PORT`, `HTTPS_PORT`
+and `BOX_PORT` override host ports; `GOTEDDYCLOUD_IMAGE` selects another image.
+Stop a native test instance using the same ports, or select unused host ports.
+An external TCP proxy may forward the chosen box port to the loopback binding.
+The box listener uses legacy name-based identity; restrict it to trusted networks.
+
+The release image does not bundle the upstream Web UI while its redistribution
+terms remain unresolved. To build and install the pinned frontend with this
+project's UI additions, use Bash, Git, Python 3 and Node.js 24 on the host
+(for example through WSL on Windows):
+
+```sh
+scripts/reference.sh prepare
+scripts/frontend.sh build
+docker compose exec goteddycloud mkdir -p /data/data/www/web
+docker compose cp .cache/goteddycloud-web/dist/. goteddycloud:/data/data/www/web/
+```
+
+Then open `http://127.0.0.1:18081/web/`. Alternatively copy your own built web
+assets to the same container directory. Repeat the copy when updating frontend
+assets; the persistent volume retains its files across image upgrades.
+
+In **Settings → Users and areas**, create the first administrator while access is
+private, then enable **Require web login**. Login is off by default. Use a trusted
+HTTPS reverse proxy or configure [management HTTPS](docs/management-tls.md) before
+exposing management access. The current CSRF/origin, password-storage and global
+lockout gaps still require hardening; enabling login alone does not clear this
+release for direct internet exposure. See the security notes in the
+[0.1.0 release](https://github.com/teian/goteddycloud/releases/tag/v0.1.0).
+
+To upgrade, select the new release tag in `.env`, then pull and recreate the
+container. Stop the deployment with `down`:
+
+```sh
+docker compose pull
+docker compose up -d
+docker compose down
+```
+
+`down` preserves the named data volume; `down -v` deletes it. To build locally,
+use `docker build --target ffmpeg -t goteddycloud:local .`, then run Compose with
+`GOTEDDYCLOUD_IMAGE=goteddycloud:local`. See [release packaging](docs/packaging.md)
+and [reverse proxy setup](docs/reverse-proxy.md) for more options.
+
+## Native build and usage
+
 Requires Go 1.26.8. The backend builds with `CGO_ENABLED=0`. External FFmpeg is
 optional for stored audio delivery and required for conversion. Implemented areas
 include configuration/overlays, certificates and listener lifecycle, offline device

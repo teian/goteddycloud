@@ -3,27 +3,37 @@ name: Publish release
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing published release tag to retry GHCR publishing
+        required: true
+        type: string
+
+env:
+  RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
 
 permissions:
   contents: read
 
 concurrency:
-  group: release-${{ github.event.release.tag_name }}
+  group: release-${{ github.event.release.tag_name || inputs.tag }}
   cancel-in-progress: false
 
 jobs:
   checks:
+    if: github.event_name == 'release'
     uses: ./.github/workflows/check.yml
 
   assets:
     name: Native binaries and Linux packages
     needs: checks
+    if: github.event_name == 'release'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
       contents: write
     env:
-      RELEASE_TAG: ${{ github.event.release.tag_name }}
       GOTOOLCHAIN: go1.26.8
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -89,7 +99,8 @@ jobs:
 
   docker:
     name: Multi-platform GHCR image
-    needs: assets
+    needs: [checks, assets]
+    if: ${{ !cancelled() && (github.event_name == 'workflow_dispatch' || (needs.checks.result == 'success' && needs.assets.result == 'success')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
@@ -99,6 +110,39 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - name: Check out immutable released sources
+        id: source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+          path: .cache/release-docker-source
+          persist-credentials: false
+      - name: Validate the release and retry prerequisites
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          test "$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft)" = false
+          latest=false
+          if [ "$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json isPrerelease --jq .isPrerelease)" = false ]; then
+            if [ "$(gh api "repos/$GITHUB_REPOSITORY/releases/latest" --jq .tag_name)" = "$RELEASE_TAG" ]; then
+              latest=true
+            fi
+          fi
+          echo "latest=$latest" >> "$GITHUB_OUTPUT"
+          version=$(cat .cache/release-docker-source/VERSION)
+          if [ "$RELEASE_TAG" != "v$version" ] && [ "$RELEASE_TAG" != "$version" ]; then
+            echo 'The release tag must match VERSION in the released sources.' >&2
+            exit 1
+          fi
+          if [ "$EVENT_NAME" = workflow_dispatch ]; then
+            sha=$(git -C .cache/release-docker-source rev-parse HEAD)
+            passed=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow check.yml \
+              --commit "$sha" --event push --status success --limit 1 \
+              --json databaseId --jq length)
+            test "$passed" -gt 0
+          fi
       - name: Set up ARM emulation
         uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
         with:
@@ -123,20 +167,21 @@ jobs:
           images: ${{ steps.image.outputs.name }}
           flavor: latest=false
           tags: |
-            type=raw,value=${{ github.event.release.tag_name }}
-            type=raw,value=latest,enable=${{ !github.event.release.prerelease }}
+            type=raw,value=${{ env.RELEASE_TAG }}
+            type=raw,value=latest,enable=${{ steps.release.outputs.latest == 'true' }}
           labels: |
             org.opencontainers.image.licenses=GPL-2.0-only
+            org.opencontainers.image.revision=${{ steps.source.outputs.commit }}
       - name: Build all architectures for inspection
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
-          context: .
+          context: .cache/release-docker-source
           target: ffmpeg
           platforms: linux/amd64,linux/arm/v7,linux/arm64
           outputs: type=oci,dest=${{ runner.temp }}/release-images.tar
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
-          build-args: VERSION=${{ github.event.release.tag_name }}
+          build-args: VERSION=${{ env.RELEASE_TAG }}
           cache-from: type=gha,scope=release-docker
           cache-to: type=gha,scope=release-docker,mode=max
           provenance: mode=max
@@ -146,12 +191,12 @@ jobs:
       - name: Load the native image for a startup test
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
-          context: .
+          context: .cache/release-docker-source
           target: ffmpeg
           platforms: linux/amd64
           load: true
           tags: goteddycloud:release-test
-          build-args: VERSION=${{ github.event.release.tag_name }}
+          build-args: VERSION=${{ env.RELEASE_TAG }}
           cache-from: type=gha,scope=release-docker
       - name: Check native container startup and FFmpeg
         run: |
@@ -161,13 +206,13 @@ jobs:
       - name: Publish verified architecture builds
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
-          context: .
+          context: .cache/release-docker-source
           target: ffmpeg
           platforms: linux/amd64,linux/arm/v7,linux/arm64
           push: true
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
-          build-args: VERSION=${{ github.event.release.tag_name }}
+          build-args: VERSION=${{ env.RELEASE_TAG }}
           cache-from: type=gha,scope=release-docker
           cache-to: type=gha,scope=release-docker,mode=max
           provenance: mode=max

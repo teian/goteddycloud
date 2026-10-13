@@ -15,6 +15,14 @@ assets and `packages: write` for GHCR; no separate registry password is required
 An existing GHCR package must allow this repository's Actions token to write it.
 The package's visibility is controlled in GitHub Packages, not by this workflow.
 
+To retry only image publishing after a workflow/tooling fix, run **Publish
+release → Run workflow** on the default branch with the existing release tag,
+or `gh workflow run release.yml -f tag=v0.1.0`. This path keeps the published tag
+and binary/package assets unchanged. It builds Docker from the immutable tagged
+sources, uses current workflow validation tools, and requires successful push CI
+for that tag's commit. Only the release marked latest by GitHub updates the image's
+`latest` tag; older releases and prereleases keep their version tag only.
+
 Both `goteddycloud` and standalone `cc3200tool` are built with `CGO_ENABLED=0`:
 
 | OS | Architectures | Archive |
