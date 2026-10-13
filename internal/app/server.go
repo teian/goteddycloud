@@ -584,6 +584,10 @@ func (s *Server) Management(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) serveManagement(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet && r.URL.Path == "/api/cloud/status" {
+		s.cloudStatus(w, r)
+		return
+	}
 	// The UI needs the local clock without exposing device routes or contacting the cloud.
 	if r.Method == http.MethodGet && r.URL.Path == "/api/time" {
 		response(w, http.StatusOK, "text/plain; charset=utf-8", []byte(strconv.FormatInt(s.Now().Unix(), 10)))

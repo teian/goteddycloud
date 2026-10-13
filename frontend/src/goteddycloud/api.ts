@@ -4,6 +4,7 @@ import { userStorage } from "../utils/storage/userStorage";
 import { backendUrl } from "../utils/basePath";
 
 export type Role = "admin" | "editor" | "reader";
+export type CloudStatus = { enabled: boolean; available: boolean };
 export type Member = { username: string; role: Role };
 export type Area = { id: string; name: string; members: Member[]; boxes: string[] };
 export type User = { username: string; role: Role; defaultArea: string };
@@ -60,6 +61,9 @@ export function memberRole(area: Area, username: string): Role | undefined {
 
 export function accessApi<T>(path: string, payload?: unknown, signal?: AbortSignal): Promise<T> {
     return managementApi<T>("/api/auth/" + path, payload, signal);
+}
+export function readCloudStatus(signal?: AbortSignal): Promise<CloudStatus> {
+    return managementApi<CloudStatus>("/api/cloud/status", undefined, signal);
 }
 
 export function areaSwitchUrl(current: string): string {

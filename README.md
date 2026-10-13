@@ -85,10 +85,12 @@ its redirects to the official GitHub mirror. Failed updates retain existing
 catalogs; a fresh deployment has none until a download succeeds. The warning's
 `error` field distinguishes a rejected HTTP response from transfer or catalog errors.
 
-`/reverse/v1/time` checks the upstream Tonie cloud, separately from the local
-`/api/time` clock. It needs a complete upstream CA/client certificate/key identity
+The UI reads `/api/cloud/status`, which reports disabled or unavailable cloud
+access as HTTP 200 status data. The local `/api/time` clock remains independent.
+Raw `/reverse/v1/time` requests still proxy the upstream Tonie cloud and need a
+complete upstream CA/client certificate/key identity
 in `core.client_cert.*`. A fresh deployment has no manufacturer client identity,
-so this check returns 502 and the cloud indicator stays offline. Import your own
+so raw reverse requests return 502 and the cloud indicator stays offline. Import your own
 valid identity for cloud access, or disable `cloud.enabled` in Settings for offline
 operation. Web HTTPS certificates serve a separate purpose.
 

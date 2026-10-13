@@ -57,8 +57,20 @@ for name, path, label in [('settings/SettingsSubNav.tsx', '/settings/users', 'us
 # Keep the UI clock on the management listener; /v1/time belongs to devices.
 edit('api/apis/BoxineApi.ts', 'path: `/v1/time`,', 'path: `/api/time`,')
 
-# A missing cloud identity cannot recover during a burst of ten retries. Keep
-# the cloud status probe separate from the working local management clock.
+# Cloud availability is status data, including when no client identity exists.
+# Do not call the raw reverse proxy or retry ordinary offline responses.
+edit('components/common/header/ServerStatus.tsx',
+     'import { BoxineApi, BoxineForcedApi, TeddyCloudApi } from "../../../api";',
+     'import { BoxineApi } from "../../../api";\nimport { readCloudStatus } from "../../../goteddycloud/api";')
+edit('components/common/header/ServerStatus.tsx',
+     'const boxineForcedApi = new BoxineForcedApi(defaultAPIConfig());\n', '')
+edit('components/common/header/ServerStatus.tsx',
+     'const teddyCloudApi = new TeddyCloudApi(defaultAPIConfig());\n', '')
+status_component = stage / 'src/components/common/header/ServerStatus.tsx'
+data = status_component.read_text()
+start = data.index('    const fetchBoxineEnabledStatus =')
+end = data.index('    const fetchTeddyStatus =', start)
+status_component.write_text(data[:start] + data[end:])
 edit('components/common/header/ServerStatus.tsx',
      'const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));\n', '')
 edit('components/common/header/ServerStatus.tsx', '''    const fetchBoxineStatusWithRetries = useCallback(async () => {
@@ -80,17 +92,24 @@ edit('components/common/header/ServerStatus.tsx', '''    const fetchBoxineStatus
         }
     }, []);''', '''    const fetchBoxineStatus = useCallback(async () => {
         try {
-            const timeRequest = (await boxineForcedApi.reverseV1TimeGet()) as string;
-            setBoxineStatus(timeRequest.length === 10);
+            const status = await readCloudStatus();
+            setBoxineEnabledStatus(status.enabled);
+            setBoxineStatus(status.available);
         } catch {
             setBoxineStatus(false);
         }
     }, []);''')
 edit('components/common/header/ServerStatus.tsx',
-     'await fetchBoxineStatusWithRetries();', 'await fetchBoxineStatus();')
+     '''        const isEnabled = await fetchBoxineEnabledStatus();
+
+        await fetchTeddyStatus();
+
+        if (isEnabled) {
+            await fetchBoxineStatusWithRetries();
+        }''', '        await Promise.all([fetchTeddyStatus(), fetchBoxineStatus()]);')
 edit('components/common/header/ServerStatus.tsx',
      '[fetchBoxineEnabledStatus, fetchTeddyStatus, fetchBoxineStatusWithRetries]',
-     '[fetchBoxineEnabledStatus, fetchTeddyStatus, fetchBoxineStatus]')
+     '[fetchTeddyStatus, fetchBoxineStatus]')
 
 edit('provider/TeddyCloudProvider.tsx', 'from "../hooks/useBoxModels";', 'from "../goteddycloud/useBoxModels";')
 edit('provider/TeddyCloudProvider.tsx', '    boxModelImagesLoading: boolean;', '    boxModelImagesLoading: boolean;\n    boxModelImagesError: boolean;')

@@ -65,6 +65,11 @@ func (s *Server) managementAccess(w http.ResponseWriter, r *http.Request) bool {
 	if !admin && !logged {
 		return deny()
 	}
+	// Global connectivity is safe for all authenticated roles, independently
+	// of the selected content area. The handler exposes no identity material.
+	if p == "/api/cloud/status" && r.Method == http.MethodGet {
+		return false
+	}
 	query := r.URL.Query()
 	if len(query["area"]) > 1 || len(query["overlay"]) > 1 {
 		return deny()

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { accessApi, downloadUrl, itemKey, memberRole, areaSwitchUrl } from "./api";
+import { accessApi, downloadUrl, itemKey, memberRole, areaSwitchUrl, readCloudStatus } from "./api";
 import { resetBasePathCache } from "../utils/basePath";
 
 describe("Go access API integration", () => {
@@ -17,6 +17,18 @@ describe("Go access API integration", () => {
         sessionStorage.clear();
         document.head.innerHTML = "";
         resetBasePathCache();
+    });
+    it("reads disabled or unavailable cloud status as ordinary data through the proxy prefix", async () => {
+        document.head.innerHTML = '<base href="https://example.test/proxy/web/">';
+        const fetch = vi.spyOn(globalThis, "fetch");
+        for (const enabled of [false, true]) {
+            fetch.mockResolvedValueOnce(Response.json({ enabled, available: false }));
+            await expect(readCloudStatus()).resolves.toEqual({ enabled, available: false });
+        }
+        expect(fetch).toHaveBeenCalledTimes(2);
+        for (const [url] of fetch.mock.calls) {
+            expect(new URL(String(url), "https://example.test").pathname).toBe("/proxy/api/cloud/status");
+        }
     });
     it("uses the existing session and reverse-proxy prefix", async () => {
         document.head.innerHTML = '<base href="https://example.test/ingress/test/web/">';
