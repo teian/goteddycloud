@@ -110,11 +110,6 @@ func (c *Client) Do(ctx context.Context, snap, global config.Snapshot, method, p
 		return nil, errors.New("upstream concurrency limit reached")
 	}
 	releaseSlot := func() { <-c.slots }
-	policy, err := clientTLS(snap, global)
-	if err != nil {
-		releaseSlot()
-		return nil, err
-	}
 	suffix := ""
 	if strings.HasPrefix(path, "/v3/") {
 		suffix = "_tb2"
@@ -124,6 +119,19 @@ func (c *Client) Do(ctx context.Context, snap, global config.Snapshot, method, p
 	if host == "" || strings.ContainsAny(host, "/@?#") || port == 0 || port > 65535 {
 		releaseSlot()
 		return nil, errors.New("invalid upstream target")
+	}
+	policy, err := clientTLS(snap, global)
+	if err != nil {
+		releaseSlot()
+		return nil, err
+	}
+	if host == legacyBoxineHost {
+		// Boxine still serves a certificate without SANs at this exact endpoint.
+		// VerifyConnection replaces the default verifier with complete chain,
+		// validity, EKU and hostname checks; this never means unverified TLS.
+		policy.ServerName = host
+		policy.InsecureSkipVerify = true
+		policy.VerifyConnection = verifyBoxineServer(policy.RootCAs)
 	}
 	parsed, err := url.ParseRequestURI(path)
 	if err != nil || !strings.HasPrefix(path, "/") || parsed.IsAbs() || parsed.Host != "" || parsed.RawQuery != "" {

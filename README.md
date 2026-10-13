@@ -92,7 +92,8 @@ complete upstream CA/client certificate/key identity
 in `core.client_cert.*`. A fresh deployment has no manufacturer client identity,
 so raw reverse requests return 502 and the cloud indicator stays offline. Import your own
 valid identity for cloud access, or disable `cloud.enabled` in Settings for offline
-operation. Web HTTPS certificates serve a separate purpose.
+operation. Web HTTPS certificates serve a separate purpose. See
+[upstream cloud access and legacy hostname verification](docs/upstream-cloud.md).
 
 The box API and RTNL require [explicitly imported box client certificates](docs/box-certificate-auth.md). Unknown certificates are rejected during TLS, including certificates which copy a known box name or issuer. Existing deployments must import the actual box identities before upgrading to this policy.
 

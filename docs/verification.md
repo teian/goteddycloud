@@ -1064,3 +1064,29 @@ where C expects an HTTP 401; it does not enable unknown production certificates.
 Only the four exact owned MQTT management/security display labels are normalized
 for comparison. Physical box interoperability and complete SHA1-only handshakes
 remain unverified; cipher compatibility policy is unchanged.
+
+
+### Original upstream credentials and legacy hostname (2026-10-13)
+
+The user-provided original certificate/private key match and the certificate is
+valid through 2048. A real Go upstream request exposed Boxine's SAN-less server
+certificate at `prod.de.tbs.toys`; the default Go hostname check rejected it.
+The scoped compatibility verifier now validates the original CA chain, signatures,
+validity and server EKU and accepts only this exact legacy CN with no SAN extension.
+Constrained CA chains cannot use this fallback. Other upstream hosts retain the
+standard TLS verifier.
+
+The actual application Go client returned HTTP 200 and a valid cloud epoch over
+TLS 1.3 / AES-256-GCM. In an isolated configuration, `/api/cloud/status` returned
+HTTP 200 with enabled/available both true. The actual original client certificate
+also passes the new inbound pin policy when explicitly selected. No original
+keys were copied into source, logs or release artifacts; no production settings
+were changed. Generated negative tests reject wrong/wildcard names, conflicting
+or non-DNS SANs, untrusted CAs, expiry/future validity, client-only EKU, critical
+extensions, invalid signatures and constrained-CA legacy bypasses. Both modern
+SAN and exact legacy-CN positive cases pass.
+
+The older oracle replay now explicitly asserts the new certificate-policy
+settings text before normalizing those display fields. All setting values,
+defaults and remaining fields stay compared. The diagnostic replay imports its
+synthetic box client identity and verifies server trust for both TLS listeners.

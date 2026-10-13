@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-2.0-only
 """Executable opt-in packet/TLS diagnostics with disposable identities only."""
+from fixture_tls import client_context
 import contextlib,http.client,os,pathlib,signal,socket,ssl,struct,subprocess,tempfile,time
 workspace=pathlib.Path(__file__).resolve().parents[1]
 def freeport():
@@ -12,9 +13,9 @@ with tempfile.TemporaryDirectory(prefix='goteddycloud-diagnostics-') as folder:
  config=root/'config/config.ini';config.write_text(config.read_text()+''.join(f'{k}={v}\n' for k,v in options.items()))
  previous=0
  for run in range(2):
-  log=open(workspace/'.cache'/f'diagnostics-{run}.log','w');process=subprocess.Popen([str(workspace/'bin/goteddycloud'),'--base_path',str(root)],stdout=log,stderr=log,start_new_session=True)
+  log=open(workspace/'.cache'/f'diagnostics-{run}.log','w');process=subprocess.Popen([str(workspace/os.environ.get('GOTEDDYCLOUD_BINARY','bin/goteddycloud')),'--base_path',str(root)],stdout=log,stderr=log,start_new_session=True)
   def request(port,tls=False):
-   c=http.client.HTTPSConnection('127.0.0.1',port,context=ssl._create_unverified_context(),timeout=5) if tls else http.client.HTTPConnection('127.0.0.1',port,timeout=5)
+   c=http.client.HTTPSConnection('127.0.0.1',port,context=client_context(root),timeout=5) if tls else http.client.HTTPConnection('127.0.0.1',port,timeout=5)
    c.request('GET','/v1/time' if port==ports[2] else '/api/time');r=c.getresponse();data=r.read();assert r.status==200 and data.isdigit();c.close()
   try:
    for _ in range(100):
