@@ -187,8 +187,12 @@ jobs:
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
           build-args: VERSION=${{ env.RELEASE_TAG }}
-          cache-from: type=gha,scope=release-docker
-          cache-to: type=gha,scope=release-docker,mode=max
+          cache-from: |
+            type=registry,ref=${{ steps.image.outputs.name }}:buildcache
+            type=gha,scope=release-docker
+          cache-to: |
+            type=registry,ref=${{ steps.image.outputs.name }}:buildcache,mode=max
+            type=gha,scope=release-docker,mode=max
           provenance: mode=max
           sbom: true
       - name: Verify the executables match the platform manifests
@@ -202,7 +206,9 @@ jobs:
           load: true
           tags: goteddycloud:release-test
           build-args: VERSION=${{ env.RELEASE_TAG }}
-          cache-from: type=gha,scope=release-docker
+          cache-from: |
+            type=registry,ref=${{ steps.image.outputs.name }}:buildcache
+            type=gha,scope=release-docker
       - name: Check native container startup and FFmpeg
         run: |
           docker run --rm goteddycloud:release-test -base_path /data \
@@ -210,6 +216,23 @@ jobs:
           docker run --rm --entrypoint ffmpeg goteddycloud:release-test -version
       - name: Check bundled Web UI with a volume and an empty host mount
         run: python3 scripts/container-webui-smoke.py --image goteddycloud:release-test
+      - name: Build a native version variant to verify layer reuse
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .cache/release-docker-source
+          target: ffmpeg
+          platforms: linux/amd64
+          outputs: type=oci,dest=${{ runner.temp }}/release-layer-variant.tar
+          build-args: VERSION=${{ env.RELEASE_TAG }}-layercheck
+          cache-from: |
+            type=registry,ref=${{ steps.image.outputs.name }}:buildcache
+            type=gha,scope=release-docker
+          provenance: false
+          sbom: false
+      - name: Require unchanged dependency and Web UI layer digests
+        run: >-
+          python3 scripts/check-container-layers.py
+          "$RUNNER_TEMP/release-images.tar" "$RUNNER_TEMP/release-layer-variant.tar"
       - name: Publish verified architecture builds
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
@@ -220,7 +243,11 @@ jobs:
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
           build-args: VERSION=${{ env.RELEASE_TAG }}
-          cache-from: type=gha,scope=release-docker
-          cache-to: type=gha,scope=release-docker,mode=max
+          cache-from: |
+            type=registry,ref=${{ steps.image.outputs.name }}:buildcache
+            type=gha,scope=release-docker
+          cache-to: |
+            type=registry,ref=${{ steps.image.outputs.name }}:buildcache,mode=max
+            type=gha,scope=release-docker,mode=max
           provenance: mode=max
           sbom: true

@@ -116,6 +116,24 @@ Base image manifests and the frontend revision are pinned. Runtime defaults to n
 For an existing host directory, run under its owning UID/GID or prepare appropriate
 permissions on the copied deployment. Host port mappings are independently chosen.
 
+OS certificates and FFmpeg install in independent dependency stages before any
+application files are copied. The server executable, frontend, notices and initial
+data layout use separate [`COPY --link`](https://docs.docker.com/reference/dockerfile/#copy---link) layers. A server-only or UI-only update
+therefore preserves the other payloads and cached dependency blobs; clients with
+those blobs download only changed layers and image metadata. The first update
+from the older image layout needs the newly arranged layers once. A base-image
+update, intentional dependency rebuild or missing build cache can replace package
+layers as well. CI preserves intermediate dependency stages in a [registry cache](https://docs.docker.com/build/cache/backends/registry/) using the GHCR
+`:buildcache` tag, alongside the GitHub Actions cache, so subsequent releases can
+reuse them even after the Actions cache expires. The cache tag is build metadata,
+not a deployment image. To deliberately refresh packages when building locally, use
+`docker buildx build --no-cache-filter runtime-deps,ffmpeg-deps --target ffmpeg --load -t goteddycloud:local .`.
+
+Release CI builds a second native image with a changed application version and
+compares the actual compressed OCI layer digests with the release build using
+`scripts/check-container-layers.py`. Publication requires exactly the executable
+layer to change; the FFmpeg, OS, UI, notices and data layers must match.
+
 ```sh
 docker run --name goteddycloud -v goteddycloud-data:/data \
   -p 18080:18080 -p 18443:18443 -p 18444:18444 goteddycloud:local

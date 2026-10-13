@@ -26,14 +26,21 @@ RUN GOOS=js GOARCH=wasm CGO_ENABLED=0 go build -buildvcs=false -trimpath -ldflag
 RUN if [ "$TARGETARCH" = arm ]; then export GOARM="${TARGETVARIANT#v}"; fi; \
     CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -buildvcs=false -trimpath -ldflags="-s -w -X main.version=$VERSION" -o /out/goteddycloud ./cmd/goteddycloud
 
-FROM debian:bookworm-slim@sha256:7c7b2c966bc9ee8cedfeef67e0e279108992c77681fa595db4a9d65c06ccc587 AS runtime
-COPY --from=build /out/goteddycloud /usr/local/bin/goteddycloud
-COPY --from=build /go/pkg/mod/google.golang.org/protobuf@v1.36.12/LICENSE /usr/share/doc/goteddycloud/protobuf-LICENSE
-COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-COPY --from=frontend /src/.cache/goteddycloud-web/dist/ /usr/share/goteddycloud/www/web/
-COPY --from=frontend /out/frontend-notices/ /usr/share/doc/goteddycloud/frontend/
-COPY LICENSE NOTICE docs/licenses.md third_party/libopus-COPYING third_party/Go-LICENSE third_party/go-serial-LICENSE third_party/x-sys-LICENSE third_party/kong-COPYING third_party/x-term-LICENSE /usr/share/doc/goteddycloud/
-COPY --chown=65532:65532 packaging/container-root/ /data/
+FROM debian:bookworm-slim@sha256:7c7b2c966bc9ee8cedfeef67e0e279108992c77681fa595db4a9d65c06ccc587 AS runtime-deps
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
+
+# Package installation depends only on the pinned OS and package instructions.
+# Application, UI and notice changes cannot invalidate the FFmpeg layer.
+FROM runtime-deps AS ffmpeg-deps
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg && rm -rf /var/lib/apt/lists/*
+
+FROM runtime-deps AS runtime
+COPY --link --from=build /go/pkg/mod/google.golang.org/protobuf@v1.36.12/LICENSE /usr/share/doc/goteddycloud/protobuf-LICENSE
+COPY --link --from=frontend /out/frontend-notices/ /usr/share/doc/goteddycloud/frontend/
+COPY --link LICENSE NOTICE docs/licenses.md third_party/libopus-COPYING third_party/Go-LICENSE third_party/go-serial-LICENSE third_party/x-sys-LICENSE third_party/kong-COPYING third_party/x-term-LICENSE /usr/share/doc/goteddycloud/
+COPY --link --from=frontend /src/.cache/goteddycloud-web/dist/ /usr/share/goteddycloud/www/web/
+COPY --link --chown=65532:65532 packaging/container-root/ /data/
+COPY --link --from=build /out/goteddycloud /usr/local/bin/goteddycloud
 ENV GOTEDDYCLOUD_BUNDLED_WWW=/usr/share/goteddycloud/www
 WORKDIR /data
 USER 65532:65532
@@ -42,7 +49,17 @@ EXPOSE 18080 18443 18444
 ENTRYPOINT ["/usr/local/bin/goteddycloud"]
 CMD ["-base_path", "/data", "-http", ":18080", "-httpsecure", ":18443", "-box", ":18444"]
 
-FROM runtime AS ffmpeg
-USER 0:0
-RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg && rm -rf /var/lib/apt/lists/*
+FROM ffmpeg-deps AS ffmpeg
+# Keep payloads separate and independent of preceding layers. COPY --link
+# preserves unchanged UI/notices when only the server executable changes.
+COPY --link --from=runtime /usr/share/doc/goteddycloud/ /usr/share/doc/goteddycloud/
+COPY --link --from=runtime /usr/share/goteddycloud/www/ /usr/share/goteddycloud/www/
+COPY --link --chown=65532:65532 --from=runtime /data/ /data/
+COPY --link --from=runtime /usr/local/bin/goteddycloud /usr/local/bin/goteddycloud
+ENV GOTEDDYCLOUD_BUNDLED_WWW=/usr/share/goteddycloud/www
+WORKDIR /data
 USER 65532:65532
+VOLUME ["/data"]
+EXPOSE 18080 18443 18444
+ENTRYPOINT ["/usr/local/bin/goteddycloud"]
+CMD ["-base_path", "/data", "-http", ":18080", "-httpsecure", ":18443", "-box", ":18444"]
