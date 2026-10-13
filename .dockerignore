@@ -23,6 +23,7 @@ internal/cc3200cli/loader/rbtl3100s.dll
 !scripts/
 !scripts/prepare-frontend.py
 !scripts/frontend-notices.py
+!scripts/snapshot-catalog.py
 
 !third_party/Go-LICENSE
 !third_party/go-serial-LICENSE

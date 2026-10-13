@@ -1,6 +1,14 @@
 # syntax=docker/dockerfile:1
-FROM --platform=$BUILDPLATFORM node:24-alpine3.24@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1 AS frontend
+FROM --platform=$BUILDPLATFORM node:24-alpine3.24@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1 AS frontend-tools
 RUN apk add --no-cache ca-certificates git python3
+
+FROM frontend-tools AS catalog
+# ADD revalidates the moving ref on every build; downloads use its immutable SHA.
+ADD https://api.github.com/repos/toniebox-reverse-engineering/tonies-json/git/ref/heads/release /tmp/catalog-ref.json
+COPY scripts/snapshot-catalog.py /snapshot-catalog.py
+RUN python3 /snapshot-catalog.py /tmp/catalog-ref.json /out/catalog
+
+FROM frontend-tools AS frontend
 WORKDIR /src
 COPY frontend/upstream-revision frontend/upstream-revision
 RUN git init /upstream && git -C /upstream remote add origin https://github.com/toniebox-reverse-engineering/teddycloud_web.git && \
@@ -39,9 +47,11 @@ COPY --link --from=build /go/pkg/mod/google.golang.org/protobuf@v1.36.12/LICENSE
 COPY --link --from=frontend /out/frontend-notices/ /usr/share/doc/goteddycloud/frontend/
 COPY --link LICENSE NOTICE docs/licenses.md third_party/libopus-COPYING third_party/Go-LICENSE third_party/go-serial-LICENSE third_party/x-sys-LICENSE third_party/kong-COPYING third_party/x-term-LICENSE /usr/share/doc/goteddycloud/
 COPY --link --from=frontend /src/.cache/goteddycloud-web/dist/ /usr/share/goteddycloud/www/web/
+COPY --link --from=catalog /out/catalog/ /usr/share/goteddycloud/catalog/
 COPY --link --chown=65532:65532 packaging/container-root/ /data/
 COPY --link --from=build /out/goteddycloud /usr/local/bin/goteddycloud
 ENV GOTEDDYCLOUD_BUNDLED_WWW=/usr/share/goteddycloud/www
+ENV GOTEDDYCLOUD_BUNDLED_CATALOG=/usr/share/goteddycloud/catalog
 WORKDIR /data
 USER 65532:65532
 VOLUME ["/data"]
@@ -54,9 +64,11 @@ FROM ffmpeg-deps AS ffmpeg
 # preserves unchanged UI/notices when only the server executable changes.
 COPY --link --from=runtime /usr/share/doc/goteddycloud/ /usr/share/doc/goteddycloud/
 COPY --link --from=runtime /usr/share/goteddycloud/www/ /usr/share/goteddycloud/www/
+COPY --link --from=runtime /usr/share/goteddycloud/catalog/ /usr/share/goteddycloud/catalog/
 COPY --link --chown=65532:65532 --from=runtime /data/ /data/
 COPY --link --from=runtime /usr/local/bin/goteddycloud /usr/local/bin/goteddycloud
 ENV GOTEDDYCLOUD_BUNDLED_WWW=/usr/share/goteddycloud/www
+ENV GOTEDDYCLOUD_BUNDLED_CATALOG=/usr/share/goteddycloud/catalog
 WORKDIR /data
 USER 65532:65532
 VOLUME ["/data"]

@@ -11,11 +11,54 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	"goteddycloud/internal/content"
 )
 
 type metadataTransport func(*http.Request) (*http.Response, error)
 
 func (f metadataTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
+
+func TestBundledCatalogRecognizesTagsWhenUpdatesAreOffline(t *testing.T) {
+	bundle := t.TempDir()
+	for name, data := range map[string]string{
+		"tonies.json":     recognitionCatalog,
+		"tonieboxes.json": `[{"id":"baseline-box","name":"Baseline box","img_src":"/img_unknown.png"}]`,
+	} {
+		if err := os.WriteFile(filepath.Join(bundle, name), []byte(data), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	t.Setenv("GOTEDDYCLOUD_BUNDLED_CATALOG", bundle)
+	s := fixtureApp(t)
+	s.MetadataHTTP = &http.Client{Transport: metadataTransport(func(*http.Request) (*http.Response, error) {
+		return nil, errors.New("offline")
+	})}
+	if err := s.updateCatalog(context.Background()); err == nil {
+		t.Fatal("offline download unexpectedly succeeded")
+	}
+	if err := s.updateBoxCatalog(context.Background()); err == nil {
+		t.Fatal("offline box catalog download unexpectedly succeeded")
+	}
+	snap := s.Settings.Snapshot("")
+	const ruid = "16000000500304e0"
+	if err := s.Content.Update(snap, ruid, func(m content.Metadata) error {
+		m.Set("box_audio_id", uint32(0x60000011))
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+	info, err := s.tagInfo(context.Background(), snap, "", ruid)
+	if err != nil || info["tonieInfo"].(map[string]any)["model"] != "AUTO_TEST" {
+		t.Fatal("baseline recognition failed", info, err)
+	}
+	if reply := perform(s, "GET", "/api/toniesJson", nil, false); reply.Code != 200 || reply.Body.String() != recognitionCatalog {
+		t.Fatal("baseline catalog unavailable to frontend", reply.Code)
+	}
+	if reply := perform(s, "GET", "/api/tonieboxesJson", nil, false); reply.Code != 200 || !bytes.Contains(reply.Body.Bytes(), []byte("baseline-box")) {
+		t.Fatal("baseline box catalog unavailable to frontend", reply.Code)
+	}
+}
 
 func TestMetadataCatalogMirrorRedirectPolicy(t *testing.T) {
 	client := metadataClient(nil)

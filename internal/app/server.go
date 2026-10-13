@@ -84,6 +84,12 @@ func New(settings *config.Store) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
+	if path := os.Getenv("GOTEDDYCLOUD_BUNDLED_CATALOG"); path != "" {
+		if err := cat.SeedBaseline(path); err != nil {
+			cat.Close()
+			return nil, fmt.Errorf("bundled catalogs: %w", err)
+		}
+	}
 	www, err := settings.Storage().OpenRoot(settings.String("", "internal.wwwdirfull"))
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		cat.Close()

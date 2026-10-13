@@ -82,7 +82,11 @@ and [reverse proxy setup](docs/reverse-proxy.md) for more options.
 
 Startup downloads the Tonie and box model catalogs from `api.revvox.de`, including
 its redirects to the official GitHub mirror. Failed updates retain existing
-catalogs; a fresh deployment has none until a download succeeds. The warning's
+catalogs. Docker images include both catalogs from the official GitHub release
+branch at image build time, so a fresh deployment can identify known Tonies
+even when downloading updates is unavailable. Missing or empty catalogs are
+seeded from this baseline; populated catalogs and custom entries are preserved.
+The warning's
 `error` field distinguishes a rejected HTTP response from transfer or catalog errors.
 
 Tonie titles and pictures are matched against this catalog using the audio ID

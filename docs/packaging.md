@@ -113,6 +113,19 @@ The environment variable `GOTEDDYCLOUD_BUNDLED_WWW` selects this read-only
 fallback. A complete custom frontend under the configured `www/web` directory
 overrides it; otherwise `/web` works with an empty named volume or host mount.
 Upgrades replace bundled assets without copying anything into persistent data.
+Both targets also include `tonies.json` and `tonieboxes.json` under
+`/usr/share/goteddycloud/catalog`, selected by `GOTEDDYCLOUD_BUNDLED_CATALOG`.
+Each build revalidates the official `toniebox-reverse-engineering/tonies-json`
+release branch and fetches both files from the same immutable commit.
+`snapshot.json` records that commit, entry counts and SHA256 hashes. A failed or
+invalid build-time download fails the image build. At runtime, missing or empty
+official catalogs are copied atomically to the configured storage backend
+(filesystem or S3) before serving requests. Populated catalogs and custom entries
+are preserved; normal successful updates replace the baseline. Startup can work
+fully offline with this snapshot. Cover images are still fetched separately;
+the snapshot contains their URLs, and generic placeholders are embedded locally.
+The catalog snapshot uses its own `COPY --link` layer so database changes do not
+invalidate FFmpeg, the frontend or the executable layer.
 Attribution and dependency notices are under `/usr/share/doc/goteddycloud/frontend`.
 Base image manifests and the frontend revision are pinned. Runtime defaults to numeric UID/GID
 65532, unprivileged ports 18080/18443/18444, and a persistent /data deployment root.
