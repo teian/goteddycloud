@@ -72,6 +72,11 @@ See [compatibility/support report](docs/compatibility-report.md),
 [implementation checklist](openspec/changes/rewrite-teddycloud-in-go/tasks.md).
 CC3200 hardware is currently unavailable; physical acceptance remains pending.
 
+Publishing a GitHub release builds Windows/Linux/macOS archives for the server
+and standalone `cc3200tool`, Linux `.deb`/`.rpm`/Arch packages, a Nix package, and
+GHCR images for amd64, ARMv7 and arm64. See [release packaging](docs/packaging.md)
+for supported targets, installation and image tags.
+
 The CC3200 ESP32-C3 browser flasher is available at `/tools/cc3200` and as the
 built-in **CC3200 flashing** frontend plugin. It creates verified backups, imports
 certificates, and installs the replacement CA and HackieboxNG preloader with

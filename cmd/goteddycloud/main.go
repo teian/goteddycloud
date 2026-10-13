@@ -19,7 +19,7 @@ import (
 	"goteddycloud/internal/storage"
 )
 
-var version = "development"
+var version = "0.1.0"
 
 type assignments []string
 
