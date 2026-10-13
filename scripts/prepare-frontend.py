@@ -23,6 +23,22 @@ def edit(name, before, after):
         raise SystemExit(f'Frontend integration anchor changed in {name}: {before!r}')
     path.write_text(text.replace(before, after, 1))
 
+# All generic request helpers must preserve existing query parameters when
+# selecting a box. Appending a second '?' folds the overlay into the ruid/path.
+edit('api/apis/TeddyCloudApi.ts', 'import * as runtime from "../runtime";',
+     'import * as runtime from "../runtime";\nimport { withOverlay } from "../../goteddycloud/overlayPath";')
+edit('api/apis/TeddyCloudApi.ts', '`/api/getTagInfo?ruid=${ruid}`',
+     '`/api/getTagInfo?ruid=${encodeURIComponent(ruid)}`')
+edit('api/apis/TeddyCloudApi.ts', 'path = path + "?overlay=" + overlay;',
+     'path = withOverlay(path, overlay.toString());')
+edit('api/apis/TeddyCloudApi.ts', 'path: `${apiPath}${overlay ? "?overlay=" + overlay : ""}`,',
+     'path: withOverlay(apiPath, overlay?.toString()),')
+edit('api/apis/TeddyCloudApi.ts', 'path: `${path}${overlay ? "?overlay=" + overlay : ""}`,',
+     'path: withOverlay(path, overlay?.toString()),')
+edit('api/apis/TeddyCloudApi.ts', '''        const overlaySeparator = path.includes("?") ? "&" : "?";
+        const requestPath = `${path}${overlay ? `${overlaySeparator}overlay=${overlay}` : ""}`;''',
+     '        const requestPath = withOverlay(path, overlay?.toString());')
+
 edit('App.tsx', 'import "./styles/matrix/matrix.css";', '''import { UsersAreasPage } from "./goteddycloud/UsersAreasPage";
 import { SharedCatalogsPage } from "./goteddycloud/SharedCatalogsPage";
 import "./styles/matrix/matrix.css";''')
