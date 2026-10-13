@@ -23,6 +23,8 @@ at c2332898a1ededc0bdd01ec279b23366d213f81e.
 Reference attribution: Copyright (C) 2016-2020 Allterco Robotics;
 Copyright (C) 2020- Team RevvoX (GPL-2.0-or-later, used under GPL version 2).
 TI loader/firmware binaries are not redistributed or downloaded automatically.
+Optional local native builds can embed a user-supplied loader; the blob is
+excluded from Git, Docker contexts and standard release snapshots.
 The embedded Go WebAssembly support runtime retains the Go Authors BSD notice;
 see third_party/Go-LICENSE. Native UART uses go.bug.st/serial (BSD-3-Clause)
 and golang.org/x/sys (BSD-3-Clause); their notices are in third_party/.

@@ -24,8 +24,13 @@ to the selected gateway pins. Use 3.3 V logic and check the
 [CC3200 pinout](https://toniebox-reverse-engineering.github.io/docs/wiki/cc3200/pinout/).
 Stable box power is required throughout installation.
 
-Select `rbtl3100s.dll` from the official
-[cc3200tool distribution](https://github.com/toniebox-reverse-engineering/cc3200tool/blob/master/cc3200tool/dll/rbtl3100s.dll).
+Download `rbtl3100s.dll` from the
+[Toniebox project's cc3200tool DLL directory](https://github.com/toniebox-reverse-engineering/cc3200tool/tree/master/cc3200tool/dll).
+Open that file, choose **Download raw file**, and save the binary with the exact
+filename `rbtl3100s.dll`. Select the downloaded file in the browser tool's loader
+field. Native CLI users can instead place it beside the executable or in its
+`dll/` subdirectory for automatic loading, or pass `--loader /path/to/rbtl3100s.dll`
+before the command; see [native loader setup](cc3200-tool.md).
 The browser verifies SHA-256
 `2c9a05c469389446e05871a88e84ca3994bf3d6a6785155135db21d33aa63cc9`
 before sending it to network-processor SRAM. No TI binary is redistributed or
@@ -131,11 +136,12 @@ preflight, preserving an existing original, and stopping before the final image
 on an earlier verification failure. CI runs the Node suite and FAT parser fuzz
 smoke alongside the existing Go checks.
 
-No physical box or ESP32-C3 is available. Browser rendering could not be visually
-checked because the computer-use environment exposes no browsers. HTTP asset,
+Native ESP32-C3/CC3200 checks are recorded in [native tool validation](cc3200-tool.md).
+The browser workflow has not been tested on hardware. Browser rendering could not
+be visually checked because the computer-use environment exposes no browsers. HTTP asset,
 plugin metadata and authentication checks are automated; USB permission prompts,
 gateway firmware installation, native Web Serial operation, actual FAT layouts,
-real read/write verification and a successful post-install boot remain hardware
+browser read/write verification and a successful post-install boot remain hardware
 acceptance tasks. In particular, an image rejected by the structural checks must
 be investigated rather than bypassing validation. This feature does not close
 the project's existing physical-device acceptance gates.

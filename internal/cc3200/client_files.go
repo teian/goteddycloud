@@ -46,7 +46,8 @@ func (c *Client) FileInfo(ctx context.Context, name string) (info FileInfo, err 
 func (c *Client) openFile(ctx context.Context, name string, flags uint32) error {
 	payload := append(words(0x21, flags, 0), []byte(name)...)
 	payload = append(payload, 0, 0)
-	_, err := c.command(ctx, payload, 4, eraseTimeout)
+	c.report("Opening device file %q (erase timeout %s)", name, c.eraseTimeout)
+	_, err := c.command(ctx, payload, 4, c.eraseTimeout)
 	return err
 }
 func (c *Client) closeFile(ctx context.Context, signature []byte) error {
@@ -73,6 +74,8 @@ func (c *Client) readFile(ctx context.Context, name string) ([]byte, error) {
 		return nil, err
 	}
 	data := make([]byte, info.Size)
+	c.report("Reading file %q (%d bytes)", name, info.Size)
+	report := c.progress("Read file " + name)
 	for pos := 0; pos < len(data); pos += 4096 {
 		count := min(4096, len(data)-pos)
 		chunk, e := c.command(ctx, words(0x2b, uint32(pos), uint32(count)), -1, commandTimeout)
@@ -84,6 +87,7 @@ func (c *Client) readFile(ctx context.Context, name string) ([]byte, error) {
 			return nil, errors.New("short file response")
 		}
 		copy(data[pos:], chunk)
+		report(pos+count, len(data))
 	}
 	if err = c.closeFile(ctx, nil); err != nil {
 		return nil, err
@@ -100,7 +104,8 @@ func (c *Client) eraseFile(ctx context.Context, name string) error {
 	}
 	payload := append(words(0x2e, 0), []byte(name)...)
 	payload = append(payload, 0)
-	if _, err := c.command(ctx, payload, 0, eraseTimeout); err != nil {
+	c.report("Erasing file %q (timeout %s)", name, c.eraseTimeout)
+	if _, err := c.command(ctx, payload, 0, c.eraseTimeout); err != nil {
 		return err
 	}
 	return c.status(ctx)
@@ -144,6 +149,8 @@ func (c *Client) WriteFile(ctx context.Context, name string, data []byte, option
 		if err = c.openFile(ctx, name, flags); err != nil {
 			return err
 		}
+		c.report("Writing file %q (%d bytes)", name, len(data))
+		report := c.progress("Write file " + name)
 		for pos := 0; pos < len(data); pos += 4096 {
 			payload := append(words(0x24, uint32(pos)), data[pos:min(pos+4096, len(data))]...)
 			if _, err = c.command(ctx, payload, 0, commandTimeout); err != nil {
@@ -152,11 +159,13 @@ func (c *Client) WriteFile(ctx context.Context, name string, data []byte, option
 			if err = c.status(ctx); err != nil {
 				return err
 			}
+			report(min(pos+4096, len(data)), len(data))
 		}
 		if err = c.closeFile(ctx, options.Signature); err != nil {
 			return err
 		}
 		if options.Verify {
+			c.report("Verifying file %q by reading it back", name)
 			actual, e := c.readFile(ctx, name)
 			if e != nil {
 				return e
@@ -164,6 +173,7 @@ func (c *Client) WriteFile(ctx context.Context, name string, data []byte, option
 			if !bytes.Equal(actual, data) {
 				return errors.New("file read-back verification failed")
 			}
+			c.report("File %q verified", name)
 		}
 		return nil
 	})
@@ -180,7 +190,8 @@ func (c *Client) Format(ctx context.Context, size int) error {
 		if size > info.Size() {
 			return errors.New("format size exceeds device storage")
 		}
-		if _, err = c.command(ctx, words(0x28, 2, uint32(size/BlockSize), 0, 0, 2), 0, eraseTimeout); err != nil {
+		c.report("Formatting flash (%d bytes, timeout %s)", size, c.eraseTimeout)
+		if _, err = c.command(ctx, words(0x28, 2, uint32(size/BlockSize), 0, 0, 2), 0, c.eraseTimeout); err != nil {
 			return err
 		}
 		return c.status(ctx)

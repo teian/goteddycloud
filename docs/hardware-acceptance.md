@@ -56,4 +56,6 @@ import, preservation of `/sys/pre-img.bin`, and read-back equality of the CA and
 preloader. Remove programming wiring, boot from the prepared SD card and confirm
 original firmware and teddyCloud playback. Check reconnect/cancel behavior during
 reads; do not deliberately interrupt destructive writes on the only available
-box. None of these physical results is currently claimed.
+box. The limited native CLI checks from 2026-10-13 are recorded in
+[native tool validation](cc3200-tool.md); complete browser installation, SD boot
+and playback acceptance remain pending.

@@ -22,6 +22,9 @@ import (
 //go:embed cc3200.html
 var cc3200Page []byte
 
+//go:embed cc3200-pinout.png
+var cc3200Pinout []byte
+
 //go:embed cc3200-ui.mjs
 var cc3200UI []byte
 
@@ -64,7 +67,7 @@ func (s *Server) cc3200API(w http.ResponseWriter, r *http.Request) bool {
 		}
 		w.Header().Set("Cache-Control", "no-store")
 		w.Header().Set("X-Content-Type-Options", "nosniff")
-		w.Header().Set("Content-Security-Policy", "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'unsafe-inline'; connect-src 'self'; frame-ancestors 'self'; base-uri 'none'; form-action 'self'")
+		w.Header().Set("Content-Security-Policy", "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; frame-ancestors 'self'; base-uri 'none'; form-action 'self'")
 		w.Header().Set("Permissions-Policy", "serial=(self)")
 		response(w, 200, kind, data)
 		return true
@@ -295,6 +298,8 @@ func cc3200Asset(name string) ([]byte, string) {
 	switch name {
 	case "/tools/cc3200", "/plugins/goteddycloud-cc3200/index.html", "/plugins/goteddycloud-cc3200/":
 		return cc3200Page, "text/html; charset=utf-8"
+	case "/tools/cc3200-pinout.png":
+		return cc3200Pinout, "image/png"
 	case "/tools/cc3200-tool.wasm":
 		return cc3200WASM, "application/wasm"
 	case "/tools/cc3200-wasm-exec.js":

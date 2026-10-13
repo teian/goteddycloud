@@ -290,6 +290,30 @@ func TestClientPrepareValidatesLoaderBeforeHandover(t *testing.T) {
 		t.Fatal("handed over with wrong loader", f.commands)
 	}
 }
+
+func TestClientExplicitLoaderDigest(t *testing.T) {
+	loader := []byte("explicit compatible future loader")
+	f := newFake()
+	f.application = true
+	client := NewClientWithOptions(f, ClientOptions{LoaderSHA256: Digest(loader)})
+	if err := client.Prepare(context.Background(), loader); err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(f.sram[:len(loader)], loader) {
+		t.Fatal("explicit loader was not uploaded")
+	}
+	for _, data := range [][]byte{nil, []byte("different loader"), make([]byte, (128<<10)+1)} {
+		f := newFake()
+		f.application = true
+		client := NewClientWithOptions(f, ClientOptions{LoaderSHA256: Digest(data)})
+		if len(data) > 0 && len(data) <= 128<<10 {
+			client.loaderSHA256 = Digest(loader)
+		}
+		if err := client.Prepare(context.Background(), data); err == nil || !bytes.Equal(f.commands, []byte{0x2f}) {
+			t.Fatal("invalid explicit loader reached handover", err, f.commands)
+		}
+	}
+}
 func TestClientPinnedLoaderHandover(t *testing.T) {
 	name := os.Getenv("TEDDYCLOUD_CC3200_NWP_LOADER")
 	if name == "" {
@@ -310,5 +334,122 @@ func TestClientPinnedLoaderHandover(t *testing.T) {
 	}
 	if f.commands[len(f.commands)-1] != 0x32 {
 		t.Fatal("loader was not executed")
+	}
+}
+
+func TestClientStatusTransferAndNoErase(t *testing.T) {
+	f := newFake()
+	var logs bytes.Buffer
+	client := NewClientWithOptions(f, ClientOptions{Status: func(message string) { fmt.Fprintln(&logs, message) }})
+	ctx := context.Background()
+	if e := client.Prepare(ctx, nil); e != nil {
+		t.Fatal(e)
+	}
+	for _, want := range []string{"Resetting device", "attempt 1/5", "Bootloader synchronized", "Querying ROM/NWP version", "NWP session already active"} {
+		if !bytes.Contains(logs.Bytes(), []byte(want)) {
+			t.Fatal("missing connection status", want, logs.String())
+		}
+	}
+	data := bytes.Repeat([]byte{0x5a}, len(f.flash))
+	if e := client.WriteFlashWithOptions(ctx, data, true, true, nil); e != nil {
+		t.Fatal(e)
+	}
+	for _, op := range f.commands {
+		if op == 0x30 {
+			t.Fatal("--no-erase erased flash")
+		}
+	}
+	if !bytes.Equal(data, f.flash) || f.writes[len(f.writes)-1] != 0 {
+		t.Fatal("write or publish ordering failed")
+	}
+	for _, want := range []string{"Write storage:", "(100%)", "Verifying flash", "Read storage:", "Flash read-back verified"} {
+		if !bytes.Contains(logs.Bytes(), []byte(want)) {
+			t.Fatal("missing transfer status", want, logs.String())
+		}
+	}
+}
+
+type noACKLink struct{ *fakeLink }
+
+func (f noACKLink) Break(context.Context) error { return nil }
+
+func TestACKSkipsStartupBytesWithoutConsumingResponse(t *testing.T) {
+	for _, prefix := range [][]byte{nil, []byte("CC3200 bootloader\r\n"), {0}, {0xcc, 0, 0, 0x41, 0}} {
+		t.Run(fmt.Sprintf("%x", prefix), func(t *testing.T) {
+			f := newFake()
+			f.buffer = append(append(append([]byte(nil), prefix...), 0, 0xcc), 0x12, 0x34)
+			var debug bytes.Buffer
+			client := NewClientWithOptions(f, ClientOptions{Debug: func(message string) { fmt.Fprintln(&debug, message) }})
+			if err := client.ack(context.Background(), time.Second); err != nil {
+				t.Fatal(err)
+			}
+			if !bytes.Equal(f.buffer, []byte{0x12, 0x34}) {
+				t.Fatalf("consumed response after ACK: %x", f.buffer)
+			}
+			if len(prefix) > 0 && !bytes.Contains(debug.Bytes(), []byte(fmt.Sprintf("Skipped %d bytes", len(prefix)))) {
+				t.Fatal("missing skipped-byte diagnostic", debug.String())
+			}
+		})
+	}
+}
+
+type streamingNoiseLink struct{ *fakeLink }
+
+func (streamingNoiseLink) Read(ctx context.Context, _ int, timeout time.Duration) ([]byte, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if timeout <= 0 {
+		return nil, context.DeadlineExceeded
+	}
+	return []byte{'x'}, nil
+}
+
+func TestACKNoiseCannotExtendDeadline(t *testing.T) {
+	client := NewClient(streamingNoiseLink{newFake()})
+	start := time.Now()
+	err := client.ack(context.Background(), 20*time.Millisecond)
+	if !errors.Is(err, context.DeadlineExceeded) || !client.broken {
+		t.Fatal(err, client.broken)
+	}
+	if time.Since(start) > time.Second {
+		t.Fatal("continuous serial output extended ACK deadline")
+	}
+	if !bytes.Contains([]byte(err.Error()), []byte("bytes without a complete ACK")) {
+		t.Fatal("missing received-byte diagnostic", err)
+	}
+}
+
+func TestSyncReportsRetriesAndPreservesCause(t *testing.T) {
+	var logs bytes.Buffer
+	client := NewClientWithOptions(noACKLink{newFake()}, ClientOptions{Status: func(message string) { fmt.Fprintln(&logs, message) }})
+	e := client.Sync(context.Background(), false)
+	if !errors.Is(e, ErrReconnect) || !errors.Is(e, io.ErrUnexpectedEOF) || !bytes.Contains(logs.Bytes(), []byte("attempt 5/5")) {
+		t.Fatal(e, logs.String())
+	}
+}
+
+func TestSyncCancellationDoesNotRetry(t *testing.T) {
+	f := newFake()
+	f.block = make(chan struct{})
+	f.entered = make(chan struct{}, 1)
+	var logs bytes.Buffer
+	client := NewClientWithOptions(f, ClientOptions{Status: func(message string) { fmt.Fprintln(&logs, message) }})
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	done := make(chan error, 1)
+	go func() { done <- client.Sync(ctx, false) }()
+	<-f.entered
+	cancel()
+	select {
+	case e := <-done:
+		if !errors.Is(e, context.Canceled) {
+			t.Fatal(e)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("sync ignored cancellation")
+	}
+	if bytes.Contains(logs.Bytes(), []byte("attempt 2/5")) {
+		t.Fatal("retried after cancellation", logs.String())
 	}
 }

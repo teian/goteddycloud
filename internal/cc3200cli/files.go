@@ -72,12 +72,6 @@ func writeRootFile(root *os.Root, name string, data []byte) (err error) {
 	}
 	return file.Close()
 }
-func createDirectory(name string) (*os.Root, error) {
-	if err := os.Mkdir(name, 0700); err != nil {
-		return nil, err
-	}
-	return os.OpenRoot(name)
-}
 
 type inputFile struct {
 	name string

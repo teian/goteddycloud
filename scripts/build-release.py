@@ -49,7 +49,7 @@ def main():
     with tempfile.TemporaryDirectory(prefix='release-source-',dir='.cache') as stage_name:
         stage=Path(stage_name).resolve()
         for directory in ['cmd','internal','docs','third_party']:
-            shutil.copytree(directory,stage/directory)
+            shutil.copytree(directory,stage/directory,ignore=shutil.ignore_patterns('rbtl3100s.dll'))
         for filename in ['go.mod','go.sum','LICENSE','NOTICE','README.md']:
             shutil.copyfile(filename,stage/filename)
         build_snapshot(args,stage)
@@ -70,7 +70,7 @@ def build_snapshot(args,stage):
         executable = directory / ('goteddycloud.exe' if goos == 'windows' else 'goteddycloud')
         environment = dict(os.environ, CGO_ENABLED='0', GOOS=goos, GOARCH=goarch)
         subprocess.run(['go', 'build', '-buildvcs=false', '-trimpath', '-ldflags', f'-s -w -X main.version={args.version}', '-o', str(executable), './cmd/goteddycloud'], env=environment, cwd=stage, check=True)
-        for source in ['LICENSE', 'NOTICE', 'README.md', 'docs/licenses.md', 'docs/storage.md', 'docs/storage-verification.md', 'docs/s3-providers.md', 'docs/cc3200-flashing.md', 'docs/cc3200-tool.md', 'docs/reverse-proxy.md', 'docs/management-tls.md', 'docs/user-areas.md', 'docs/migration.md', 'docs/verification.md', 'third_party/Go-LICENSE', 'third_party/go-serial-LICENSE', 'third_party/x-sys-LICENSE', 'third_party/x-crypto-LICENSE', 'third_party/x-net-LICENSE', 'third_party/x-text-LICENSE', 'third_party/libopus-COPYING', 'third_party/gofakes3-LICENSE', 'third_party/goskiplist-LICENSE']:
+        for source in ['LICENSE', 'NOTICE', 'README.md', 'docs/licenses.md', 'docs/storage.md', 'docs/storage-verification.md', 'docs/s3-providers.md', 'docs/cc3200-flashing.md', 'docs/cc3200-tool.md', 'docs/reverse-proxy.md', 'docs/management-tls.md', 'docs/user-areas.md', 'docs/migration.md', 'docs/verification.md', 'third_party/Go-LICENSE', 'third_party/go-serial-LICENSE', 'third_party/kong-COPYING', 'third_party/x-term-LICENSE', 'third_party/x-sys-LICENSE', 'third_party/x-crypto-LICENSE', 'third_party/x-net-LICENSE', 'third_party/x-text-LICENSE', 'third_party/libopus-COPYING', 'third_party/gofakes3-LICENSE', 'third_party/goskiplist-LICENSE']:
             shutil.copyfile(stage / source, directory / Path(source).name)
         shutil.copyfile(module_dir / 'LICENSE', directory / 'protobuf-LICENSE')
         (directory / 'modules.txt').write_text(modules)

@@ -5,6 +5,10 @@ based on official `develop` commit `8b39ac9c9cbc312ea1fa948f66b0dc014fd096c1`
 (frontend `636a8d65043f6c6e322f76bcb11e958725159e96`).
 **Incomplete; not yet a compatible replacement for teddyCloud.**
 
+Licensed under the [GNU General Public License version 2](LICENSE)
+(`GPL-2.0-only`), matching teddyCloud's project license. See [NOTICE](NOTICE)
+for upstream attribution and [third-party license notices](docs/licenses.md).
+
 Requires Go 1.26.8. The backend builds with `CGO_ENABLED=0`. External FFmpeg is
 optional for stored audio delivery and required for conversion. Implemented areas
 include configuration/overlays, certificates and listener lifecycle, offline device

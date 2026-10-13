@@ -72,4 +72,41 @@ is preserved and `third_party/Go-LICENSE` accompanies release/container packages
 The protocol port is based on cc3200tool commit
 `c2332898a1ededc0bdd01ec279b23366d213f81e`, GPL-2.0-or-later, used under version 2.
 Allterco Robotics and Team RevvoX attribution is retained in NOTICE. Manufacturer
-loader/firmware binaries remain user-supplied; they are not embedded in Go/WASM.
+loader/firmware binaries remain user-supplied and are excluded from standard
+release/container builds and Go/WASM browser assets. A local native build can
+embed the supplied stock loader using `scripts/build-cc3200-with-loader.py`.
+The binary blob is Git-ignored; its redistribution license is unconfirmed.
+The GPL license of the upstream Python tool is not treated as proof of rights
+to redistribute the TI blob. The BSD license in TI's embedded-programming
+example package covers that package, which does not contain `rbtl3100s.dll`.
+The separate UniFlash v3 license includes restrictions on object-code distribution;
+see [TI's UniFlash licensing information](https://software-dl.ti.com/ccs/esd/uniflash/docs/uniflash.html).
+
+Loader license recheck (2026-10-13): the complete upstream Git history identifies
+[commit e03bb3ad3d4df3d1a8ec0ec94de72a340a7c2a09](https://github.com/toniebox-reverse-engineering/cc3200tool/commit/e03bb3ad3d4df3d1a8ec0ec94de72a340a7c2a09)
+as the update from TI UniFlash **3.4.1.00012**. Its `rbtl3100s.dll` is byte-identical
+to the current pinned 49,588-byte blob, SHA-256
+`2c9a05c469389446e05871a88e84ca3994bf3d6a6785155135db21d33aa63cc9`.
+This establishes TI provenance, not a GPL grant for the blob.
+
+TI's linked [UniFlash v3 license archive](https://software-dl.ti.com/ccs/esd/uniflash/docs/license/UniFlashLicensing.zip)
+was downloaded again and matches the reviewed `287163_UniFlash.DOC`, SHA-256
+`72eded755f1010954d6a481950a10b0b060886f43cc98b42a1eda013f55abd6a`.
+Section 1(a)(ii) limits object-code redistribution to target applications
+executing on TI devices; section 1(f)(iv) restricts other third-party distribution;
+section 1(f)(vii) restricts combinations that subject TI materials to open-source
+license obligations. No loader-specific redistribution exception was found in
+the reviewed upstream history or TI license materials. Whether a host binary
+carrying a separate target-only blob qualifies under the target-application grant
+is not resolved by those sources. Therefore public release embedding remains
+uncleared; changing goTeddyCloud's license to GPLv2 does not resolve that question.
+The optional local embedding build and explicit `--loader` override remain
+available. A loader-specific TI grant or applicable permissive license is needed
+before enabling the blob in standard release builds.
+
+Native command parsing uses `github.com/alecthomas/kong v1.16.1` (MIT); its
+notice is retained in `third_party/kong-COPYING`. Terminal capability detection
+uses `golang.org/x/term v0.47.0` (BSD-3-Clause), with its notice in
+`third_party/x-term-LICENSE`. Both notices accompany release/container packages.
+These modules are linked into the native and integrated CC3200 commands, not
+the browser WebAssembly module.

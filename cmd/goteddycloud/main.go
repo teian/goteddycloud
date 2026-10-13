@@ -38,6 +38,9 @@ func (a *assignments) Set(value string) error {
 var errRestartRequested = errors.New("restart requested")
 
 func main() {
+	if len(os.Args) > 1 && os.Args[1] == "cc3200" {
+		os.Exit(cc3200cli.Main(os.Args[2:], os.Stdout, os.Stderr))
+	}
 	for {
 		err := run()
 		if errors.Is(err, errRestartRequested) {

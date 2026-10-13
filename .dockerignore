@@ -5,6 +5,7 @@
 !cmd/**
 !internal/
 !internal/**
+internal/cc3200cli/loader/rbtl3100s.dll
 !LICENSE
 !NOTICE
 !docs/
@@ -19,3 +20,5 @@
 !third_party/Go-LICENSE
 !third_party/go-serial-LICENSE
 !third_party/x-sys-LICENSE
+!third_party/kong-COPYING
+!third_party/x-term-LICENSE

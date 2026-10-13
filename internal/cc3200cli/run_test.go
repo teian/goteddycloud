@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"goteddycloud/internal/cc3200"
@@ -35,7 +36,7 @@ func TestOfflineCLIReadsExtractsAndPatches(t *testing.T) {
 	image := imageFixture(t)
 	ctx := context.Background()
 	var stdout, stderr bytes.Buffer
-	if err := Run(ctx, []string{"-if", image, "list_filesystem"}, &stdout, &stderr); err != nil {
+	if err := Run(ctx, []string{"-if", image, "list_filesystem", "--json-output"}, &stdout, &stderr); err != nil {
 		t.Fatal(err)
 	}
 	if !bytes.Contains(stdout.Bytes(), []byte("/cert/ca.der")) {
@@ -97,5 +98,82 @@ func TestBulkUploadRejectsSymlinks(t *testing.T) {
 	}
 	if _, err := readDirectory(root); err == nil {
 		t.Fatal("accepted symlink")
+	}
+}
+
+func TestOfflineChainedCommandsAndAnonymousExtraction(t *testing.T) {
+	image := imageFixture(t)
+	data, e := os.ReadFile(image)
+	if e != nil {
+		t.Fatal(e)
+	}
+	binary.LittleEndian.PutUint16(data[0x774:], 0xffff)
+	binary.LittleEndian.PutUint16(data[0x776:], 0xffff)
+	if e = os.WriteFile(image, data, 0600); e != nil {
+		t.Fatal(e)
+	}
+	dir := filepath.Join(t.TempDir(), "extracted")
+	var stdout, stderr bytes.Buffer
+	if e = Run(context.Background(), []string{"-if", image, "read_all_files", dir, "--by-file-id", "read_file", "unused-name", "-", "--file-id", "0"}, &stdout, &stderr); e != nil {
+		t.Fatal(e, stderr.String())
+	}
+	extracted, e := os.ReadFile(filepath.Join(dir, "0"))
+	if e != nil || !bytes.Equal(extracted, []byte{1, 2, 3, 4}) || !bytes.Equal(extracted, stdout.Bytes()) {
+		t.Fatal(extracted, stdout.Bytes(), e)
+	}
+
+	image = imageFixture(t)
+	input := filepath.Join(t.TempDir(), "new.der")
+	if e = os.WriteFile(input, []byte{8, 9}, 0600); e != nil {
+		t.Fatal(e)
+	}
+	output := filepath.Join(t.TempDir(), "patched.bin")
+	stdout.Reset()
+	stderr.Reset()
+	if e = Run(context.Background(), []string{"-if", image, "-of", output, "write_file", input, "/cert/ca.der", "read_file", "/cert/ca.der", "-"}, &stdout, &stderr); e != nil {
+		t.Fatal(e)
+	}
+	if !bytes.Equal(stdout.Bytes(), []byte{8, 9}) {
+		t.Fatal(stdout.Bytes())
+	}
+	patched, e := os.ReadFile(output)
+	if e != nil {
+		t.Fatal(e)
+	}
+	actual, e := cc3200.ImageFile(patched, cc3200.ImageOptions{}, "/cert/ca.der", -1)
+	if e != nil || !bytes.Equal(actual, stdout.Bytes()) {
+		t.Fatal(actual, e)
+	}
+}
+
+func TestChainPreflightPreventsEarlierSideEffects(t *testing.T) {
+	image := imageFixture(t)
+	output := filepath.Join(t.TempDir(), "read.der")
+	var stdout, stderr bytes.Buffer
+	e := Run(context.Background(), []string{"-if", image, "read_file", "/cert/ca.der", output, "write_all_files", "missing-input-directory"}, &stdout, &stderr)
+	if e == nil {
+		t.Fatal("accepted invalid later command")
+	}
+	if _, e = os.Stat(output); !os.IsNotExist(e) {
+		t.Fatal("executed earlier command before completing preflight", e)
+	}
+}
+
+func TestFilesystemHumanAndPythonJSONOutput(t *testing.T) {
+	image := imageFixture(t)
+	var stdout, stderr bytes.Buffer
+	if e := Run(context.Background(), []string{"-if", image, "list_filesystem", "--extended"}, &stdout, &stderr); e != nil {
+		t.Fatal(e)
+	}
+	if stdout.Len() != 0 || !bytes.Contains(stderr.Bytes(), []byte("/cert/ca.der")) || !bytes.Contains(stderr.Bytes(), []byte("BYTES")) {
+		t.Fatal(stdout.String(), stderr.String())
+	}
+	stderr.Reset()
+	if e := Run(context.Background(), []string{"--quiet", "-if", image, "list_filesystem", "--json-output"}, &stdout, &stderr); e != nil {
+		t.Fatal(e)
+	}
+	const want = `{"fat_commit_revision":1,"block_size":4096,"block_count":8,"used_blocks":6,"files":[{"index":0,"start_block":5,"size_blocks":1,"mirrored":false,"flags":12,"fname":"/cert/ca.der","total_blocks":1,"header":null,"magic":null,"size":0}],"holes":[{"start_block":6,"size_blocks":1}]}`
+	if strings.TrimSpace(stdout.String()) != want || stderr.Len() != 0 {
+		t.Fatal(stdout.String(), stderr.String())
 	}
 }
