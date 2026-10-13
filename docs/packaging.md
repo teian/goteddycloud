@@ -17,11 +17,18 @@ The package's visibility is controlled in GitHub Packages, not by this workflow.
 
 To retry only image publishing after a workflow/tooling fix, run **Publish
 release → Run workflow** on the default branch with the existing release tag,
-or `gh workflow run release.yml -f tag=v0.1.0`. This path keeps the published tag
-and binary/package assets unchanged. It builds Docker from the immutable tagged
+or `gh workflow run release.yml -f tag=v0.1.0`. This path keeps the published Git tag
+and binary/package assets unchanged. By default it builds Docker from the immutable tagged
 sources, uses current workflow validation tools, and requires successful push CI
 for that tag's commit. Only the release marked latest by GitHub updates the image's
 `latest` tag; older releases and prereleases keep their version tag only.
+
+To explicitly rebuild an existing image tag from a corrected source commit,
+provide `-f source_ref=FULL_COMMIT_SHA` as well. That commit must have successful
+push CI and its `VERSION` must match the selected release. This replaces only
+the GHCR image tags, preserving the Git release tag and native release assets.
+OCI revision labels record the actual source commit. The default retry path
+continues to use the original tagged sources.
 
 Both `goteddycloud` and standalone `cc3200tool` are built with `CGO_ENABLED=0`:
 
@@ -54,9 +61,10 @@ configured nixpkgs. It is not an upstream nixpkgs submission or a Nix binary cac
 `python3 scripts/build-release.py VERSION` takes one frozen source snapshot and
 writes native archives, a Nix package, dependency notices, build provenance and
 `SHA256SUMS` to `dist/`. Add `--packages --nfpm /path/to/nfpm` to build Linux
-packages; this requires a semantic version such as `v1.2.3`. Frontend assets
-remain separately supplied because their redistribution terms and transitive
-asset notices remain unresolved in [the license inventory](licenses.md).
+packages; this requires a semantic version such as `v1.2.3`. Native packages and
+archives require separately supplied frontend assets. Docker images build and
+include the frontend as described below. Its outstanding upstream licensing
+questions are recorded in [the license inventory](licenses.md).
 Manufacturer DLLs and locally embedded loaders are excluded from
 release snapshots and images; pass the external loader with `--loader` as needed.
 The backend links no C runtime or upstream C libraries. FFmpeg remains external.
@@ -94,10 +102,16 @@ docker buildx build --platform linux/amd64 --target ffmpeg --load -t goteddyclou
 
 The runtime target works without FFmpeg; the ffmpeg target installs the external
 codec package. GHCR release images use the `ffmpeg` target and contain
-linux/amd64, linux/arm/v7 and linux/arm64 in one image index. Supply the Web UI
-separately in the deployment's `data/www` directory (or configure `core.wwwdir`).
-The image does not distribute upstream frontend assets.
-Base image manifests are pinned. Runtime defaults to numeric UID/GID
+linux/amd64, linux/arm/v7 and linux/arm64 in one image index. Both targets build
+the pinned frontend and owned overlay in a Node.js build stage. The resulting
+Web UI is included at `/usr/share/goteddycloud/www/web`, outside the data mount;
+Node.js, Git, Python and npm dependencies are absent from the runtime image.
+The environment variable `GOTEDDYCLOUD_BUNDLED_WWW` selects this read-only
+fallback. A complete custom frontend under the configured `www/web` directory
+overrides it; otherwise `/web` works with an empty named volume or host mount.
+Upgrades replace bundled assets without copying anything into persistent data.
+Attribution and dependency notices are under `/usr/share/doc/goteddycloud/frontend`.
+Base image manifests and the frontend revision are pinned. Runtime defaults to numeric UID/GID
 65532, unprivileged ports 18080/18443/18444, and a persistent /data deployment root.
 For an existing host directory, run under its owning UID/GID or prepare appropriate
 permissions on the copied deployment. Host port mappings are independently chosen.

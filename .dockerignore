@@ -16,6 +16,13 @@ internal/cc3200cli/loader/rbtl3100s.dll
 !packaging/container-root/
 !packaging/container-root/.keep
 !Dockerfile
+!frontend/
+!frontend/upstream-revision
+!frontend/src/
+!frontend/src/**
+!scripts/
+!scripts/prepare-frontend.py
+!scripts/frontend-notices.py
 
 !third_party/Go-LICENSE
 !third_party/go-serial-LICENSE

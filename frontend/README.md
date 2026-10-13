@@ -46,9 +46,21 @@ untouched. Edit `frontend/src/goteddycloud/` rather than the generated stage.
 `install-fixture` accepts only a marked disposable generated deployment. For an
 existing deployment, install the **complete** `.cache/goteddycloud-web/dist/` asset
 build into its configured `www/web/` directory and refresh the browser. These
-assets are independent of the Go binary. Frontend assets are not embedded in Go,
-Docker or release archives; existing upstream asset distribution boundaries
-remain unchanged. See [license inventory](../docs/licenses.md).
+assets are independent of the Go binary. Native release archives still require
+separately installed frontend assets.
+
+Docker builds fetch the revision in `upstream-revision`, apply the same overlay,
+install lockfile-pinned dependencies using Node.js 24 and build the UI. Both the
+`runtime` and `ffmpeg` targets include the result at
+`/usr/share/goteddycloud/www/web`. Node.js and npm dependencies stay in the build
+stage. `GOTEDDYCLOUD_BUNDLED_WWW=/usr/share/goteddycloud/www` enables the server's
+read-only fallback, independently of its data storage backend. A custom
+deployment with `www/web/index.html` overrides the whole bundled build; missing
+custom assets return 404 rather than mixing builds. An empty `/data` host mount
+therefore works without copying assets, and image updates replace the bundled UI.
+Upstream attribution, font notices and installed npm package notices are retained
+under `/usr/share/doc/goteddycloud/frontend`. See the
+[license inventory](../docs/licenses.md) for remaining upstream licensing gaps.
 
 ## Browser verification
 

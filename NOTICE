@@ -8,6 +8,10 @@ Original master baseline: 78c3b38e36f665d3a5fffe907f73a02725176377
 This project's authored code is distributed under GPL-2.0-only (see LICENSE).
 Retain upstream notices on copied schemas and source-derived code.
 Third-party components retain their own licenses; see docs/licenses.md.
+Docker images additionally build teddycloud_web revision
+636a8d65043f6c6e322f76bcb11e958725159e96 with this project's frontend overlay.
+Upstream and npm notices are retained under /usr/share/doc/goteddycloud/frontend.
+The upstream frontend's missing top-level license remains recorded in the inventory.
 No affiliation with or endorsement by the Toniebox manufacturer is implied.
 
 internal/mqtt/box_entities.json, server_settings.json and desired_settings.json

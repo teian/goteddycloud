@@ -15,25 +15,29 @@ source notices; it does not relicense third-party code or assets.
 | protobuf-c | BSD-2-Clause, Dave Benson and authors | src/proto/protobuf-c.c header | Oracle only; generated Go bindings use their own runtime |
 | FatFs | ChaN permissive one-condition notice | fat/LICENSE.txt, fat/source/ff.c | Oracle only; no C filesystem code copied |
 | emsdk | Not populated or reviewed | .gitmodules pinned revision | Excluded WASM toolchain; not distributed |
-| official frontend | No top-level LICENSE or package.json license field at pinned revision | teddycloud_web@e2f40c2c69a3b2b46093ddc5542773dd0fa0067e | Not copied/bundled; distribution license remains unresolved |
-| frontend fonts | SIL OFL 1.1 noted, per-family notices | src/assets/fonts/teddystudio/LICENSES.md | Not copied/bundled |
-| frontend opening guide | CC BY-NC-SA 3.0 referenced; Tobias Isakeit/iFixit attribution | frontend README Attribution and OpenBoxGuide.tsx | Not copied/bundled |
-| frontend logo/icons | Flaticon links, license terms not included in C README | upstream READMEs Attribution | Not copied/bundled; no replacement rights assumed |
-| frontend flags | country-flag-icons v1.5.18 attribution | frontend README Attribution | Not copied/bundled |
-| npm dependencies | Dependency declarations/lock available; transitive notices not yet installed/reviewed | frontend package.json and lock file | Defer bundling until lock-based license audit |
-| FFmpeg | External executable, not vendored; build-dependent license | installed executable's `-version`/`-L` | Optional runtime process; package-specific notice required if bundled later |
+| official frontend | No top-level LICENSE or package.json license field at pinned revision | teddycloud_web@636a8d65043f6c6e322f76bcb11e958725159e96 | Downloaded and built in Docker; upstream distribution license remains unresolved |
+| frontend fonts | SIL OFL 1.1 noted, per-family notices and licenses embedded in font binaries | src/assets/fonts/teddystudio/LICENSES.md | Docker assets; notice retained in image |
+| frontend opening guide | CC BY-NC-SA 3.0 referenced; Tobias Isakeit/iFixit attribution | frontend README Attribution and OpenBoxGuidePage.tsx | Docker assets; original attribution retained |
+| frontend logo/icons | Flaticon links, license terms not included in upstream README | upstream README Attribution | Docker assets; original attribution retained, no replacement rights assumed |
+| frontend flags | country-flag-icons v1.5.18 attribution | frontend README Attribution | Docker assets; original attribution retained |
+| npm dependencies | Per-package license metadata and available LICENSE/LICENCE/COPYING/NOTICE files | lockfile-pinned installed dependencies | Docker build records metadata and copies notices; collection is not a legal compatibility audit |
+| FFmpeg | External executable, not vendored; build-dependent license | installed executable's `-version`/`-L` | Optional native runtime process; Debian package and dependency notices retained in ffmpeg image |
 | Go standard library | Go distribution LICENSE | Go toolchain | Linked according to Go license; include notice in releases |
 
-Before task 6.1 distributes frontend assets, resolve its missing top-level license
-and preserve all per-asset notices; serving an explicitly supplied frontend path
-can be developed without adding those assets to this repository. Do not infer
-frontend licensing from the backend GPL text. No frontend assets or manufacturer
-audio/firmware/client keys are included by this initial implementation.
+Docker builds fetch the revision recorded in `frontend/upstream-revision`, apply
+the project's overlay, and include compiled frontend assets. Native binary
+archives still omit those assets. The image preserves the upstream README,
+font notices, source revision, package manifests/lockfile and installed npm
+package notices under `/usr/share/doc/goteddycloud/frontend` using
+`scripts/frontend-notices.py`. This records provenance and available notices;
+it does not resolve the missing upstream top-level license or establish
+redistribution permission. Do not infer frontend licensing from the backend's
+GPL text. Manufacturer audio, firmware and client keys remain excluded.
 
 Any added Go module must be pinned in go.mod/go.sum and added to this inventory
-before release packaging. License inventory is complete for the currently used
-components; frontend redistribution and its transitive asset audit remain an
-explicit task 6.1 prerequisite.
+before release packaging. Frontend redistribution terms and a full transitive
+asset license audit remain unresolved, independently of the implemented Docker
+packaging.
 
 Added Go module: `google.golang.org/protobuf v1.36.12`, observed BSD-3-Clause
 notice, Copyright (c) 2018 The Go Authors. Module LICENSE must accompany packaged

@@ -4,9 +4,11 @@ package app
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -54,11 +56,22 @@ func (s *Server) static(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if s.www == nil {
+	root := s.www
+	web := path == "/web" || strings.HasPrefix(path, "/web/")
+	if web && s.bundledWWW != nil {
+		// Select one complete build for both the index and its hashed assets.
+		// Never mix a deployment's custom frontend with the bundled build.
+		if root == nil {
+			root = s.bundledWWW
+		} else if _, err := root.Stat("web/index.html"); errors.Is(err, os.ErrNotExist) {
+			root = s.bundledWWW
+		}
+	}
+	if root == nil {
 		referenceNotFound(w)
 		return
 	}
-	if strings.HasPrefix(path, "/web") && (path == "/web" || strings.HasSuffix(path, "/") || !strings.Contains(path, ".")) {
+	if web && (path == "/web" || strings.HasSuffix(path, "/") || !strings.Contains(path, ".")) {
 		path = "/web/index.html"
 	}
 	name := strings.TrimPrefix(path, "/")
@@ -66,7 +79,11 @@ func (s *Server) static(w http.ResponseWriter, r *http.Request) {
 		referenceNotFound(w)
 		return
 	}
-	file, err := s.www.Open(name)
+	if root == s.bundledWWW && !strings.HasPrefix(filepath.ToSlash(filepath.Clean(name)), "web/") {
+		referenceNotFound(w)
+		return
+	}
+	file, err := root.Open(name)
 	if err != nil {
 		referenceNotFound(w)
 		return

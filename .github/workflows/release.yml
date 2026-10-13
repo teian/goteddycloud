@@ -9,6 +9,10 @@ on:
         description: Existing published release tag to retry GHCR publishing
         required: true
         type: string
+      source_ref:
+        description: Optional CI-verified commit to rebuild this image tag (native release assets stay unchanged)
+        required: false
+        type: string
 
 env:
   RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
@@ -111,11 +115,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Check out immutable released sources
+      - name: Check out image sources
         id: source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ env.RELEASE_TAG }}
+          ref: ${{ inputs.source_ref || env.RELEASE_TAG }}
           path: .cache/release-docker-source
           persist-credentials: false
       - name: Validate the release and retry prerequisites
@@ -204,6 +208,8 @@ jobs:
           docker run --rm goteddycloud:release-test -base_path /data \
             -http :18080 -httpsecure :18443 -box :18444 -docker-test
           docker run --rm --entrypoint ffmpeg goteddycloud:release-test -version
+      - name: Check bundled Web UI with a volume and an empty host mount
+        run: python3 scripts/container-webui-smoke.py --image goteddycloud:release-test
       - name: Publish verified architecture builds
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:

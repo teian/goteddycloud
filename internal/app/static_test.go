@@ -7,9 +7,73 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 )
+
+func TestBundledWebUIWithCustomDeploymentOverride(t *testing.T) {
+	bundle := t.TempDir()
+	if err := os.Mkdir(filepath.Join(bundle, "web"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	for name, data := range map[string]string{
+		"web/index.html": "<html><head></head><body>bundled UI</body></html>",
+		"web/bundle.js":  "bundled script",
+		"private.txt":    "outside web namespace",
+	} {
+		if err := os.WriteFile(filepath.Join(bundle, name), []byte(data), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	t.Setenv("GOTEDDYCLOUD_BUNDLED_WWW", bundle)
+	s := fixtureApp(t)
+	www := s.Settings.String("", "internal.wwwdirfull")
+	if err := os.Remove(filepath.Join(www, "web/index.html")); err != nil {
+		t.Fatal(err)
+	}
+	for _, path := range []string{"/web", "/web/", "/web/settings/users"} {
+		reply := perform(s, "GET", path, nil, false)
+		if reply.Code != 200 || !strings.Contains(reply.Body.String(), "bundled UI") || !strings.Contains(reply.Body.String(), "<base href=") {
+			t.Fatalf("%s: %d %s", path, reply.Code, reply.Body.String())
+		}
+	}
+	if reply := perform(s, "GET", "/web/bundle.js", nil, false); reply.Code != 200 || reply.Body.String() != "bundled script" {
+		t.Fatal(reply)
+	}
+	for _, path := range []string{"/private.txt", "/webfoo", "/web/missing.js"} {
+		if reply := perform(s, "GET", path, nil, false); reply.Code != 404 {
+			t.Fatalf("%s: unexpected status %d", path, reply.Code)
+		}
+	}
+	if reply := perform(s, "GET", "/web/../private.txt", nil, false); reply.Code != http.StatusBadRequest {
+		t.Fatal("traversal accepted", reply)
+	}
+	if reply := perform(s, "GET", "/web", nil, true); reply.Code != 404 {
+		t.Fatal("bundle served on device listener")
+	}
+	if err := os.WriteFile(filepath.Join(www, "web/index.html"), []byte("custom UI"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if reply := perform(s, "GET", "/web/settings/users", nil, false); reply.Code != 200 || reply.Body.String() != "custom UI" {
+		t.Fatal("custom deployment did not override bundle", reply)
+	}
+	if reply := perform(s, "GET", "/web/bundle.js", nil, false); reply.Code != 404 {
+		t.Fatal("mixed custom and bundled builds", reply)
+	}
+	// A deployment without any www directory also uses the read-only bundle.
+	if err := os.RemoveAll(www); err != nil {
+		t.Fatal(err)
+	}
+	empty, err := New(s.Settings)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer empty.Close()
+	if reply := perform(empty, "GET", "/web", nil, false); reply.Code != 200 || !strings.Contains(reply.Body.String(), "bundled UI") {
+		t.Fatal(reply)
+	}
+}
 
 func TestStaticSPAMIMEAndConfinement(t *testing.T) {
 	s := fixtureApp(t)

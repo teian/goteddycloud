@@ -12,9 +12,9 @@ for upstream attribution and [third-party license notices](docs/licenses.md).
 ## Docker Compose usage
 
 The [Compose example](docker-compose.yml) uses the versioned GHCR image. Docker
-selects amd64, ARMv7 or arm64 automatically. Configuration, certificates, web
-assets and audio persist in a named volume. The image runs as UID/GID 65532 and
-includes FFmpeg.
+selects amd64, ARMv7 or arm64 automatically. Configuration, certificates and
+audio persist in a named volume. The image runs as UID/GID 65532 and includes
+FFmpeg and the integrated Web UI.
 
 ```sh
 cp .env.example .env
@@ -38,21 +38,25 @@ Stop a native test instance using the same ports, or select unused host ports.
 An external TCP proxy may forward the chosen box port to the loopback binding.
 The box listener uses legacy name-based identity; restrict it to trusted networks.
 
-The release image does not bundle the upstream Web UI while its redistribution
-terms remain unresolved. To build and install the pinned frontend with this
-project's UI additions, use Bash, Git, Python 3 and Node.js 24 on the host
-(for example through WSL on Windows):
+Images built from these sources include the pinned frontend with this project's
+UI additions. Open `http://127.0.0.1:18081/web/`; no separate frontend installation
+is needed. The assets live at `/usr/share/goteddycloud/www/web`, outside `/data`,
+so both named volumes and host directory mounts work and image upgrades update
+the bundled UI. Existing containers need a fresh image pull and recreation to
+use the updated image.
+
+To build and use the updated image locally:
 
 ```sh
-scripts/reference.sh prepare
-scripts/frontend.sh build
-docker compose exec goteddycloud mkdir -p /data/data/www/web
-docker compose cp .cache/goteddycloud-web/dist/. goteddycloud:/data/data/www/web/
+docker build --target ffmpeg -t goteddycloud:local .
+GOTEDDYCLOUD_IMAGE=goteddycloud:local docker compose up -d
 ```
 
-Then open `http://127.0.0.1:18081/web/`. Alternatively copy your own built web
-assets to the same container directory. Repeat the copy when updating frontend
-assets; the persistent volume retains its files across image upgrades.
+A complete custom frontend in `/data/data/www/web` (or the configured
+`core.wwwdir`'s `web` subdirectory) overrides the bundled UI. Its `index.html` and
+assets are served together. Remove that custom build to resume using the image's
+UI. Source attribution and dependency notices are retained in the image; see the
+[frontend license inventory](docs/licenses.md) for unresolved upstream terms.
 
 In **Settings → Users and areas**, create the first administrator while access is
 private, then enable **Require web login**. Login is off by default. Use a trusted

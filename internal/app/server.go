@@ -62,6 +62,7 @@ type Server struct {
 	reverseSlots      chan struct{}
 	reverseRequests   atomic.Uint64
 	www               *storage.Root
+	bundledWWW        *storage.Root
 	Cloud             upstream
 	MetadataHTTP      *http.Client
 	metadataUpdate    chan struct{}
@@ -101,6 +102,15 @@ func New(settings *config.Store) (*Server, error) {
 		Events:       hub,
 		Boxes:        boxstate.New(hub),
 		trackExports: make(chan struct{}, maxConcurrentTrackExports),
+	}
+	// Container assets live outside the writable data mount. Keep the local
+	// bundle independent of the configured storage backend (including S3).
+	if path := os.Getenv("GOTEDDYCLOUD_BUNDLED_WWW"); path != "" {
+		server.bundledWWW, err = storage.Open(path)
+		if err != nil {
+			server.Close()
+			return nil, fmt.Errorf("bundled web assets: %w", err)
+		}
 	}
 	if err := server.loadWebUsers(); err != nil {
 		server.Close()
@@ -161,6 +171,9 @@ func (s *Server) Close() error {
 	}
 	if s.www != nil {
 		err = errors.Join(err, s.www.Close())
+	}
+	if s.bundledWWW != nil {
+		err = errors.Join(err, s.bundledWWW.Close())
 	}
 	if s.cacheRoot != nil {
 		err = errors.Join(err, s.cacheRoot.Close())

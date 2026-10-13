@@ -1,4 +1,17 @@
 # syntax=docker/dockerfile:1
+FROM --platform=$BUILDPLATFORM node:24-bookworm-slim@sha256:d6aa754f16b3197301076f047b5def2f02ea1dbbc2ca920407d46d7ec7f87b20 AS frontend
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates git python3 && rm -rf /var/lib/apt/lists/*
+WORKDIR /src
+COPY frontend/upstream-revision frontend/upstream-revision
+RUN git init /upstream && git -C /upstream remote add origin https://github.com/toniebox-reverse-engineering/teddycloud_web.git && \
+    git -C /upstream fetch --depth=1 origin "$(cat frontend/upstream-revision)" && git -C /upstream checkout --detach FETCH_HEAD
+COPY scripts/prepare-frontend.py scripts/frontend-notices.py scripts/
+COPY frontend/src frontend/src
+RUN python3 scripts/prepare-frontend.py /upstream
+WORKDIR /src/.cache/goteddycloud-web
+RUN --mount=type=cache,target=/root/.npm npm ci --ignore-scripts --no-audit --no-fund
+RUN npm run build && python3 /src/scripts/frontend-notices.py . /out/frontend-notices
+
 FROM --platform=$BUILDPLATFORM golang:1.26.8-bookworm@sha256:dc9ad6c05acc7a88e5b71bde60a5fe3bd4b9f0db209011711b464107438a8107 AS build
 ARG TARGETOS
 ARG TARGETARCH
@@ -17,8 +30,11 @@ FROM debian:bookworm-slim@sha256:7c7b2c966bc9ee8cedfeef67e0e279108992c77681fa595
 COPY --from=build /out/goteddycloud /usr/local/bin/goteddycloud
 COPY --from=build /go/pkg/mod/google.golang.org/protobuf@v1.36.12/LICENSE /usr/share/doc/goteddycloud/protobuf-LICENSE
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=frontend /src/.cache/goteddycloud-web/dist/ /usr/share/goteddycloud/www/web/
+COPY --from=frontend /out/frontend-notices/ /usr/share/doc/goteddycloud/frontend/
 COPY LICENSE NOTICE docs/licenses.md third_party/libopus-COPYING third_party/Go-LICENSE third_party/go-serial-LICENSE third_party/x-sys-LICENSE third_party/kong-COPYING third_party/x-term-LICENSE /usr/share/doc/goteddycloud/
 COPY --chown=65532:65532 packaging/container-root/ /data/
+ENV GOTEDDYCLOUD_BUNDLED_WWW=/usr/share/goteddycloud/www
 WORKDIR /data
 USER 65532:65532
 VOLUME ["/data"]
