@@ -177,6 +177,10 @@ func TestTrackExportLimitBelongsToServer(t *testing.T) {
 
 func TestConcurrentUserChangesRetainAllSuccessfulWrites(t *testing.T) {
 	server := fixtureApp(t)
+	admin := accessClient{t: t, server: server}
+	admin.call("POST", "/api/auth/users/create", `{"username":"admin","password":"secret"}`, 200)
+	admin.call("POST", "/api/auth/enabled", `{"enabled":true}`, 200)
+	admin = admin.login("admin")
 	const count = 12
 	var workers sync.WaitGroup
 	statuses := make(chan int, count)
@@ -185,6 +189,7 @@ func TestConcurrentUserChangesRetainAllSuccessfulWrites(t *testing.T) {
 		go func() {
 			defer workers.Done()
 			request := httptest.NewRequest("POST", "/api/auth/users/create", strings.NewReader(fmt.Sprintf(`{"username":"user%d","password":"secret"}`, index)))
+			request.Header.Set("Authorization", "Bearer "+admin.token)
 			response := httptest.NewRecorder()
 			server.Management(response, request)
 			statuses <- response.Code
@@ -201,7 +206,7 @@ func TestConcurrentUserChangesRetainAllSuccessfulWrites(t *testing.T) {
 	if err := reloaded.loadWebUsers(); err != nil {
 		t.Fatal(err)
 	}
-	if len(reloaded.auth.users) != count {
+	if len(reloaded.auth.users) != count+1 {
 		t.Fatalf("lost concurrent writes: %d users", len(reloaded.auth.users))
 	}
 }

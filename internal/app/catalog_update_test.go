@@ -149,12 +149,26 @@ func TestStartupCatalogUpdatesAndCORS(t *testing.T) {
 			t.Fatal("startup update timeout")
 		}
 	}
+	// Receiving the second request does not mean its response has been saved.
+	// Keep the integration context alive until the update is published.
+	boxPath := filepath.Join(s.Settings.Snapshot("").String("internal.configdirfull"), "tonieboxes.json")
+	deadline := time.Now().Add(3 * time.Second)
+	for {
+		data, err := os.ReadFile(boxPath)
+		if err == nil && bytes.Contains(data, []byte("STARTUP")) {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("startup box catalog was not published", err)
+		}
+		time.Sleep(time.Millisecond)
+	}
 	cancel()
 	s.integrations.Wait()
 	if s.Catalog.ByModel("STARTUP") == nil {
 		t.Fatal("startup catalog missing")
 	}
-	boxData, err := os.ReadFile(filepath.Join(s.Settings.Snapshot("").String("internal.configdirfull"), "tonieboxes.json"))
+	boxData, err := os.ReadFile(boxPath)
 	if err != nil || !bytes.Contains(boxData, []byte("STARTUP")) {
 		t.Fatal(string(boxData), err)
 	}
