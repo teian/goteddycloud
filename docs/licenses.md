@@ -8,6 +8,7 @@ source notices; it does not relicense third-party code or assets.
 | Component | Observed notice | Location in pinned oracle | Use in Go project |
 | --- | --- | --- | --- |
 | teddyCloud | GNU GPL version 2 | LICENSE | Behavioral reference, attributed schema/logic derivation |
+| teddyCloud placeholder images | Repository GPL version 2; no separate asset notice found | contrib/data/www/img_{unknown,custom,empty}.png at 8b39ac9c9cbc312ea1fa948f66b0dc014fd096c1 | Verbatim backend placeholders embedded in internal/app/static_images; upstream attribution retained in NOTICE |
 | Cyclone Common/Crypto/SSL/TCP | GPL-2.0-or-later in source headers | cyclone/*/LICENSE and source headers | Oracle only; not linked or bundled |
 | cJSON | MIT, Dave Gamble and contributors | cJSON/LICENSE | Oracle only |
 | libogg | BSD-style three-clause, Xiph.Org | ogg/COPYING | Oracle only |

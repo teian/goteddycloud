@@ -3,6 +3,7 @@ package app
 
 import (
 	"bytes"
+	"image/png"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -11,6 +12,48 @@ import (
 	"testing"
 	"time"
 )
+
+func TestDefaultTonieImagesWithoutDeploymentAssets(t *testing.T) {
+	s := fixtureApp(t)
+	www := s.Settings.String("", "internal.wwwdirfull")
+	checkImages := func(server *Server) {
+		t.Helper()
+		for _, path := range []string{"/img_unknown.png", "/img_custom.png", "/img_empty.png"} {
+			reply := perform(server, "GET", path, nil, false)
+			if reply.Code != 200 || reply.Header().Get("Content-Type") != "image/png" {
+				t.Fatal(path, reply.Code, reply.Header())
+			}
+			if _, err := png.Decode(bytes.NewReader(reply.Body.Bytes())); err != nil {
+				t.Fatal("invalid placeholder", path, err)
+			}
+			if reply := perform(server, "GET", path, nil, true); reply.Code != 404 {
+				t.Fatal("placeholder exposed on the device listener", reply.Code)
+			}
+		}
+	}
+	checkImages(s)
+	custom := []byte("deployment placeholder")
+	if err := os.WriteFile(filepath.Join(www, "img_unknown.png"), custom, 0600); err != nil {
+		t.Fatal(err)
+	}
+	if reply := perform(s, "GET", "/img_unknown.png", nil, false); reply.Code != 200 || !bytes.Equal(reply.Body.Bytes(), custom) {
+		t.Fatal("custom placeholder overridden", reply)
+	}
+	if err := os.RemoveAll(www); err != nil {
+		t.Fatal(err)
+	}
+	withoutWWW, err := New(s.Settings)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer withoutWWW.Close()
+	checkImages(withoutWWW)
+	for _, path := range []string{"/img_private.png", "/static_images/img_unknown.png", "/web/img_unknown.png"} {
+		if reply := perform(withoutWWW, "GET", path, nil, false); reply.Code != 404 {
+			t.Fatal("unexpected image path exposed", path, reply.Code)
+		}
+	}
+}
 
 func TestBundledWebUIWithCustomDeploymentOverride(t *testing.T) {
 	bundle := t.TempDir()

@@ -85,6 +85,14 @@ its redirects to the official GitHub mirror. Failed updates retain existing
 catalogs; a fresh deployment has none until a download succeeds. The warning's
 `error` field distinguishes a rejected HTTP response from transfer or catalog errors.
 
+Tonie titles and pictures are matched against this catalog using the audio ID
+reported by the box's freshness check, even when its audio is already on the
+box's SD card and has never been downloaded to goTeddyCloud. Reported IDs are
+retained so a later catalog update can resolve previously unknown tags. After
+upgrading, let the box sync again, then reload the Tonies page. A tag UID alone
+does not identify its title; special audio ID 1 requires a local audio header/hash
+or a manually assigned model. Existing model assignments are preserved.
+
 The UI reads `/api/cloud/status`, which reports disabled or unavailable cloud
 access as HTTP 200 status data. The local `/api/time` clock remains independent.
 Raw `/reverse/v1/time` requests still proxy the upstream Tonie cloud and need a

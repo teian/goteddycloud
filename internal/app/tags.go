@@ -208,10 +208,16 @@ func (s *Server) tagInfo(ctx context.Context, snap config.Snapshot, id, uid stri
 			sourceModel = item.String("model")
 		}
 	}
-	if m.String("tonie_model") == "" && sourceModel != "" {
+	model := sourceModel
+	if header == nil {
+		if item := s.boxAudioModel(boxAudioID(m)); item != nil {
+			model = item.String("model")
+		}
+	}
+	if m.String("tonie_model") == "" && model != "" {
 		if err := s.Content.UpdateContext(ctx, snap, uid, func(current content.Metadata) error {
 			if current.String("tonie_model") == "" {
-				current.Set("tonie_model", sourceModel)
+				current.Set("tonie_model", model)
 			}
 			return nil
 		}); err != nil {
@@ -246,6 +252,41 @@ func (s *Server) tagInfo(ctx context.Context, snap config.Snapshot, id, uid stri
 		info["sourceInfo"] = s.tonieDescription(ctx, s.Catalog.ByModel(sourceModel), sourceModel)
 	}
 	return info, nil
+}
+
+func boxAudioID(m content.Metadata) uint32 {
+	var id uint32
+	_ = json.Unmarshal(m["box_audio_id"], &id)
+	return id
+}
+
+func (s *Server) boxAudioModel(id uint32) catalog.Entry {
+	// Audio ID 1 is shared by special/custom content; only its TAF hash can
+	// identify a model. Zero means the box has no usable audio ID yet.
+	if id <= 1 {
+		return nil
+	}
+	id, _ = normalizedAudioID(id)
+	return s.Catalog.ByAudio(id, nil)
+}
+
+func (s *Server) rememberBoxAudio(ctx context.Context, snap config.Snapshot, uid string, m content.Metadata, audioID uint32) {
+	model := ""
+	if item := s.boxAudioModel(audioID); item != nil {
+		model = item.String("model")
+	}
+	if boxAudioID(m) == audioID && (model == "" || m.String("tonie_model") != "") {
+		return
+	}
+	// Retain the audio ID even while the catalog is unavailable. tagInfo can
+	// resolve it after a catalog update, without another box request or download.
+	_ = s.Content.UpdateContext(ctx, snap, uid, func(current content.Metadata) error {
+		current.Set("box_audio_id", audioID)
+		if current.String("tonie_model") == "" && model != "" {
+			current.Set("tonie_model", model)
+		}
+		return nil
+	})
 }
 
 func (s *Server) tonieboxesJSON(w http.ResponseWriter, r *http.Request) {

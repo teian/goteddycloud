@@ -541,6 +541,10 @@ func (s *Server) localFreshnessContext(ctx context.Context, id string, snap conf
 				}
 			}
 			marked = marked || updated
+		} else {
+			// A box can already have the audio on its SD card, so no content
+			// download (and hence no local TAF header) is needed for recognition.
+			s.rememberBoxAudio(ctx, snap, ruid, metadata, info.GetAudioId())
 		}
 		if marked {
 			reply.TonieMarked = append(reply.TonieMarked, info.GetUid())

@@ -68,6 +68,9 @@ func (s *Server) static(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if root == nil {
+		if serveDefaultImage(w, r, path) {
+			return
+		}
 		referenceNotFound(w)
 		return
 	}
@@ -85,6 +88,9 @@ func (s *Server) static(w http.ResponseWriter, r *http.Request) {
 	}
 	file, err := root.Open(name)
 	if err != nil {
+		if errors.Is(err, os.ErrNotExist) && serveDefaultImage(w, r, path) {
+			return
+		}
 		referenceNotFound(w)
 		return
 	}
