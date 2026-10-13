@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -88,5 +89,19 @@ func TestObserveFilesEventsAndLimits(t *testing.T) {
 func TestMatchingMissingRoutesCannotPassSuccessCase(t *testing.T) {
 	if err := Compare(Case{Kind: "bytes", ExpectedStatus: 200}, Observation{Status: 404}, Observation{Status: 404}); err == nil {
 		t.Fatal("matching 404 passed success case")
+	}
+}
+
+func TestSettingsIndexOnlyNormalizesAssertedSecurityText(t *testing.T) {
+	left := `{"options":[{"ID":"core.allowNewBox","description":"Allow new boxes to be added, if they try to connect","value":true}]}`
+	right := `{"options":[{"ID":"core.allowNewBox","description":"Allow boxes with an already imported, exactly matching client certificate to create an overlay when connecting. Unknown certificates are always rejected.","value":true}]}`
+	c := Case{Kind: "settings-index"}
+	if err := Compare(c, Observation{Body: []byte(left)}, Observation{Body: []byte(right)}); err != nil {
+		t.Fatal(err)
+	}
+	for _, changed := range []string{strings.Replace(right, `"value":true`, `"value":false`, 1), strings.Replace(right, "Unknown certificates are always rejected.", "Unknown certificates are accepted.", 1)} {
+		if Compare(c, Observation{Body: []byte(left)}, Observation{Body: []byte(changed)}) == nil {
+			t.Fatal("unexpected setting change normalized away")
+		}
 	}
 }

@@ -189,7 +189,7 @@ func Compare(c Case, a, b Observation) error {
 		if !bytes.Equal(left, right) {
 			return errors.New("SSE names, values or sequence differ")
 		}
-	case "json":
+	case "json", "settings-index":
 		decode := func(data []byte) (any, error) {
 			d := json.NewDecoder(bytes.NewReader(data))
 			d.UseNumber()
@@ -209,6 +209,11 @@ func Compare(c Case, a, b Observation) error {
 		right, err := decode(b.Body)
 		if err != nil {
 			return fmt.Errorf("candidate JSON: %w", err)
+		}
+		if c.Kind == "settings-index" {
+			if err := normalizeCertificateLabels(left, right); err != nil {
+				return err
+			}
 		}
 		if !reflect.DeepEqual(left, right) {
 			return errors.New("JSON values differ")
@@ -254,6 +259,56 @@ func Compare(c Case, a, b Observation) error {
 		}
 	default:
 		return fmt.Errorf("unknown comparison kind %q", c.Kind)
+	}
+	return nil
+}
+
+// Assert the exact documented security text before normalizing display fields.
+// Settings values, defaults, visibility and every other field remain compared.
+func normalizeCertificateLabels(left, right any) error {
+	index := func(value any) (map[string]map[string]any, error) {
+		object, ok := value.(map[string]any)
+		if !ok {
+			return nil, errors.New("settings index object missing")
+		}
+		rows, ok := object["options"].([]any)
+		if !ok {
+			return nil, errors.New("settings index options missing")
+		}
+		out := map[string]map[string]any{}
+		for _, item := range rows {
+			row, ok := item.(map[string]any)
+			if !ok {
+				return nil, errors.New("invalid settings row")
+			}
+			id, ok := row["ID"].(string)
+			if !ok || out[id] != nil {
+				return nil, errors.New("invalid or duplicate settings ID")
+			}
+			out[id] = row
+		}
+		return out, nil
+	}
+	a, err := index(left)
+	if err != nil {
+		return err
+	}
+	b, err := index(right)
+	if err != nil {
+		return err
+	}
+	for _, label := range []struct{ id, field, old, new string }{
+		{"core.allowNewBox", "description", "Allow new boxes to be added, if they try to connect", "Allow boxes with an already imported, exactly matching client certificate to create an overlay when connecting. Unknown certificates are always rejected."},
+		{"core.boxCertAuth", "description", "Client certificates are required for access to the HTTPS API for the boxes", "Legacy compatibility setting. Box API and RTNL always require an exact locally imported client certificate; false no longer disables authentication."},
+		{"core.boxCertAuth", "label", "HTTPS box cert auth", "Box certificate auth (always required)"},
+	} {
+		if a[label.id] == nil && b[label.id] == nil {
+			continue
+		}
+		if a[label.id] == nil || b[label.id] == nil || a[label.id][label.field] != label.old || b[label.id][label.field] != label.new {
+			return errors.New("unexpected box security setting label")
+		}
+		b[label.id][label.field] = label.old
 	}
 	return nil
 }

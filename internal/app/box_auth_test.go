@@ -6,6 +6,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"crypto/rsa"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
@@ -161,7 +162,11 @@ func TestBoxCertificateAuthenticationAndRevocation(t *testing.T) {
 	renewed := pair
 	renewed.Certificate = [][]byte{renewedDER}
 	wrongKey := pair
-	wrongKey.PrivateKey = key
+	wrongPrivate, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		t.Fatal(err)
+	}
+	wrongKey.PrivateKey = wrongPrivate
 	for _, tc := range []struct {
 		name string
 		pair *tls.Certificate

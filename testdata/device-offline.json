@@ -78,7 +78,7 @@
     "method": "GET",
     "path": "/api/settings/getIndex",
     "body": "",
-    "kind": "json",
+    "kind": "settings-index",
     "headers": [
       "Content-Type"
     ],
