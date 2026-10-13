@@ -3,7 +3,7 @@
 import argparse, sys, shutil, contextlib, http.client, json, os, pathlib, signal, socket, subprocess, time, zipfile, io
 workspace=pathlib.Path(__file__).resolve().parents[1]
 reference=workspace/'.cache/teddycloud-develop-reference'
-parser=argparse.ArgumentParser();parser.add_argument('--stage',default='.cache/develop-rehearsal');mode=parser.add_mutually_exclusive_group();mode.add_argument('--hardening-only',action='store_true');mode.add_argument('--api-only',action='store_true',help='compare auth, JSON and track exports without rerunning the hardware simulator');args=parser.parse_args()
+parser=argparse.ArgumentParser();parser.add_argument('--stage',default='.cache/develop-rehearsal');parser.add_argument('--go-binary',default=str(workspace/'bin/goteddycloud'));mode=parser.add_mutually_exclusive_group();mode.add_argument('--hardening-only',action='store_true');mode.add_argument('--api-only',action='store_true',help='compare auth, JSON and track exports without rerunning the hardware simulator');args=parser.parse_args()
 stage=workspace/args.stage
 assert not stage.exists(), 'use a fresh rehearsal directory'
 stage.mkdir()
@@ -16,7 +16,7 @@ def req(port,method,path,body=None,token=None):
  c=http.client.HTTPConnection('127.0.0.1',port,timeout=30);c.request(method,path,body,headers);r=c.getresponse();result=(r.status,dict(r.getheaders()),r.read());c.close();return result
 processes=[];targets=[]
 try:
- for name,binary in [('C',reference/'bin/teddycloud'),('Go',workspace/'bin/goteddycloud')]:
+ for name,binary in [('C',reference/'bin/teddycloud'),('Go',pathlib.Path(args.go_binary).resolve())]:
   root=stage/name;subprocess.run(['go','run','-buildvcs=false','./cmd/fixturegen','-output',str(root)],cwd=workspace,check=True,capture_output=True)
   if name=='C':
    subprocess.run([str(reference/'bin/teddycloud'),'--base_path',str(root)+'/', '--encode',str(root/'data/library/synthetic.taf'),str(root/'tone1.wav'),str(root/'tone2.wav')],check=True,stdout=(stage/(name+'-encode.log')).open('w'),stderr=subprocess.STDOUT)
@@ -84,7 +84,8 @@ try:
    subprocess.run(['openssl','rsa','-inform','DER','-in',str(identity/'private.der'),'-out',str(identity/'private.pem')],check=True,capture_output=True)
    env['TEDDYCLOUD_CLIENT_CERT']=str(identity/'client.pem');env['TEDDYCLOUD_CLIENT_KEY']=str(identity/'private.pem')
   if args.hardening_only:tests=['test_auth_pool_reuse.py','test_hardening.py::Settings528','test_hardening.py::Secrets505','test_hardening.py::PrivateFetch']
-  if name=='Go':env['PYTHONPATH']=str(workspace/'scripts');env['PYTEST_PLUGINS']='develop_pytest_policy'
+  env['PYTHONPATH']=str(workspace/'scripts')
+  env['PYTEST_PLUGINS']='develop_pytest_policy' if name=='Go' else 'develop_reference_policy'
   subprocess.run([sys.executable,'-m','pytest','-xq']+[str(reference/'tests/py'/t) for t in tests],cwd=workspace,env=env,check=True)
   print('PASS',name,'upstream develop tests',flush=True)
 finally:
