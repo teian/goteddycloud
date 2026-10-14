@@ -199,6 +199,16 @@ When requested, the full raw backup remains verified even with `--no-verify`.
 unless `--no-verify` is selected. `read_all_files` skips `/sys/servicepack.ucf`,
 matching the upstream extraction blacklist.
 
+Named extraction saves `/cert/ca.der`, `/cert/private.der`, `/cert/client.der`,
+`/sys/mcuimg.bin`, `/sys/mcuimg1.bin`, `/sys/mcuimg2.bin`, `/sys/mcuimg3.bin`
+and `/sys/mcubootinfo.bin` first. Live named extraction also queries these paths
+when their names are absent from the FAT. Files reported as nonexistent by the
+device API (such as stale `/sys/pref.net` entries) are reported and skipped so
+later files are still extracted. An unavailable priority file listed in the FAT
+causes an error after the remaining files have been saved. Transport errors and
+read verification failures stop extraction immediately. Existing output files
+are still never overwritten; use an empty destination for a fresh extraction.
+
 ```sh
 bin/goteddycloud cc3200 --port /dev/ttyUSB0 --loader rbtl3100s.dll \
   --yes --backup before-write.bin write_file new-ca.der /cert/ca.der
@@ -255,3 +265,12 @@ verification. The user also reported a verified 15,791-byte HackieboxNG preloade
 write to `/sys/mcuimg.bin`. The embedded stock loader was then tested without a
 `--loader` argument. No post-install boot/playback or complete browser installation
 is claimed; the broader physical acceptance gates remain pending.
+
+On 2026-10-14, the native command
+`bin/cc3200tool -g --gateway-tx=21 --gateway-rx=20 read_all_files ExtractedFromBox/`
+completed on this gateway/CC3200 setup. All eight priority paths above were
+extracted and verified by two matching device API reads, with mode 0600 outputs.
+Extraction continued after the device reported `/sys/pref.net` as nonexistent
+and saved all 22 available files; `/sys/servicepack.ucf` remained blacklisted.
+A separate `read_flash backup.bin` then saved the complete 4 MiB flash after
+two matching reads.

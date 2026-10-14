@@ -13,7 +13,6 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"time"
 
 	"goteddycloud/internal/cc3200"
@@ -410,48 +409,7 @@ func execute(ctx context.Context, o options, op operation, client *cc3200.Client
 		if e != nil {
 			return e
 		}
-		root, e := openExtractionDirectory(op.args[0])
-		if e != nil {
-			return e
-		}
-		defer root.Close()
-		for _, entry := range manifest.Entries {
-			if e = ctx.Err(); e != nil {
-				return e
-			}
-			if entry.Name == "/sys/servicepack.ucf" {
-				t.status("Skipping /sys/servicepack.ucf (upstream extraction blacklist)")
-				continue
-			}
-			name, id := strings.TrimPrefix(entry.Name, "/"), -1
-			if op.allByID || entry.Name == "" && op.byID {
-				name = fmt.Sprint(entry.ID)
-				id = entry.ID
-			} else if entry.Name == "" {
-				return fmt.Errorf("file ID %d has no name; use --by-file-id", entry.ID)
-			}
-			t.status(fmt.Sprintf("Extracting file %d: %q", entry.ID, name))
-			data, e := readFile(entry.Name, id)
-			if e != nil {
-				return e
-			}
-			if !offline && !op.noVerify {
-				t.status("Verifying extracted file with a second read")
-				again, e := readFile(entry.Name, id)
-				if e != nil {
-					return e
-				}
-				if !bytes.Equal(data, again) {
-					return errors.New("file backup verification failed")
-				}
-			}
-			if e = ctx.Err(); e != nil {
-				return e
-			}
-			if e = writeRootFile(root, name, data); e != nil {
-				return e
-			}
-		}
+		return extractFiles(ctx, manifest.Entries, op, offline, readFile, t)
 	case "write_file":
 		return writeFile(op.args[1], op.input)
 	case "write_all_files":
