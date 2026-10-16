@@ -108,6 +108,8 @@ The claim response is preserved and does not wait for the audio download. Tags
 marked nocloud, custom UIDs, zero-password tags, live sources and cloud overrides
 are excluded; explicit source assignments are preserved. Workers recheck current
 settings/metadata and existing files before downloading.
+Removed or disabled boxes and boxes moved out of the deployment's user area are
+also excluded when a queued job starts.
 
 Each deployment allows two active jobs and at most 16 queued/active jobs together.
 Duplicate jobs for the same content root/UID are merged. Failed jobs defer retries

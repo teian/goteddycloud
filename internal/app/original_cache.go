@@ -30,7 +30,7 @@ func originalCacheEligible(snap config.Snapshot, ruid string, m content.Metadata
 	if _, err := content.UIDPath(ruid); err != nil {
 		return false
 	}
-	return snap.Bool("cloud.enabled") && snap.Bool("cloud.enableV2Content") && snap.Bool("cloud.cacheContent") &&
+	return snap.Bool("toniebox.api_access") && snap.Bool("cloud.enabled") && snap.Bool("cloud.enableV2Content") && snap.Bool("cloud.cacheContent") &&
 		strings.HasSuffix(strings.ToLower(ruid), "0304e0") && !m.Bool("nocloud") && !m.Bool("live") && !m.Bool("cloud_override") &&
 		m.String("source") == "" && hasCloudAuth(m)
 }
@@ -124,6 +124,15 @@ func (s *Server) stopOriginalCache() {
 }
 
 func (s *Server) cacheOriginal(ctx context.Context, id, ruid, userAgent string) bool {
+	if id != "" && !s.Settings.HasBox(id) {
+		return true
+	}
+	if s.parent != nil {
+		owner, ok := s.parent.boxOwner(id)
+		if !ok || owner.ID != s.areaID {
+			return true
+		}
+	}
 	snap := s.Settings.Snapshot(id)
 	m, err := s.Content.MetadataContext(ctx, snap, ruid)
 	if err != nil {

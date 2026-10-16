@@ -239,3 +239,27 @@ func TestOriginalCacheShutdownCancelsWorkAndRejectsNewJobs(t *testing.T) {
 		t.Fatal("background work restarted after shutdown")
 	}
 }
+
+func TestOriginalCacheRechecksDisabledBoxBeforeFetching(t *testing.T) {
+	s := fixtureApp(t)
+	const id, ruid = "001122334455", "97763c1a500304e0"
+	for _, key := range []string{"cloud.enabled", "cloud.cacheContent"} {
+		if err := s.Settings.Set("", key, "true"); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := s.Content.Update(s.Settings.Snapshot(id), ruid, func(m content.Metadata) error { m.Set("cloud_auth", strings.Repeat("AB", 32)); return nil }); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Settings.Set(id, "toniebox.api_access", "false"); err != nil {
+		t.Fatal(err)
+	}
+	mock := &originalCacheCloud{started: make(chan struct{}), release: make(chan struct{})}
+	s.Cloud = mock
+	if !s.cacheOriginal(context.Background(), id, ruid, "") {
+		t.Fatal("disabled box should skip background work")
+	}
+	if _, downloads := mock.counts(); downloads != 0 {
+		t.Fatal("disabled box fetched audio")
+	}
+}
