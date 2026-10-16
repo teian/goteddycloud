@@ -1,14 +1,24 @@
 #!/usr/bin/env bash
-# Build the pinned frontend with the Go UI overlay.
+# Build an isolated copy of the pinned frontend fork.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 frontend=.cache/teddycloud-reference/teddycloud_web
 pin=e2f40c2c69a3b2b46093ddc5542773dd0fa0067e
 if [[ "${REFERENCE_BRANCH:-develop}" == develop ]]; then
- frontend=.cache/teddycloud-develop-reference/teddycloud_web
+ frontend="${FRONTEND_SOURCE:-.cache/teddycloud-web-fork}"
  pin=$(cat frontend/upstream-revision)
+ if [[ ! -d "$frontend/.git" && ! -f "$frontend/.git" ]]; then
+  git clone --no-checkout https://github.com/teian/teddycloud_web.git "$frontend"
+ fi
+ if [[ "$frontend" == .cache/teddycloud-web-fork ]]; then
+  if ! git -C "$frontend" cat-file -e "$pin^{commit}" 2>/dev/null; then
+   git -C "$frontend" fetch origin "$pin"
+  fi
+  git -C "$frontend" checkout --detach "$pin"
+ fi
 fi
 [[ "$(git -C "$frontend" rev-parse HEAD)" == "$pin" ]] || { echo 'Unexpected frontend revision' >&2; exit 1; }
+[[ -z "$(git -C "$frontend" status --porcelain --untracked-files=no)" ]] || { echo 'Frontend contains tracked edits' >&2; exit 1; }
 source_frontend="$frontend"
 if [[ "${REFERENCE_BRANCH:-develop}" == develop ]]; then
  frontend=.cache/goteddycloud-web

@@ -1090,3 +1090,28 @@ The older oracle replay now explicitly asserts the new certificate-policy
 settings text before normalizing those display fields. All setting values,
 defaults and remaining fields stay compared. The diagnostic replay imports its
 synthetic box client identity and verifies server trust for both TLS listeners.
+
+
+### Live tag updates and frontend fork migration (2026-10-16)
+
+The frontend previously generated at `.cache/goteddycloud-web`, including users,
+areas, catalog sharing and accumulated UI fixes, is committed in
+`teian/teddycloud_web` on `experimental/live-tag-sse`. Backend local and Docker
+builds now fetch that fork at the exact revision in `frontend/upstream-revision`.
+The duplicate backend overlay and integration-anchor patches are removed.
+
+Real TLS RTNL frames with generated identities verify immediate unknown-tag
+metadata creation, SSE discovery, automatic card insertion, blue borders,
+tag switching, live metadata edits, notifications, a full heartbeat interval,
+reconnect snapshots, preservation of existing card elements, and a shared
+connection while opening the RTNL viewer. The users/areas/sharing browser smoke
+suite also passes. These checks use disposable fixtures, without claiming new
+physical-device acceptance or modifying existing deployments.
+
+Validation: `go test ./...`, `go test -race ./internal/app ./internal/boxstate
+./internal/events`, focused discovery/snapshot/metadata tests, the production
+frontend build, all 109 frontend tests, formatting and translation checks.
+Evidence: `.cache/live-ui-go-tests.log`, `.cache/live-ui-race.log`,
+`.cache/live-ui-scope-tests.log`, `.cache/live-ui-build.log`,
+`.cache/live-ui-browser.log`, `.cache/live-ui-accounts-browser.log`, and
+`.cache/webui-live-tags.png` (visually inspected).

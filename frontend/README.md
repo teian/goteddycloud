@@ -1,9 +1,12 @@
 # Integrated Web UI
 
-The owned React/TypeScript overlay in `src/goteddycloud/` extends the pinned
-upstream frontend `636a8d65043f6c6e322f76bcb11e958725159e96`. It uses the existing
-React router, Ant Design components, theme, login/session handling and runtime
-reverse-proxy prefix. Pages render directly in the application, without iframes.
+The integrated frontend lives in the
+[teian/teddycloud_web fork](https://github.com/teian/teddycloud_web/tree/experimental/live-tag-sse),
+on `experimental/live-tag-sse`. `upstream-revision` pins the exact commit used by
+local and Docker builds. The earlier `.cache/goteddycloud-web` work, including
+users/areas, shared catalogs and UI fixes, has been committed to that branch.
+It uses the existing React router, Ant Design components, theme, login/session
+handling and runtime reverse-proxy prefix.
 
 - **Settings → Users and areas**, `/web/settings/users`: initial administrator
   setup, login protection, account roles, password reset/change, shared areas,
@@ -19,6 +22,15 @@ reverse-proxy prefix. Pages render directly in the application, without iframes.
   parameters and saved device selection are cleared. Other parameters survive.
 
 English and German labels are included; other languages fall back to English.
+The authenticated app shares an SSE stream for tag discovery and metadata
+updates. Presenting a tag immediately marks its card with a blue border; unknown
+tags are added without reloading the page or waiting for an audio download.
+Tag notifications appear in the existing notification UI. Lists retain their
+filters during background refreshes, and box cards update their last played tag.
+The stream uses the normal bearer/cookie handling and reverse-proxy prefix,
+reconnects after transient failures, and restores last-tag state on reconnection.
+Area access and revocation are enforced by the backend.
+
 Normal accounts entering `/web/settings` go to the accessible users/areas page.
 Backend authorization remains authoritative for all old and new pages.
 User and area management is a built-in application route, not a plugin.
@@ -36,12 +48,13 @@ scripts/frontend.sh test
 scripts/frontend.sh install-fixture .cache/local-test-20261010
 ```
 
-The build creates `.cache/goteddycloud-web` from an isolated copy of the pinned
-frontend, installs the upstream lockfile's dependencies and applies the owned
-source overlay and checked integration anchors using `scripts/prepare-frontend.py`.
-It refuses unexpected revisions or changed integration anchors. The generated
-stage is marked before reuse; the upstream checkout and sibling C repo remain
-untouched. Edit `frontend/src/goteddycloud/` rather than the generated stage.
+The build fetches the pinned fork into `.cache/teddycloud-web-fork`, creates an
+isolated copy in `.cache/goteddycloud-web` and installs lockfile dependencies.
+The generated stage is marked before reuse. Edit the frontend fork at
+`~/code/teddycloud_web`; cached assets and dependencies are never committed.
+To build an already checked-out pinned revision locally, use
+`FRONTEND_SOURCE=../teddycloud_web scripts/frontend.sh build`. Unexpected
+revisions and tracked source edits are rejected.
 
 `install-fixture` accepts only a marked disposable generated deployment. For an
 existing deployment, install the **complete** `.cache/goteddycloud-web/dist/` asset
@@ -49,7 +62,7 @@ build into its configured `www/web/` directory and refresh the browser. These
 assets are independent of the Go binary. Native release archives still require
 separately installed frontend assets.
 
-Docker builds fetch the revision in `upstream-revision`, apply the same overlay,
+Docker builds fetch the revision in `upstream-revision`, stage the same frontend,
 install lockfile-pinned dependencies using Node.js 24 and build the UI. Both the
 `runtime` and `ffmpeg` targets include the result at
 `/usr/share/goteddycloud/www/web`. Node.js and npm dependencies stay in the build
@@ -71,6 +84,7 @@ server. It does not alter the running manual-test deployment:
 npm install --prefix .cache/browser-tools --no-audit --no-fund playwright
 node .cache/browser-tools/node_modules/playwright/cli.js install chromium
 node scripts/webui-smoke.mjs
+node scripts/webui-live-smoke.mjs
 ```
 
 `PLAYWRIGHT_MODULE` can specify an existing Playwright `index.mjs`, and
@@ -80,3 +94,6 @@ download authorization, revocation, ordinary-user controls, area switching,
 mobile navigation, dark theme and German labels. Screenshots are written under
 `.cache/webui-*.png`. Unit tests also cover reverse-proxy prefixes, bearer/cookie
 handling, expired sessions, membership roles and stale selector cleanup.
+The live smoke test sends real RTNL frames over TLS with a generated box identity,
+then verifies SSE delivery, automatic unknown-tag insertion, blue card borders,
+tag switching, live metadata, notifications and a complete heartbeat interval.

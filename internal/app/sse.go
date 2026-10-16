@@ -18,6 +18,8 @@ func (s *Server) sse(w http.ResponseWriter, r *http.Request) {
 	}
 	defer unsubscribe()
 	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache, no-transform")
+	w.Header().Set("X-Accel-Buffering", "no")
 	w.WriteHeader(200)
 	control := http.NewResponseController(w)
 	send := func(event events.Event) error {
@@ -32,10 +34,19 @@ func (s *Server) sse(w http.ResponseWriter, r *http.Request) {
 		if _, err := fmt.Fprintf(w, "event: %s\ndata: %s\n\n", event.Name, data); err != nil {
 			return err
 		}
-		return control.Flush()
+		err := control.Flush()
+		// The idle interval exceeds the write budget. Do not leave an expired
+		// deadline on the connection while waiting for the next event.
+		_ = control.SetWriteDeadline(time.Time{})
+		return err
 	}
 	keepalive := events.NewEvent("", "keep-alive", "")
 	if err := send(keepalive); err != nil {
+		return
+	}
+	// Subscribe before taking a snapshot so discoveries during reconnection
+	// remain queued and are delivered after the initial state.
+	if err := send(events.NewEvent("", "tag-state", s.tagState())); err != nil {
 		return
 	}
 	timer := time.NewTicker(15 * time.Second)

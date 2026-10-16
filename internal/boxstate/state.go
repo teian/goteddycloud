@@ -32,6 +32,9 @@ type Store struct {
 	// ContentInfo runs with per-box ingestion serialized. It may read state,
 	// but must not recursively ingest the same box. Configure it before use.
 	ContentInfo func(box string, uid uint64, audioID uint32) (title, picture string)
+	// TagPresented runs after state is committed, with the same per-box
+	// serialization, so discovery and last-tag notifications cannot reorder.
+	TagPresented func(box string, uid uint64)
 }
 
 // Each box serializes ingestion independently. mu protects map membership and
@@ -103,6 +106,7 @@ func (s *Store) IngestWithMultipress(id string, data []byte, multipress uint64) 
 	state := box.state
 	s.mu.Unlock()
 	var pending []events.Event
+	presented := false
 	emit := func(name string, data any) { pending = append(pending, events.NewEvent(id, name, data)) }
 	playback := func(value string) {
 		state.Playback = value
@@ -164,10 +168,12 @@ func (s *Store) IngestWithMultipress(id string, data []byte, multipress uint64) 
 			case RTNL2_FUNC_TAG_VALID_CC3200, RTNL2_FUNC_TAG_VALID_ESP32:
 				state.UID = uint64(binary.BigEndian.Uint32(d)) | uint64(binary.BigEndian.Uint32(d[4:]))<<32
 				state.Valid = true
+				presented = true
 				emit("TagValid", fmt.Sprintf("%016X", state.UID))
 			case RTNL2_FUNC_TAG_INVALID_CC3200, RTNL2_FUNC_TAG_INVALID_ESP32:
 				state.UID = uint64(binary.BigEndian.Uint32(d)) | uint64(binary.BigEndian.Uint32(d[4:]))<<32
 				state.Valid = false
+				presented = true
 				emit("TagInvalid", fmt.Sprintf("%016X", state.UID))
 			case RTNL2_FUNC_TAG_VALID_REMOVED_CC3200, RTNL2_FUNC_TAG_VALID_REMOVED_ESP32:
 				state.UID = uint64(binary.BigEndian.Uint32(d)) | uint64(binary.BigEndian.Uint32(d[4:]))<<32
@@ -234,6 +240,9 @@ func (s *Store) IngestWithMultipress(id string, data []byte, multipress uint64) 
 	s.mu.Lock()
 	box.state = state
 	s.mu.Unlock()
+	if presented && s.TagPresented != nil {
+		s.TagPresented(id, state.UID)
+	}
 	// Publish after committing state so event consumers can immediately read it.
 	// The per-box ingestion lock preserves event order through publication.
 	for _, event := range pending {

@@ -70,6 +70,7 @@ func (s *Server) contentAPI(w http.ResponseWriter, r *http.Request) bool {
 			if err != nil {
 				response(w, 500, "", nil)
 			} else {
+				s.tagUpdated(id, uid)
 				response(w, 200, "application/octet-stream", []byte("OK"))
 			}
 			return true

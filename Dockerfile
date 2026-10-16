@@ -11,10 +11,9 @@ RUN python3 /snapshot-catalog.py /tmp/catalog-ref.json /out/catalog
 FROM frontend-tools AS frontend
 WORKDIR /src
 COPY frontend/upstream-revision frontend/upstream-revision
-RUN git init /upstream && git -C /upstream remote add origin https://github.com/toniebox-reverse-engineering/teddycloud_web.git && \
+RUN git init /upstream && git -C /upstream remote add origin https://github.com/teian/teddycloud_web.git && \
     git -C /upstream fetch --depth=1 origin "$(cat frontend/upstream-revision)" && git -C /upstream checkout --detach FETCH_HEAD
 COPY scripts/prepare-frontend.py scripts/frontend-notices.py scripts/
-COPY frontend/src frontend/src
 RUN python3 scripts/prepare-frontend.py /upstream
 WORKDIR /src/.cache/goteddycloud-web
 RUN --mount=type=cache,target=/root/.npm npm ci --ignore-scripts --no-audit --no-fund

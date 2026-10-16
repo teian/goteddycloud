@@ -280,13 +280,15 @@ func (s *Server) rememberBoxAudio(ctx context.Context, snap config.Snapshot, uid
 	}
 	// Retain the audio ID even while the catalog is unavailable. tagInfo can
 	// resolve it after a catalog update, without another box request or download.
-	_ = s.Content.UpdateContext(ctx, snap, uid, func(current content.Metadata) error {
+	if err := s.Content.UpdateContext(ctx, snap, uid, func(current content.Metadata) error {
 		current.Set("box_audio_id", audioID)
 		if current.String("tonie_model") == "" && model != "" {
 			current.Set("tonie_model", model)
 		}
 		return nil
-	})
+	}); err == nil {
+		s.tagUpdated(snap.String("commonName"), uid)
+	}
 }
 
 func (s *Server) tonieboxesJSON(w http.ResponseWriter, r *http.Request) {

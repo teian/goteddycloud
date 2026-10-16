@@ -10,10 +10,11 @@ import (
 
 	"goteddycloud/internal/config"
 	"goteddycloud/internal/content"
+	"goteddycloud/internal/runtime"
 	"goteddycloud/internal/taf"
 )
 
-func (s *Server) v3ContentMeta(w http.ResponseWriter, r *http.Request, snap config.Snapshot) {
+func (s *Server) v3ContentMeta(w http.ResponseWriter, r *http.Request, id string, snap config.Snapshot) {
 	ruid, ok := ruidAt(r.URL.Path, 17)
 	if !ok {
 		response(w, 404, "", nil)
@@ -32,6 +33,10 @@ func (s *Server) v3ContentMeta(w http.ResponseWriter, r *http.Request, snap conf
 		response(w, 500, "", nil)
 		return
 	}
+	if runtime.RequestPeer(r.Context()).Box {
+		s.tagPresented(r.Context(), snap, id, ruid)
+	}
+	defer s.tagUpdated(id, ruid)
 	_ = s.Content.EnsurePlaylist(r.Context(), snap, s.Settings.Snapshot(""), ruid)
 	file, header, err := s.Content.OpenContext(r.Context(), snap, s.Settings.Snapshot(""), ruid)
 	if err == nil {

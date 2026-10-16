@@ -17,7 +17,7 @@ source notices; it does not relicense third-party code or assets.
 | protobuf-c | BSD-2-Clause, Dave Benson and authors | src/proto/protobuf-c.c header | Oracle only; generated Go bindings use their own runtime |
 | FatFs | ChaN permissive one-condition notice | fat/LICENSE.txt, fat/source/ff.c | Oracle only; no C filesystem code copied |
 | emsdk | Not populated or reviewed | .gitmodules pinned revision | Excluded WASM toolchain; not distributed |
-| official frontend | No top-level LICENSE or package.json license field at pinned revision | teddycloud_web@636a8d65043f6c6e322f76bcb11e958725159e96 | Downloaded and built in Docker; upstream distribution license remains unresolved |
+| frontend fork (upstream attribution retained) | No top-level LICENSE or package.json license field at pinned revision | teian/teddycloud_web@c130a40c5380343caeb78914dcfba7282738c873 | Downloaded and built in Docker; upstream distribution license remains unresolved |
 | frontend fonts | SIL OFL 1.1 noted, per-family notices and licenses embedded in font binaries | src/assets/fonts/teddystudio/LICENSES.md | Docker assets; notice retained in image |
 | frontend opening guide | CC BY-NC-SA 3.0 referenced; Tobias Isakeit/iFixit attribution | frontend README Attribution and OpenBoxGuidePage.tsx | Docker assets; original attribution retained |
 | frontend logo/icons | Flaticon links, license terms not included in upstream README | upstream README Attribution | Docker assets; original attribution retained, no replacement rights assumed |
@@ -26,8 +26,8 @@ source notices; it does not relicense third-party code or assets.
 | FFmpeg | External executable, not vendored; build-dependent license | installed executable's `-version`/`-L` | Optional native runtime process; Debian package and dependency notices retained in ffmpeg image |
 | Go standard library | Go distribution LICENSE | Go toolchain | Linked according to Go license; include notice in releases |
 
-Docker builds fetch the revision recorded in `frontend/upstream-revision`, apply
-the project's overlay, and include compiled frontend assets. Native binary
+Docker builds fetch the frontend fork revision recorded in
+`frontend/upstream-revision` and include compiled frontend assets. Native binary
 archives still omit those assets. The image preserves the upstream README,
 font notices, source revision, package manifests/lockfile and installed npm
 package notices under `/usr/share/doc/goteddycloud/frontend` using

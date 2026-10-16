@@ -153,6 +153,9 @@ func New(settings *config.Store) (*Server, error) {
 		}
 		return entry.String("title"), server.registerImage(context.Background(), entry.String("pic"), false, false)
 	}
+	server.Boxes.TagPresented = func(id string, uid uint64) {
+		server.tagPresented(context.Background(), settings.Snapshot(id), id, content.RUID(uid))
+	}
 	snap := settings.Snapshot("")
 	if err := cat.RecoverRename(snap.String("internal.contentdirfull"), snap.Uint("tonie_json.custom_backup_keep"), time.Now(), func(from, to string) error { return server.Content.RenameModels(context.Background(), snap, from, to) }); err != nil {
 		server.Close()
@@ -256,7 +259,7 @@ func (s *Server) Device(w http.ResponseWriter, r *http.Request) {
 	case get && strings.HasPrefix(path, "/v3/ota/"):
 		s.otaV3(w, r, snap)
 	case get && strings.HasPrefix(path, "/v3/content-meta/"):
-		s.v3ContentMeta(w, r, snap)
+		s.v3ContentMeta(w, r, id, snap)
 	case get && strings.HasPrefix(path, "/v3/chapter/"):
 		s.v3Chapter(w, r, snap)
 	case post && strings.HasPrefix(path, "/v3/freshness-check"):
@@ -302,6 +305,7 @@ func (s *Server) Device(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "claim persistence failed", 500)
 			return
 		}
+		s.tagPresented(r.Context(), snap, id, ruid)
 		m, err := s.Content.Metadata(snap, ruid)
 		if err != nil {
 			response(w, 500, "", nil)
@@ -369,6 +373,12 @@ func (s *Server) serveStored(w http.ResponseWriter, r *http.Request, id string, 
 		response(w, 500, "", nil)
 		return
 	}
+	if runtime.RequestPeer(r.Context()).Box {
+		s.tagPresented(r.Context(), snap, id, ruid)
+	} else {
+		s.tagUpdated(id, ruid)
+	}
+	defer s.tagUpdated(id, ruid)
 	if s.serveLive(w, r, id, snap, ruid, metadata) {
 		return
 	}

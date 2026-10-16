@@ -106,7 +106,7 @@ the ffmpeg target adds Alpine's FFmpeg package and its required shared libraries
 No Go/Node toolchain, Python, Git, development headers or build cache is shipped.
 GHCR release images use the `ffmpeg` target and contain
 linux/amd64, linux/arm/v7 and linux/arm64 in one image index. Both targets build
-the pinned frontend and owned overlay in a Node.js build stage. The resulting
+the pinned frontend fork in a Node.js build stage. The resulting
 Web UI is included at `/usr/share/goteddycloud/www/web`, outside the data mount;
 Node.js, Git, Python and npm dependencies are absent from the runtime image.
 The environment variable `GOTEDDYCLOUD_BUNDLED_WWW` selects this read-only
