@@ -236,7 +236,7 @@ func (s *Server) tagInfo(ctx context.Context, snap config.Snapshot, id, uid stri
 		kind = "system"
 	}
 	download := "/content/download/" + name + "?overlay=" + url.QueryEscape(id)
-	info := map[string]any{"ruid": uid, "uid": strings.Join(parts, ":"), "type": kind, "valid": header != nil, "exists": exists, "live": m.Bool("live"), "nocloud": m.Bool("nocloud"), "hasCloudAuth": hasCloudAuth(m) && !m.Bool("cloud_override"), "hide": m.Bool("hide"), "claimed": m.Bool("claimed"), "source": m.String("source"), "trackSeconds": tracks, "audioUrl": download + "&skip_header=true", "tonieInfo": s.tonieDescription(ctx, s.Catalog.ByModel(m.String("tonie_model")), m.String("tonie_model"))}
+	info := map[string]any{"ruid": uid, "uid": strings.Join(parts, ":"), "type": kind, "valid": header != nil, "exists": exists, "live": m.Bool("live"), "nocloud": m.Bool("nocloud"), "hasCloudAuth": hasCloudAuth(m) && !m.Bool("cloud_override"), "cloudAuthState": cloudAuthState(m), "hide": m.Bool("hide"), "claimed": m.Bool("claimed"), "source": m.String("source"), "trackSeconds": tracks, "audioUrl": download + "&skip_header=true", "tonieInfo": s.tonieDescription(ctx, s.Catalog.ByModel(m.String("tonie_model")), m.String("tonie_model"))}
 	if header != nil {
 		if length := lengthSeconds(file, header); length > 0 {
 			info["lengthSeconds"] = length

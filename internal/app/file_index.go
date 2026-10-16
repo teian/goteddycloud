@@ -104,10 +104,30 @@ func fileMetadata(root *storage.Root, name string) content.Metadata {
 	}
 	return m
 }
-func hasCloudAuth(m content.Metadata) bool {
-	b, err := hex.DecodeString(m.String("cloud_auth"))
-	return err == nil && len(b) == 32
+func tagPasswordPresent(token []byte) bool {
+	if len(token) != 32 {
+		return false
+	}
+	for _, value := range token {
+		if value != 0 {
+			return true
+		}
+	}
+	return false
 }
+
+// Presence of a nonempty password is not proof that Tonies will accept it.
+func cloudAuthState(m content.Metadata) string {
+	token, err := hex.DecodeString(m.String("cloud_auth"))
+	if err != nil || len(token) != 32 {
+		return "missing"
+	}
+	if !tagPasswordPresent(token) {
+		return "empty"
+	}
+	return "present"
+}
+func hasCloudAuth(m content.Metadata) bool { return cloudAuthState(m) == "present" }
 
 func (s *Server) fileIndexAPI(w http.ResponseWriter, r *http.Request) bool {
 	if r.Method != "GET" || !strings.HasPrefix(r.URL.Path, "/api/fileIndex") {

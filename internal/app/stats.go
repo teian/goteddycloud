@@ -11,6 +11,7 @@ import (
 	"sync/atomic"
 
 	"goteddycloud/internal/config"
+	"goteddycloud/internal/content"
 	"goteddycloud/internal/events"
 )
 
@@ -53,14 +54,23 @@ func (s *Server) doCloud(ctx context.Context, snap, global config.Snapshot, meth
 	// Record only route categories and status, never tag tokens, full URLs,
 	// query strings or response bodies. This remains useful at the default log level.
 	route := cloudLogRoute(path)
+	token, _ := boxToken(&http.Request{Header: headers})
+	authState := "missing"
+	if len(token) == 32 {
+		authState = "empty"
+		if tagPasswordPresent(token) {
+			authState = "present"
+		}
+	}
+	tagPrefix := cloudLogTagPrefix(path)
 	if err != nil {
 		s.cloudFailed.Add(1)
 		slog.Warn("Tonies cloud request failed", "box", snap.String("commonName"), "method", method, "route", route, "reason", cloudLogReason(err))
 	} else if response != nil {
 		if response.StatusCode >= 300 {
-			slog.Warn("Tonies cloud response", "box", snap.String("commonName"), "method", method, "route", route, "status", response.StatusCode)
+			slog.Warn("Tonies cloud response", "box", snap.String("commonName"), "method", method, "route", route, "tag_prefix", tagPrefix, "auth_state", authState, "status", response.StatusCode)
 		} else if strings.Contains(route, "/claim") || strings.Contains(route, "/content") {
-			slog.Info("Tonies cloud response", "box", snap.String("commonName"), "method", method, "route", route, "status", response.StatusCode)
+			slog.Info("Tonies cloud response", "box", snap.String("commonName"), "method", method, "route", route, "tag_prefix", tagPrefix, "auth_state", authState, "status", response.StatusCode)
 		}
 	}
 	if err == nil && response != nil && response.Body != nil {
@@ -141,4 +151,14 @@ func cloudLogReason(err error) string {
 		return "too_many_cloud_requests"
 	}
 	return "request_failed"
+}
+
+func cloudLogTagPrefix(path string) string {
+	parts := strings.Split(path, "/")
+	if len(parts) > 3 && len(parts[3]) == 16 {
+		if _, err := content.UIDPath(parts[3]); err == nil {
+			return strings.ToLower(parts[3][:8])
+		}
+	}
+	return ""
 }

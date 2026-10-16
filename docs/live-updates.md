@@ -37,14 +37,20 @@ identities and a disposable deployment.
 
 ## Cloud download diagnostics
 
-An explicit cloud choice (`nocloud=false` or `nocloud=true` through the tag API)
-is persisted with `nocloud_manual=true`. Automatic custom-tag detection respects
-that choice on subsequent claim/content requests. Tags without an explicit choice
-keep the existing password/UID detection behavior.
+Custom-tag autodetection retains the original password/UID behavior and
+blocks cloud access on the next device request even after a manual enable.
+The legacy `nocloud_manual` field from an earlier experimental image is ignored.
+Browser downloads reuse saved credentials and do not perform RFID autodetection.
+Fresh nonempty credentials received from a device refresh stored credentials;
+empty claim passwords cannot overwrite a useful password or a cloud override.
+`cloudAuthState` in tag info distinguishes missing, empty and present passwords
+without returning their values. A present password is not a guarantee that the
+external cloud accepts it.
 
 The cloud icon tooltip explains whether access is blocked for the tag. Default
 server logs distinguish a locally blocked download (`reason=tag_cloud_blocked`)
-from an upstream HTTP rejection (`Tonies cloud response`, with `status`), missing
+from an upstream HTTP rejection (`Tonies cloud response`, with `status`,
+`auth_state` and an eight-character `tag_prefix`), missing
 client identity, network/TLS failures and interrupted transfers. Credentials,
 query parameters, complete tag paths and response bodies are not logged.
 For Docker deployments, run `docker logs --since 2m --follow <container>` and

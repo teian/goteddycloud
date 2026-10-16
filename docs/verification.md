@@ -1136,3 +1136,22 @@ record route categories/status/failure reasons without credentials. UI tests
 also reject HTTP errors and empty audio responses as failed downloads.
 This establishes the local policy fix; acceptance by the external Tonies cloud
 still depends on valid device/tag credentials and the upstream response.
+
+
+### Device credentials and browser downloads (2026-10-16)
+
+Two regression tests initially reproduced a browser download changing an enabled
+tag to `nocloud=true`, and a later authenticated device request failing to replace
+a previously saved empty password. Browser downloads now reuse metadata without
+performing RFID autodetection. Device requests refresh nonempty saved credentials;
+later empty passwords cannot erase useful credentials or explicit cloud overrides.
+Tag info reports `cloudAuthState`; an all-zero password no longer counts as usable
+cloud authentication. Frontend errors show the actual HTTP status from the API.
+
+At the user's request, custom-tag password/UID autodetection again disables cloud
+access on device requests even after a manual enable. This supersedes the earlier
+experimental `nocloud_manual` exception; that legacy field is ignored. Tests verify
+both automatic custom-tag protection and forwarding of an original figurine.
+Logs identify tags by an eight-character prefix and report only password state,
+never password contents. This allows the original figurine and a custom tag to be
+distinguished while diagnosing rejected downloads.

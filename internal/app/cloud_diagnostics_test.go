@@ -34,6 +34,9 @@ func TestCloudDiagnosticsDoNotDiscloseCredentials(t *testing.T) {
 			t.Fatal("credential disclosed", log)
 		}
 	}
+	if got := cloudLogTagPrefix("/v2/content/97763c1a500304e0"); got != "97763c1a" {
+		t.Fatal(got)
+	}
 	if got := cloudLogRoute("/v2/content/private-tag-id"); got != "/v2/content" {
 		t.Fatal(got)
 	}

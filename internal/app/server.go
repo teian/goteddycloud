@@ -360,10 +360,18 @@ func ruidAt(path string, start int) (string, bool) {
 	return v, err == nil
 }
 func (s *Server) serveStored(w http.ResponseWriter, r *http.Request, id string, snap config.Snapshot, ruid string) {
+	s.serveStoredContent(w, r, id, snap, ruid, true)
+}
+
+// Management downloads reuse saved credentials; they are not new RFID reads
+// and must never change cloud policy or replace device credentials.
+func (s *Server) serveStoredContent(w http.ResponseWriter, r *http.Request, id string, snap config.Snapshot, ruid string, deviceRequest bool) {
 	s.assignUnknown(r, snap, ruid)
 	if err := s.Content.UpdateContext(r.Context(), snap, ruid, func(m content.Metadata) error {
 		m.Set("hide", false)
-		updateTagAuth(m, r, snap, ruid, strings.HasPrefix(r.URL.Path, "/v2/content"))
+		if deviceRequest {
+			updateTagAuth(m, r, snap, ruid, strings.HasPrefix(r.URL.Path, "/v2/content"))
+		}
 		return nil
 	}); err != nil {
 		response(w, 500, "", nil)
@@ -416,7 +424,7 @@ func (s *Server) serveStored(w http.ResponseWriter, r *http.Request, id string, 
 		case !snap.Bool("cloud.enableV2Content"):
 			reason = "content_forwarding_disabled"
 		}
-		slog.Warn("Tonies audio unavailable", "box", id, "route", cloudLogRoute(r.URL.Path), "status", 404, "reason", reason)
+		slog.Warn("Tonies audio unavailable", "box", id, "route", cloudLogRoute(r.URL.Path), "tag_prefix", cloudLogTagPrefix(r.URL.Path), "status", 404, "reason", reason)
 		response(w, 404, "", nil)
 		return
 	}
@@ -695,11 +703,14 @@ func updateTagAuth(m content.Metadata, r *http.Request, snap config.Snapshot, ru
 	if !present {
 		return
 	}
-	if snap.Bool("cloud.dumpRuidAuthContentJson") && !m.Bool("cloud_override") && m.String("cloud_ruid") == "" {
+	// A claim can carry an empty password before a content request supplies the
+	// actual tag credentials. Refresh on a device request, but never replace a
+	// useful password with a later all-zero claim or change an explicit override.
+	if snap.Bool("cloud.dumpRuidAuthContentJson") && !m.Bool("cloud_override") && (m.String("cloud_ruid") == "" || tagPasswordPresent(token)) {
 		m.Set("cloud_ruid", ruid)
 		m.Set("cloud_auth", strings.ToUpper(hex.EncodeToString(token)))
 	}
-	if !detectCustom || m.Bool("nocloud") || m.Bool("nocloud_manual") || m.Bool("cloud_override") {
+	if !detectCustom || m.Bool("nocloud") || m.Bool("cloud_override") {
 		return
 	}
 	custom := false
