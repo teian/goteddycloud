@@ -29,7 +29,7 @@ func diagnosticLogger(ctx context.Context) *slog.Logger {
 }
 
 func logIdentity(logger *slog.Logger, policy *tls.Config, selected config.Snapshot, fallback bool) {
-	if logger == nil {
+	if logger == nil || !logger.Enabled(context.Background(), slog.LevelDebug) {
 		return
 	}
 	leaf, err := x509.ParseCertificate(policy.Certificates[0].Certificate[0])
@@ -42,7 +42,7 @@ func logIdentity(logger *slog.Logger, policy *tls.Config, selected config.Snapsh
 		source = "global"
 	}
 	now := time.Now()
-	logger.Info("Tonies cloud TLS identity",
+	logger.Debug("Tonies cloud TLS identity",
 		"identity_source", source, "global_fallback", fallback,
 		"certificate_inline", selected.String("core.client_cert.data.crt") != "",
 		"certificate_cn", boundedCertificateName(leaf.Subject.CommonName),
@@ -86,12 +86,12 @@ func traceClientCertificate(policy *tls.Config, logger *slog.Logger) *atomic.Int
 				continue
 			}
 			selection.Store(1)
-			logger.Info("Tonies cloud TLS certificate selection", "client_certificate_sent", true,
+			logger.Debug("Tonies cloud TLS certificate selection", "client_certificate_sent", true,
 				"acceptable_ca_count", len(request.AcceptableCAs), "signature_scheme_count", len(request.SignatureSchemes))
 			return certificate, nil
 		}
 		selection.Store(2)
-		logger.Warn("Tonies cloud TLS certificate selection", "client_certificate_sent", false,
+		logger.Debug("Tonies cloud TLS certificate selection", "client_certificate_sent", false,
 			"reason", reason, "acceptable_ca_count", len(request.AcceptableCAs), "signature_scheme_count", len(request.SignatureSchemes))
 		return new(tls.Certificate), nil
 	}

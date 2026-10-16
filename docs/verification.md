@@ -1227,3 +1227,27 @@ its concrete cache-policy/failure log to establish the actual cause.
 Evidence: `.cache/original-cache-integration.log`,
 `.cache/original-cache-final-focused.log`, `.cache/original-cache-go-tests.log`,
 `.cache/original-cache-race.log` and `.cache/original-cache-image/`.
+
+### Readable server logs and startup identity (2026-10-16)
+
+The console handler now prints single-line events with UTC timestamps, severity,
+readable field labels, described HTTP statuses, timing units and readable sizes
+alongside exact byte counts. Derived/grouped loggers share an output lock and
+preserve their context; controls and delimiters are quoted to prevent forged
+lines or fields. Every server start/restart identifies GoTeddyCloud and its build
+version before initialization, including when routine logging is disabled.
+Protocol workers and CLI data operations retain their output contracts.
+
+Certificate material/fallback, public certificate metadata, TLS selection,
+transport summaries and credential comparisons now require DEBUG. INFO retains
+cloud request/results and download/cache outcomes. Real TLS tests verify that
+DEBUG preserves the prior redacted diagnostics and normal certificate selection,
+while INFO hides certificate details for successful, fallback and rejected
+identities. Handler tests cover formatting, concurrent writes, grouping, injection
+protection, startup identity with logging off and level changes without restart.
+The native smoke checks the startup banner, listener addresses, TLS, persisted
+settings and both application/process restart paths.
+
+Evidence: `.cache/readable-logs-focused.log`, `.cache/readable-logs-go-tests.log`,
+`.cache/readable-logs-race.log`, `.cache/readable-logs-native.log` and
+`.cache/readable-logs-image/`.

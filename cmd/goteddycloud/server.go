@@ -32,6 +32,7 @@ type serverOptions struct {
 }
 
 func startServer(settings *config.Store, options serverOptions) error {
+	configureLogging(os.Stderr, configuredLevel{settings}, version)
 	var err error
 	snap := settings.Snapshot("")
 	address := func(override, key string) string {
@@ -94,7 +95,6 @@ func startServer(settings *config.Store, options serverOptions) error {
 		return err
 	}
 	defer application.Close()
-	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: configuredLevel{settings}})))
 	var restart atomic.Bool
 	if err := application.StartIntegrations(ctx, version); err != nil {
 		return err
@@ -144,7 +144,7 @@ func startServer(settings *config.Store, options serverOptions) error {
 		KeyLogPath:           snap.String("core.sslkeylogfile"),
 		Stderr:               os.Stderr,
 		Ready: func(addresses map[string]string) {
-			slog.Info("listeners ready", "addresses", addresses, "base_path", snap.Base)
+			slog.Info("Server ready", "http", addresses["http"], "https", addresses["web"], "box_api", addresses["box"], "base_path", snap.Base)
 			if options.dockerTest {
 				stop()
 			}

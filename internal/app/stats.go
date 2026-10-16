@@ -28,9 +28,10 @@ func (s *Server) doCloud(ctx context.Context, snap, global config.Snapshot, meth
 	logger := slog.Default().With("cloud_request", requestID, "box", snap.String("commonName"), "method", method, "route", route, "tag_prefix", tagPrefix)
 	if strings.Contains(route, "/claim") || strings.Contains(route, "/content") || strings.Contains(route, "/chapter") {
 		ctx = cloud.WithDiagnosticLogger(ctx, logger)
-		logger.Info("Tonies cloud request started", "query_present", query != "", "range_requested", headers.Get("Range") != "", "user_agent_kind", cloudUserAgentKind(headers.Get("User-Agent")))
+		logger.Info("Tonies cloud request started")
+		logger.Debug("Tonies cloud request details", "query_present", query != "", "range_requested", headers.Get("Range") != "", "user_agent_kind", cloudUserAgentKind(headers.Get("User-Agent")))
 		if attributes, ok := ctx.Value(tagCloudDiagnosticKey{}).([]any); ok {
-			logger.Info("Tonies cloud tag credentials", attributes...)
+			logger.Debug("Tonies cloud tag credentials", attributes...)
 		}
 	}
 	if s.MQTT != nil {
@@ -79,9 +80,9 @@ func (s *Server) doCloud(ctx context.Context, snap, global config.Snapshot, meth
 		logger.Warn("Tonies cloud request failed", "reason", cloudLogReason(err), "auth_state", authState, "elapsed_ms", time.Since(started).Milliseconds())
 	} else if response != nil {
 		if response.StatusCode >= 300 {
-			logger.Warn("Tonies cloud response", "auth_state", authState, "status", response.StatusCode)
+			logger.Warn("Tonies cloud response", "auth_state", authState, "status", response.StatusCode, "elapsed_ms", time.Since(started).Milliseconds())
 		} else if strings.Contains(route, "/claim") || strings.Contains(route, "/content") {
-			logger.Info("Tonies cloud response", "auth_state", authState, "status", response.StatusCode)
+			logger.Info("Tonies cloud response", "auth_state", authState, "status", response.StatusCode, "elapsed_ms", time.Since(started).Milliseconds())
 		}
 	}
 	if err == nil && response != nil && response.Body != nil {

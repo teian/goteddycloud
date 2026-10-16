@@ -55,7 +55,7 @@ func clientTLS(snap, global config.Snapshot, logger *slog.Logger) (*tls.Config, 
 		crt, b := material(s, "crt")
 		key, c := material(s, "key")
 		if logger != nil {
-			logger.Info("Tonies cloud identity material", "identity_source", source,
+			logger.Debug("Tonies cloud identity material", "identity_source", source,
 				"ca_available", a == nil, "certificate_available", b == nil, "private_key_available", c == nil)
 		}
 		return ca, crt, key, errors.Join(a, b, c)
@@ -65,7 +65,7 @@ func clientTLS(snap, global config.Snapshot, logger *slog.Logger) (*tls.Config, 
 	fallback := false
 	if err != nil {
 		if logger != nil {
-			logger.Warn("Tonies cloud identity fallback", "reason", "selected_material_unavailable", "fallback", "global")
+			logger.Debug("Tonies cloud identity fallback", "reason", "selected_material_unavailable", "fallback", "global")
 		}
 		ca, crt, key, err = load(global, "global")
 		selected, fallback = global, true
@@ -209,7 +209,7 @@ func (c *Client) Do(ctx context.Context, snap, global config.Snapshot, method, p
 		if response.TLS != nil {
 			attributes = append(attributes, "tls_version", tls.VersionName(response.TLS.Version), "tls_cipher", tls.CipherSuiteName(response.TLS.CipherSuite))
 		}
-		logger.Info("Tonies cloud HTTP diagnostics", attributes...)
+		logger.Debug("Tonies cloud HTTP diagnostics", attributes...)
 	}
 	response.Body = &ownedBody{ReadCloser: response.Body, release: func() { transport.CloseIdleConnections(); cancel(); releaseSlot() }}
 	return response, nil

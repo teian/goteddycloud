@@ -66,11 +66,20 @@ Upstream audio errors carry `X-TeddyCloud-Error-Origin: tonies-cloud` so a cloud
 is displayed as a download failure without opening the web login prompt. A local
 management 401 still requires login.
 
-Cloud claim/content diagnostics are enabled at the default INFO level. Each
-upstream attempt has a `cloud_request` number linking request parameters, saved
-credential comparisons, TLS identity/selection and HTTP response diagnostics.
-`identity_source=selected` uses the selected settings; `identity_source=global`
-with `global_fallback=true` means those credentials could not be loaded and the
+Server logs use UTC timestamps, severity labels and readable fields separated by
+` | `. HTTP statuses include their description, durations include units, and
+transferred sizes include both readable units and the exact byte count. Each
+server start/restart begins with `GoTeddyCloud starting | Name: GoTeddyCloud |
+Version: <build version>`, even when routine logging is disabled. Workers and
+CLI data output do not emit the banner.
+
+Cloud request/results and audio/cache outcomes remain at the default INFO level.
+Each upstream attempt has a `Request` number linking its messages. Detailed
+request parameters, saved credential comparisons, certificate material/fallback,
+TLS identity/selection and HTTP transport diagnostics require DEBUG
+(`log.level=5`, applied without a restart).
+`Identity source: selected` uses the selected settings; `Identity source: global`
+with `Global fallback: yes` means those credentials could not be loaded and the
 global set was used instead. Availability booleans identify missing CA,
 certificate or private-key material. Certificate common name, issuer, fingerprint,
 algorithm and validity dates identify the public certificate without exposing it
@@ -78,13 +87,13 @@ or its private key. TLS selection reports an unacceptable issuer separately from
 other compatibility failures, and the HTTP summary reports the negotiated TLS
 version/cipher, timing, redirect count and content length.
 
-`auth_source` distinguishes device, saved and override credentials.
-`outgoing_auth_matches_saved` compares values without logging them;
-`saved_ruid` is missing, matches_tag or different. These are diagnostic comparisons,
+`Password source` distinguishes device, saved, background and override credentials.
+`Outgoing auth matches saved` compares values without logging them;
+`Saved RUID` is missing, matches tag or different. These are diagnostic comparisons,
 not proof that Tonies accepts the credentials. Audio transfer completion includes
 status and byte count. Request passwords (including hashes), raw user agents,
 query values, arbitrary response headers and response bodies remain absent from
-the logs. No debug setting or log-level change is needed for these messages.
+the logs, including at DEBUG level.
 
 Audio transfer completion is separate from durable cache publication. The cache
 does not depend on a successful claim: a claim 401 followed by a full content 200

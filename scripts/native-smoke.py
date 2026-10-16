@@ -25,14 +25,23 @@ def ready(process):
     selector = selectors.DefaultSelector()
     selector.register(process.stderr, selectors.EVENT_READ)
     deadline = time.monotonic() + 10
+    pending = ''
+    banner_seen = False
     try:
         while time.monotonic() < deadline:
             if selector.select(0.2):
-                line = process.stderr.readline()
-                if 'listeners ready' in line:
-                    addresses = dict(re.findall(r'(http|web|box):([0-9.:]+)', line))
-                    assert len(addresses) == 3, 'missing listener readiness'
-                    return addresses
+                pending += os.read(process.stderr.fileno(), 65536).decode()
+                while '\n' in pending:
+                    line, pending = pending.split('\n', 1)
+                    if 'GoTeddyCloud starting' in line:
+                        assert 'Name: GoTeddyCloud | Version: ' in line, 'missing startup build identity'
+                        banner_seen = True
+                    if 'Server ready' in line:
+                        assert banner_seen, 'server ready before startup banner'
+                        labels = {'HTTP': 'http', 'HTTPS': 'web', 'Box API': 'box'}
+                        addresses = {labels[label]: address for label, address in re.findall(r'(HTTP|HTTPS|Box API): ([0-9.:]+)', line)}
+                        assert len(addresses) == 3, 'missing listener readiness'
+                        return addresses
             if process.poll() is not None:
                 raise AssertionError('native startup failed')
         raise AssertionError('readiness deadline exceeded')

@@ -43,15 +43,19 @@ func TestTransportDiagnosticsObserveCertificateSelectionWithoutLeakingSecrets(t 
 	for _, test := range []struct {
 		name, state                   string
 		request, compatible, fallback bool
+		level                         slog.Level
 	}{
-		{"box identity", "sent", true, true, false},
-		{"global fallback", "sent", true, true, true},
-		{"issuer not accepted", "not_sent", true, false, false},
-		{"not requested", "not_requested", false, false, false},
+		{"box identity", "sent", true, true, false, slog.LevelDebug},
+		{"global fallback", "sent", true, true, true, slog.LevelDebug},
+		{"issuer not accepted", "not_sent", true, false, false, slog.LevelDebug},
+		{"not requested", "not_requested", false, false, false, slog.LevelDebug},
+		{"info hides certificate details", "sent", true, true, false, slog.LevelInfo},
+		{"info hides certificate fallback", "sent", true, true, true, slog.LevelInfo},
+		{"info hides rejected certificate details", "not_sent", true, false, false, slog.LevelInfo},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			var logs bytes.Buffer
-			logger := slog.New(slog.NewTextHandler(&logs, nil)).With("cloud_request", 123)
+			logger := slog.New(slog.NewTextHandler(&logs, &slog.HandlerOptions{Level: test.level})).With("cloud_request", 123)
 			server := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				if r.URL.RawQuery != "secret-query=value" || r.Header.Get("Authorization") != "BD "+strings.Repeat("AB", 32) {
 					t.Error("diagnostics changed the request")
@@ -112,6 +116,12 @@ func TestTransportDiagnosticsObserveCertificateSelectionWithoutLeakingSecrets(t 
 				t.Fatal("TLS selection changed", res.StatusCode)
 			}
 			output := logs.String()
+			if test.level == slog.LevelInfo {
+				if output != "" {
+					t.Fatal("transport/certificate details must require debug level", output)
+				}
+				return
+			}
 			for _, expected := range []string{"cloud_request=123", "Tonies cloud TLS identity", "certificate_sha256=", "tls_version=", "client_certificate=" + test.state} {
 				if !strings.Contains(output, expected) {
 					t.Fatalf("missing diagnostic %q: %s", expected, output)

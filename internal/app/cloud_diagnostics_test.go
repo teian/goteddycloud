@@ -55,7 +55,7 @@ func TestTagCredentialDiagnosticsReportSourceAndMismatchWithoutTokens(t *testing
 	s := fixtureApp(t)
 	var output bytes.Buffer
 	previous := slog.Default()
-	slog.SetDefault(slog.New(slog.NewTextHandler(&output, nil)))
+	slog.SetDefault(slog.New(slog.NewTextHandler(&output, &slog.HandlerOptions{Level: slog.LevelDebug})))
 	defer slog.SetDefault(previous)
 	const ruid = "97763c1a500304e0"
 	metadata := content.Metadata{}
