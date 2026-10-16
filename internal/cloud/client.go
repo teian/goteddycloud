@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net"
 	"net/http"
 	"net/url"
@@ -48,16 +49,26 @@ func pemMaterial(kind string, data []byte) []byte {
 	}
 	return pem.EncodeToMemory(&pem.Block{Type: kind, Bytes: data})
 }
-func clientTLS(snap, global config.Snapshot) (*tls.Config, error) {
-	load := func(s config.Snapshot) ([]byte, []byte, []byte, error) {
+func clientTLS(snap, global config.Snapshot, logger *slog.Logger) (*tls.Config, error) {
+	load := func(s config.Snapshot, source string) ([]byte, []byte, []byte, error) {
 		ca, a := material(s, "ca")
 		crt, b := material(s, "crt")
 		key, c := material(s, "key")
+		if logger != nil {
+			logger.Info("Tonies cloud identity material", "identity_source", source,
+				"ca_available", a == nil, "certificate_available", b == nil, "private_key_available", c == nil)
+		}
 		return ca, crt, key, errors.Join(a, b, c)
 	}
-	ca, crt, key, err := load(snap)
+	ca, crt, key, err := load(snap, "selected")
+	selected := snap
+	fallback := false
 	if err != nil {
-		ca, crt, key, err = load(global)
+		if logger != nil {
+			logger.Warn("Tonies cloud identity fallback", "reason", "selected_material_unavailable", "fallback", "global")
+		}
+		ca, crt, key, err = load(global, "global")
+		selected, fallback = global, true
 	}
 	if err != nil {
 		return nil, errors.New("complete upstream CA/client identity required")
@@ -80,7 +91,9 @@ func clientTLS(snap, global config.Snapshot) (*tls.Config, error) {
 	if err != nil {
 		return nil, errors.New("invalid upstream client identity")
 	}
-	return &tls.Config{MinVersion: tls.VersionTLS12, RootCAs: roots, Certificates: []tls.Certificate{pair}}, nil
+	policy := &tls.Config{MinVersion: tls.VersionTLS12, RootCAs: roots, Certificates: []tls.Certificate{pair}}
+	logIdentity(logger, policy, selected, fallback)
+	return policy, nil
 }
 
 type Client struct{ slots chan struct{} }
@@ -120,11 +133,13 @@ func (c *Client) Do(ctx context.Context, snap, global config.Snapshot, method, p
 		releaseSlot()
 		return nil, errors.New("invalid upstream target")
 	}
-	policy, err := clientTLS(snap, global)
+	logger := diagnosticLogger(ctx)
+	policy, err := clientTLS(snap, global, logger)
 	if err != nil {
 		releaseSlot()
 		return nil, err
 	}
+	selection := traceClientCertificate(policy, logger)
 	if host == legacyBoxineHost {
 		// Boxine still serves a certificate without SANs at this exact endpoint.
 		// VerifyConnection replaces the default verifier with complete chain,
@@ -156,7 +171,12 @@ func (c *Client) Do(ctx context.Context, snap, global config.Snapshot, method, p
 		connectTimeout = 2 * time.Second
 	}
 	transport := &http.Transport{Proxy: nil, TLSClientConfig: policy, DialContext: (&net.Dialer{Timeout: connectTimeout}).DialContext, TLSHandshakeTimeout: connectTimeout, ResponseHeaderTimeout: 10 * time.Second, DisableKeepAlives: true, MaxResponseHeaderBytes: 32 << 10}
+	redirects := 0
 	client := &http.Client{Transport: transport, CheckRedirect: func(r *http.Request, via []*http.Request) error {
+		redirects = len(via)
+		if logger != nil {
+			logger.Info("Tonies cloud redirect", "redirect_count", redirects, "same_origin", r.URL.Scheme == target.Scheme && r.URL.Host == target.Host)
+		}
 		if len(via) >= 5 {
 			return errors.New("upstream redirect limit")
 		}
@@ -165,8 +185,12 @@ func (c *Client) Do(ctx context.Context, snap, global config.Snapshot, method, p
 		}
 		return nil
 	}}
+	started := time.Now()
 	response, err := client.Do(request)
 	if err != nil {
+		if logger != nil {
+			logger.Warn("Tonies cloud transport failed", "elapsed_ms", time.Since(started).Milliseconds(), "client_certificate", certificateSelectionState(selection))
+		}
 		cause := ctx.Err()
 		transport.CloseIdleConnections()
 		cancel()
@@ -175,6 +199,17 @@ func (c *Client) Do(ctx context.Context, snap, global config.Snapshot, method, p
 			return nil, cause
 		}
 		return nil, fmt.Errorf("upstream TLS or transport failure")
+	}
+	if logger != nil {
+		attributes := []any{"host", host, "port", port, "status", response.StatusCode,
+			"elapsed_ms", time.Since(started).Milliseconds(), "http_protocol", response.Proto,
+			"redirect_count", redirects,
+			"client_certificate", certificateSelectionState(selection), "content_length", response.ContentLength,
+			"authentication_challenge_present", response.Header.Get("WWW-Authenticate") != ""}
+		if response.TLS != nil {
+			attributes = append(attributes, "tls_version", tls.VersionName(response.TLS.Version), "tls_cipher", tls.CipherSuiteName(response.TLS.CipherSuite))
+		}
+		logger.Info("Tonies cloud HTTP diagnostics", attributes...)
 	}
 	response.Body = &ownedBody{ReadCloser: response.Body, release: func() { transport.CloseIdleConnections(); cancel(); releaseSlot() }}
 	return response, nil

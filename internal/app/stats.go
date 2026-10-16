@@ -9,7 +9,9 @@ import (
 	"net/http"
 	"strings"
 	"sync/atomic"
+	"time"
 
+	"goteddycloud/internal/cloud"
 	"goteddycloud/internal/config"
 	"goteddycloud/internal/content"
 	"goteddycloud/internal/events"
@@ -20,7 +22,17 @@ func (s *Server) doCloud(ctx context.Context, snap, global config.Snapshot, meth
 		s.cloudBlocked.Add(1)
 		return nil, errors.New("cloud disabled")
 	}
-	s.cloudRequests.Add(1)
+	requestID := s.cloudRequests.Add(1)
+	route := cloudLogRoute(path)
+	tagPrefix := cloudLogTagPrefix(path)
+	logger := slog.Default().With("cloud_request", requestID, "box", snap.String("commonName"), "method", method, "route", route, "tag_prefix", tagPrefix)
+	if strings.Contains(route, "/claim") || strings.Contains(route, "/content") || strings.Contains(route, "/chapter") {
+		ctx = cloud.WithDiagnosticLogger(ctx, logger)
+		logger.Info("Tonies cloud request started", "query_present", query != "", "range_requested", headers.Get("Range") != "", "user_agent_kind", cloudUserAgentKind(headers.Get("User-Agent")))
+		if attributes, ok := ctx.Value(tagCloudDiagnosticKey{}).([]any); ok {
+			logger.Info("Tonies cloud tag credentials", attributes...)
+		}
+	}
 	if s.MQTT != nil {
 		s.MQTT.Event(events.NewEvent("", "CloudRequest", path))
 		name := ""
@@ -50,10 +62,10 @@ func (s *Server) doCloud(ctx context.Context, snap, global config.Snapshot, meth
 			s.MQTT.Record(snap.String("commonName"), name, s.Now().UTC().Format("2006-01-02T15:04:05Z"))
 		}
 	}
+	started := time.Now()
 	response, err := s.Cloud.Do(ctx, snap, global, method, path, query, headers, body)
 	// Record only route categories and status, never tag tokens, full URLs,
 	// query strings or response bodies. This remains useful at the default log level.
-	route := cloudLogRoute(path)
 	token, _ := boxToken(&http.Request{Header: headers})
 	authState := "missing"
 	if len(token) == 32 {
@@ -62,23 +74,35 @@ func (s *Server) doCloud(ctx context.Context, snap, global config.Snapshot, meth
 			authState = "present"
 		}
 	}
-	tagPrefix := cloudLogTagPrefix(path)
 	if err != nil {
 		s.cloudFailed.Add(1)
-		slog.Warn("Tonies cloud request failed", "box", snap.String("commonName"), "method", method, "route", route, "reason", cloudLogReason(err))
+		logger.Warn("Tonies cloud request failed", "reason", cloudLogReason(err), "auth_state", authState, "elapsed_ms", time.Since(started).Milliseconds())
 	} else if response != nil {
 		if response.StatusCode >= 300 {
-			slog.Warn("Tonies cloud response", "box", snap.String("commonName"), "method", method, "route", route, "tag_prefix", tagPrefix, "auth_state", authState, "status", response.StatusCode)
+			logger.Warn("Tonies cloud response", "auth_state", authState, "status", response.StatusCode)
 		} else if strings.Contains(route, "/claim") || strings.Contains(route, "/content") {
-			slog.Info("Tonies cloud response", "box", snap.String("commonName"), "method", method, "route", route, "tag_prefix", tagPrefix, "auth_state", authState, "status", response.StatusCode)
+			logger.Info("Tonies cloud response", "auth_state", authState, "status", response.StatusCode)
 		}
 	}
 	if err == nil && response != nil && response.Body != nil {
 		response.Body = &cloudBodyCounter{ReadCloser: response.Body, failed: &s.cloudFailed, onFailure: func() {
-			slog.Warn("Tonies cloud audio transfer interrupted", "box", snap.String("commonName"), "route", route)
+			logger.Warn("Tonies cloud audio transfer interrupted")
 		}}
 	}
 	return response, err
+}
+
+func cloudUserAgentKind(value string) string {
+	switch {
+	case value == "":
+		return "missing"
+	case strings.HasPrefix(value, "TB/") || strings.Contains(value, " TB/"):
+		return "toniebox"
+	case strings.HasPrefix(value, "Mozilla/"):
+		return "browser"
+	default:
+		return "other"
+	}
 }
 func (s *Server) statsAPI(w http.ResponseWriter, r *http.Request) bool {
 	if r.Method != "GET" || !strings.HasPrefix(r.URL.Path, "/api/stats") {

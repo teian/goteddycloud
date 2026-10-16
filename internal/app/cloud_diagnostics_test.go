@@ -8,8 +8,11 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"goteddycloud/internal/content"
 )
 
 func TestCloudDiagnosticsDoNotDiscloseCredentials(t *testing.T) {
@@ -45,6 +48,41 @@ func TestCloudDiagnosticsDoNotDiscloseCredentials(t *testing.T) {
 	}
 	if got := cloudLogReason(context.DeadlineExceeded); got != "timeout" {
 		t.Fatal(got)
+	}
+}
+
+func TestTagCredentialDiagnosticsReportSourceAndMismatchWithoutTokens(t *testing.T) {
+	s := fixtureApp(t)
+	var output bytes.Buffer
+	previous := slog.Default()
+	slog.SetDefault(slog.New(slog.NewTextHandler(&output, nil)))
+	defer slog.SetDefault(previous)
+	const ruid = "97763c1a500304e0"
+	metadata := content.Metadata{}
+	metadata.Set("cloud_auth", strings.Repeat("AB", 32))
+	metadata.Set("cloud_ruid", "b4114322500304e0")
+	r := httptest.NewRequest("GET", "/v2/content/"+ruid+"?secret-query=value", nil)
+	r.Header.Set("User-Agent", "secret-user-agent")
+	headers := http.Header{"Authorization": {"BD " + strings.Repeat("CD", 32)}, "User-Agent": {"secret-user-agent"}}
+	if err := s.Settings.Set("", "cloud.enabled", "true"); err != nil {
+		t.Fatal(err)
+	}
+	s.Cloud = &mockUpstream{}
+	res, err := s.doCloud(tagCloudContext(r, ruid, metadata, headers), s.Settings.Snapshot("001122334455"), s.Settings.Snapshot(""), "GET", r.URL.Path, r.URL.RawQuery, headers, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	res.Body.Close()
+	log := output.String()
+	for _, expected := range []string{"cloud_request=1", "auth_source=saved", "outgoing_auth_matches_saved=false", "saved_ruid=different", "tag_prefix=97763c1a"} {
+		if !strings.Contains(log, expected) {
+			t.Fatal("missing credential diagnostic", expected, log)
+		}
+	}
+	for _, secret := range []string{strings.Repeat("AB", 32), strings.Repeat("CD", 32), ruid, "b4114322500304e0", "secret-query", "secret-user-agent"} {
+		if strings.Contains(log, secret) {
+			t.Fatal("credential disclosed", secret)
+		}
 	}
 }
 

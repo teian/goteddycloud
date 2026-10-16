@@ -3,6 +3,7 @@ package app
 
 import (
 	"io"
+	"log/slog"
 	"net/http"
 
 	"goteddycloud/internal/config"
@@ -26,7 +27,7 @@ func (s *Server) serveCloudContent(w http.ResponseWriter, r *http.Request, snap 
 		}
 	}
 	path, headers := cloudTagRequest(r, metadata, ruid)
-	res, err := s.doCloud(r.Context(), snap, s.Settings.Snapshot(""), r.Method, path, r.URL.RawQuery, headers, nil)
+	res, err := s.doCloud(tagCloudContext(r, ruid, metadata, headers), snap, s.Settings.Snapshot(""), r.Method, path, r.URL.RawQuery, headers, nil)
 	if err != nil {
 		response(w, 502, "", nil)
 		return
@@ -57,9 +58,12 @@ func (s *Server) serveCloudContent(w http.ResponseWriter, r *http.Request, snap 
 	if cache != nil {
 		destination = io.MultiWriter(w, cache)
 	}
-	if _, err := io.Copy(destination, res.Body); err != nil {
+	transferred, err := io.Copy(destination, res.Body)
+	if err != nil {
+		slog.Warn("Tonies audio download interrupted", "box", snap.String("commonName"), "tag_prefix", cloudLogTagPrefix(path), "status", res.StatusCode, "bytes", transferred)
 		return
 	}
+	slog.Info("Tonies audio download completed", "box", snap.String("commonName"), "tag_prefix", cloudLogTagPrefix(path), "status", res.StatusCode, "bytes", transferred)
 	if cache != nil && cache.Commit(r.Context(), res.ContentLength) == nil {
 		// Publish before changing the pointer so a failed transfer preserves the
 		// existing source mapping and usable cache. Unknown metadata stays intact.

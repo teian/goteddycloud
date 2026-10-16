@@ -1169,3 +1169,21 @@ error origin header, preserved tag policy and absence of cached error audio.
 Explicit browser downloads are now logged independently of upstream requests,
 without tag passwords or full UIDs. These checks do not establish why the live
 Tonies service rejected a particular original figure's claim.
+
+### Cloud authentication diagnostics (2026-10-16)
+
+Added INFO-level request correlation, credential-source comparisons, client
+identity selection/fallback, public certificate metadata, TLS certificate
+selection, HTTP protocol/status/timing and transfer byte counts. Real TLS tests
+cover a matching issuer, unavailable selected credentials with global fallback,
+an unacceptable issuer and a server that does not request client authentication.
+They check the observed peer certificate and returned status/body, ensuring the
+diagnostic callback follows normal Go certificate selection. Redaction tests
+exclude passwords, full tag UIDs, user agents, query values, response bodies and
+arbitrary authentication challenge values. App tests cover saved-credential/UID
+mismatches and correlated request logs without printing the underlying values.
+
+Validation evidence: `.cache/cloud-debug-focused.log`,
+`.cache/cloud-debug-go-tests.log`, `.cache/cloud-debug-race.log` and
+`.cache/cloud-debug-image/`. No live cloud acceptance is inferred from these
+synthetic tests.

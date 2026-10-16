@@ -315,7 +315,7 @@ func (s *Server) Device(w http.ResponseWriter, r *http.Request) {
 		_, _, hasOverride := override(m)
 		if enabled(snap, "enableV1Claim") && (!m.Bool("nocloud") || hasOverride) {
 			forwardPath, headers := cloudTagRequest(r, m, ruid)
-			if s.cloudResponse(w, r, snap, forwardPath, headers, nil) {
+			if s.cloudResponse(w, r.WithContext(tagCloudContext(r, ruid, m, headers)), snap, forwardPath, headers, nil) {
 				return
 			}
 			response(w, 502, "", nil)
