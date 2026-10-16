@@ -90,7 +90,11 @@ func (s *Server) serveCloudContent(w http.ResponseWriter, r *http.Request, snap 
 	// The complete response may already have reached a client that closes its
 	// connection. Finish publishing the validated file independently of that
 	// disconnect, but bound finalization and never detach an incomplete transfer.
-	publishCtx, cancel := context.WithTimeout(context.WithoutCancel(r.Context()), 30*time.Second)
+	parent := context.WithoutCancel(r.Context())
+	if background, _ := r.Context().Value(backgroundCloudCacheKey{}).(bool); background {
+		parent = r.Context() // Server shutdown still owns background jobs.
+	}
+	publishCtx, cancel := context.WithTimeout(parent, 30*time.Second)
 	defer cancel()
 	if err := cache.Commit(publishCtx, res.ContentLength); err != nil {
 		logger.Warn("Tonies audio cache failed", "stage", "publish", "reason", cacheFailureReason(err), "bytes", transferred)

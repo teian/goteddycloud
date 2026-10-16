@@ -99,6 +99,26 @@ failure. Library migration has its own success/failure message. A completed
 transfer alone does not establish that a file was stored: look for
 `Tonies audio cache published` and `Tonies audio library cache published`.
 
+## Backfill original figures on placement
+
+An authenticated box claim now queues a background audio fetch for an original
+UID with usable saved credentials, enabled cloud/content caching and no local
+audio source. This is independent of the upstream claim status, including 401.
+The claim response is preserved and does not wait for the audio download. Tags
+marked nocloud, custom UIDs, zero-password tags, live sources and cloud overrides
+are excluded; explicit source assignments are preserved. Workers recheck current
+settings/metadata and existing files before downloading.
+
+Each deployment allows two active jobs and at most 16 queued/active jobs together.
+Duplicate jobs for the same content root/UID are merged. Failed jobs defer retries
+for one minute, with a bounded retry history. Jobs have a two-minute deadline and
+are canceled/joined on server shutdown. Responses are discarded while the common
+manual-download path streams into and validates the cache; no complete audio
+body is buffered in worker memory. Logs report queued/started/completed/failed
+jobs and retry deferral, with `auth_source=background` on their upstream request.
+The UI receives a tag-updated event after completion. A background job succeeds
+only when the stored audio can be reopened, not merely on HTTP 200.
+
 `node scripts/webui-assignment-smoke.mjs` verifies the selected-box library and
 catalog assignment against a generated deployment. `FRONTEND_DIST` can point to
 a local frontend build instead of the default cached stage.

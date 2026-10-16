@@ -18,6 +18,9 @@ func tagCloudContext(r *http.Request, ruid string, metadata content.Metadata, he
 	if runtime.RequestPeer(r.Context()).Box {
 		source = "device"
 	}
+	if background, _ := r.Context().Value(backgroundCloudCacheKey{}).(bool); background {
+		source = "background"
+	}
 	if _, _, ok := override(metadata); ok {
 		source = "override"
 	}

@@ -73,6 +73,7 @@ type Server struct {
 	Settings          *config.Store
 	Content           *content.Store
 	Identity          *identity.Policy
+	originalCache     originalCacheState
 	Now               func() time.Time
 	mu                sync.Mutex // freshness only
 	rtnlMu            sync.Mutex
@@ -166,6 +167,7 @@ func New(settings *config.Store) (*Server, error) {
 	return server, nil
 }
 func (s *Server) Close() error {
+	s.stopOriginalCache()
 	if s.integrationsStop != nil {
 		s.integrationsStop()
 		s.integrations.Wait()
@@ -313,6 +315,9 @@ func (s *Server) Device(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		_, _, hasOverride := override(m)
+		if peer.Box {
+			defer s.scheduleOriginalCache(id, ruid, m, r.UserAgent())
+		}
 		if enabled(snap, "enableV1Claim") && (!m.Bool("nocloud") || hasOverride) {
 			forwardPath, headers := cloudTagRequest(r, m, ruid)
 			if s.cloudResponse(w, r.WithContext(tagCloudContext(r, ruid, m, headers)), snap, forwardPath, headers, nil) {

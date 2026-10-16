@@ -1208,3 +1208,22 @@ messages expose that separately from HTTP transfer success.
 Evidence: `.cache/cloud-cache-before.log`, `.cache/cloud-cache-focused.log`,
 `.cache/cloud-cache-go-tests.log`, `.cache/cloud-cache-race.log` and
 `.cache/cloud-cache-image/`.
+
+### Original audio backfill on authenticated claims (2026-10-16)
+
+A real TLS box-listener test presents an imported synthetic box certificate and
+an original-pattern tag with a nonzero password. The mock claim returns 401 and
+holds the content response open: both the initial claim and a repeated claim
+complete with 401 while exactly one background download runs. Releasing the
+response publishes identical bytes into the separate box library, leaving the
+global library untouched. The manual download then serves those stored bytes
+without another upstream request. Authenticated custom/zero-password tags do
+not forward to the cloud, and an existing local source assignment is preserved.
+Another test cancels a blocked background transfer on shutdown and verifies that
+new jobs are refused afterward. Manual completed-client-disconnect and corrupt
+payload cache tests remain enabled; the live manual storage failure still needs
+its concrete cache-policy/failure log to establish the actual cause.
+
+Evidence: `.cache/original-cache-integration.log`,
+`.cache/original-cache-final-focused.log`, `.cache/original-cache-go-tests.log`,
+`.cache/original-cache-race.log` and `.cache/original-cache-image/`.
