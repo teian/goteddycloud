@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"log/slog"
 	"mime"
 	"net/http"
 	"net/url"
@@ -112,6 +113,9 @@ func (s *Server) contentAPI(w http.ResponseWriter, r *http.Request) bool {
 			return true
 		}
 		cloned := r.Clone(r.Context())
+		if q.Get("skip_header") == "" {
+			slog.Info("Browser audio download requested", "box", id, "tag_prefix", uid[:8], "auth_state", cloudAuthState(metadata))
+		}
 		copiedURL := *r.URL
 		cloned.URL = &copiedURL
 		cloned.Header.Del("Authorization")

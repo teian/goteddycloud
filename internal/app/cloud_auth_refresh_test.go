@@ -2,10 +2,13 @@
 package app
 
 import (
+	"context"
+	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
+	"goteddycloud/internal/config"
 	"goteddycloud/internal/content"
 )
 
@@ -32,6 +35,45 @@ func TestBrowserDownloadDoesNotRedetectCustomTag(t *testing.T) {
 	}
 	if len(mock.requests) != 1 {
 		t.Fatal("browser request was not forwarded", reply.Code)
+	}
+}
+
+type rejectedAudioCloud struct{ mockUpstream }
+
+func (c *rejectedAudioCloud) Do(ctx context.Context, snap, global config.Snapshot, method, path, query string, headers http.Header, body []byte) (*http.Response, error) {
+	response, err := c.mockUpstream.Do(ctx, snap, global, method, path, query, headers, body)
+	response.StatusCode = http.StatusUnauthorized
+	return response, err
+}
+
+func TestBrowserCloudRejectionIsDistinctFromWebAuthentication(t *testing.T) {
+	s := fixtureApp(t)
+	const id, ruid = "001122334455", "72a80421500304e0"
+	if err := s.Settings.Set(id, "cloud.enabled", "true"); err != nil {
+		t.Fatal(err)
+	}
+	snap := s.Settings.Snapshot(id)
+	if err := s.Content.Update(snap, ruid, func(m content.Metadata) error {
+		m.Set("cloud_auth", strings.Repeat("AB", 32))
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+	mock := &rejectedAudioCloud{}
+	s.Cloud = mock
+	reply := perform(s, "GET", "/content/download/72A80421/500304E0?overlay="+id, nil, false)
+	if reply.Code != 401 || reply.Header().Get("X-TeddyCloud-Error-Origin") != "tonies-cloud" {
+		t.Fatal("cloud rejection confused with web login", reply.Code, reply.Header())
+	}
+	if len(mock.requests) != 1 || mock.requests[0].Path != "/v2/content/"+ruid || mock.requests[0].Header.Get("Authorization") != "BD "+strings.Repeat("AB", 32) {
+		t.Fatal("selected box download was not forwarded correctly")
+	}
+	metadata, err := s.Content.Metadata(snap, ruid)
+	if err != nil || metadata.Bool("nocloud") {
+		t.Fatal("original figure blocked after cloud rejection", err)
+	}
+	if _, _, err := s.Content.Open(snap, s.Settings.Snapshot(""), ruid); err == nil {
+		t.Fatal("cloud error cached as audio")
 	}
 }
 

@@ -57,6 +57,15 @@ For Docker deployments, run `docker logs --since 2m --follow <container>` and
 present the affected tag. A cloud setting permits an upstream request; it does
 not replace the tag authorization or guarantee that Tonies will accept it.
 
+The global cloud status probe is advisory for downloads: it may lack the selected
+box's client identity or return stale availability. A permitted download remains
+clickable and reports the actual response using that box's saved tag credentials.
+`Browser audio download requested` confirms receipt of an explicit download click;
+an already cached file can be served without a new upstream content request.
+Upstream audio errors carry `X-TeddyCloud-Error-Origin: tonies-cloud` so a cloud 401
+is displayed as a download failure without opening the web login prompt. A local
+management 401 still requires login.
+
 `node scripts/webui-assignment-smoke.mjs` verifies the selected-box library and
 catalog assignment against a generated deployment. `FRONTEND_DIST` can point to
 a local frontend build instead of the default cached stage.

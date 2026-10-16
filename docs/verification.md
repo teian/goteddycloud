@@ -1155,3 +1155,17 @@ both automatic custom-tag protection and forwarding of an original figurine.
 Logs identify tags by an eight-character prefix and report only password state,
 never password contents. This allows the original figurine and a custom tag to be
 distinguished while diagnosing rejected downloads.
+
+### Downloads with an unavailable global status probe (2026-10-16)
+
+The card no longer blocks a permitted box download when the global status probe
+reports unavailable. The browser fixture clicks the actual download icon with
+that status, verifies the selected overlay in the request, injects an upstream
+401 response, and checks that the notification contains HTTP 401 without firing
+the web authentication event. A frontend test also verifies session preservation
+for this error; existing tests retain login prompts for management 401 responses.
+A backend test verifies forwarding with box-specific cloud enablement, the cloud
+error origin header, preserved tag policy and absence of cached error audio.
+Explicit browser downloads are now logged independently of upstream requests,
+without tag passwords or full UIDs. These checks do not establish why the live
+Tonies service rejected a particular original figure's claim.

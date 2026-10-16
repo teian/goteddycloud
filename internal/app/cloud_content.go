@@ -48,6 +48,10 @@ func (s *Server) serveCloudContent(w http.ResponseWriter, r *http.Request, snap 
 	if w.Header().Get("Content-Type") == "" {
 		w.Header().Set("Content-Type", "application/octet-stream")
 	}
+	// A Tonies 401 is a cloud rejection, not an expired management session.
+	if res.StatusCode >= 400 {
+		w.Header().Set("X-TeddyCloud-Error-Origin", "tonies-cloud")
+	}
 	w.WriteHeader(res.StatusCode)
 	var destination io.Writer = w
 	if cache != nil {
