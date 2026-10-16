@@ -31,6 +31,14 @@ The stream uses the normal bearer/cookie handling and reverse-proxy prefix,
 reconnects after transient failures, and restores last-tag state on reconnection.
 Area access and revocation are enforced by the backend.
 
+Audio assignment uses the selected Toniebox's library, including the custom model
+editor and previous/next episode controls. The file chooser also offers a
+`tonies.json` tab: choosing a model sets its metadata and picks matching library
+audio when available, checking every catalog audio revision. Saving applies the
+assignment; metadata-only choices retain the existing audio source. Failed or
+empty cloud downloads produce an error instead of a success notification.
+
+
 Normal accounts entering `/web/settings` go to the accessible users/areas page.
 Backend authorization remains authoritative for all old and new pages.
 User and area management is a built-in application route, not a plugin.

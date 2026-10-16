@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"os"
 	"strconv"
@@ -406,6 +407,16 @@ func (s *Server) serveStored(w http.ResponseWriter, r *http.Request, id string, 
 		return
 	}
 	if err != nil {
+		reason := "local_audio_missing"
+		switch {
+		case metadata.Bool("nocloud") && !metadata.Bool("cloud_override"):
+			reason = "tag_cloud_blocked"
+		case !snap.Bool("cloud.enabled"):
+			reason = "cloud_disabled"
+		case !snap.Bool("cloud.enableV2Content"):
+			reason = "content_forwarding_disabled"
+		}
+		slog.Warn("Tonies audio unavailable", "box", id, "route", cloudLogRoute(r.URL.Path), "status", 404, "reason", reason)
 		response(w, 404, "", nil)
 		return
 	}
@@ -688,7 +699,7 @@ func updateTagAuth(m content.Metadata, r *http.Request, snap config.Snapshot, ru
 		m.Set("cloud_ruid", ruid)
 		m.Set("cloud_auth", strings.ToUpper(hex.EncodeToString(token)))
 	}
-	if !detectCustom || m.Bool("nocloud") || m.Bool("cloud_override") {
+	if !detectCustom || m.Bool("nocloud") || m.Bool("nocloud_manual") || m.Bool("cloud_override") {
 		return
 	}
 	custom := false

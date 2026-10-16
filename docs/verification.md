@@ -1115,3 +1115,24 @@ Evidence: `.cache/live-ui-go-tests.log`, `.cache/live-ui-race.log`,
 `.cache/live-ui-scope-tests.log`, `.cache/live-ui-build.log`,
 `.cache/live-ui-browser.log`, `.cache/live-ui-accounts-browser.log`, and
 `.cache/webui-live-tags.png` (visually inspected).
+
+
+### Assignment and manual cloud choices (2026-10-16)
+
+The audio picker now passes the selected box overlay through to the library
+index. A synthetic browser fixture with an empty global library and a separate
+box library verifies visible files, catalog search, assignment of a later audio
+revision, saved model/source, and metadata-only selection without losing audio.
+The file chooser exposes `tonies.json` as an alternate assignment tab.
+All 115 frontend tests, TypeScript/production build, translations and formatting
+pass. Evidence: `.cache/assignment-browser.log` and `.cache/webui-assignment.png`.
+
+An explicit per-tag cloud choice now survives the next request even when
+password/UID autodetection would mark the tag as custom. Tests reproduce the
+local 404, enable cloud through the management API, present the same zero-password
+tag again, and verify successful forwarding and preserved metadata. Automatic
+protection remains enabled for tags without an explicit choice. Diagnostics
+record route categories/status/failure reasons without credentials. UI tests
+also reject HTTP errors and empty audio responses as failed downloads.
+This establishes the local policy fix; acceptance by the external Tonies cloud
+still depends on valid device/tag credentials and the upstream response.

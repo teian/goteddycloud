@@ -60,6 +60,9 @@ func (s *Server) contentAPI(w http.ResponseWriter, r *http.Request) bool {
 						m.Set(key, form.Get(key))
 					}
 				}
+				if form.Has("nocloud") {
+					m.Set("nocloud_manual", true)
+				}
 				for _, key := range []string{"live", "nocloud", "hide", "claimed"} {
 					if form.Has(key) {
 						m.Set(key, form.Get(key) == "true")

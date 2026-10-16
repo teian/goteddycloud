@@ -33,3 +33,24 @@ Run `node scripts/webui-live-smoke.mjs` after building the frontend to verify re
 TLS RTNL discovery, unknown cards, blue borders, tag switching, metadata updates,
 notifications, reconnect snapshots and shared RTNL streaming using generated
 identities and a disposable deployment.
+
+
+## Cloud download diagnostics
+
+An explicit cloud choice (`nocloud=false` or `nocloud=true` through the tag API)
+is persisted with `nocloud_manual=true`. Automatic custom-tag detection respects
+that choice on subsequent claim/content requests. Tags without an explicit choice
+keep the existing password/UID detection behavior.
+
+The cloud icon tooltip explains whether access is blocked for the tag. Default
+server logs distinguish a locally blocked download (`reason=tag_cloud_blocked`)
+from an upstream HTTP rejection (`Tonies cloud response`, with `status`), missing
+client identity, network/TLS failures and interrupted transfers. Credentials,
+query parameters, complete tag paths and response bodies are not logged.
+For Docker deployments, run `docker logs --since 2m --follow <container>` and
+present the affected tag. A cloud setting permits an upstream request; it does
+not replace the tag authorization or guarantee that Tonies will accept it.
+
+`node scripts/webui-assignment-smoke.mjs` verifies the selected-box library and
+catalog assignment against a generated deployment. `FRONTEND_DIST` can point to
+a local frontend build instead of the default cached stage.
