@@ -1187,3 +1187,24 @@ Validation evidence: `.cache/cloud-debug-focused.log`,
 `.cache/cloud-debug-go-tests.log`, `.cache/cloud-debug-race.log` and
 `.cache/cloud-debug-image/`. No live cloud acceptance is inferred from these
 synthetic tests.
+
+### Cache publication after a completed browser download (2026-10-16)
+
+A regression test first reproduced loss of an otherwise valid download when a
+response writer cancels the request after the final byte. The same test first
+receives a claim 401, then downloads audio with 200. The connected-client case
+already cached successfully; the completed/disconnected case failed before the
+fix. Completed transfers now finalize with a detached, bounded context. Both
+cases persist identical library bytes, reopen through a new content store and
+serve locally after cloud forwarding is disabled, with no additional upstream
+requests. Existing incomplete-transfer and collision tests retain prior files.
+
+Cache policy and each publication stage now log their result. Further tests
+check that a corrupt payload and disabled caching are diagnosed without publishing
+invalid audio. Length, hash and Ogg checks are unchanged. These reproductions do
+not establish which cache failure affected the live deployment; the new cache
+messages expose that separately from HTTP transfer success.
+
+Evidence: `.cache/cloud-cache-before.log`, `.cache/cloud-cache-focused.log`,
+`.cache/cloud-cache-go-tests.log`, `.cache/cloud-cache-race.log` and
+`.cache/cloud-cache-image/`.

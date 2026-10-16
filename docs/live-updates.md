@@ -86,6 +86,19 @@ status and byte count. Request passwords (including hashes), raw user agents,
 query values, arbitrary response headers and response bodies remain absent from
 the logs. No debug setting or log-level change is needed for these messages.
 
+Audio transfer completion is separate from durable cache publication. The cache
+does not depend on a successful claim: a claim 401 followed by a full content 200
+can publish both the UID file and library entry. After the full response has been
+copied, publication and migration use an independent context with a 30-second
+timeout so a client closing after the final byte cannot discard the download.
+Incomplete transfers remain ineligible, and length/hash/Ogg validation stays in
+place. `Tonies audio cache policy` reports the effective overlay settings and
+content/library roots. `Tonies audio cache skipped` gives the policy reason;
+`Tonies audio cache failed` identifies initialization, publication or metadata
+failure. Library migration has its own success/failure message. A completed
+transfer alone does not establish that a file was stored: look for
+`Tonies audio cache published` and `Tonies audio library cache published`.
+
 `node scripts/webui-assignment-smoke.mjs` verifies the selected-box library and
 catalog assignment against a generated deployment. `FRONTEND_DIST` can point to
 a local frontend build instead of the default cached stage.

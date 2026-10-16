@@ -2,9 +2,11 @@
 package app
 
 import (
+	"context"
 	"io"
 	"log/slog"
 	"net/http"
+	"time"
 
 	"goteddycloud/internal/config"
 	"goteddycloud/internal/content"
@@ -33,13 +35,31 @@ func (s *Server) serveCloudContent(w http.ResponseWriter, r *http.Request, snap 
 		return
 	}
 	defer res.Body.Close()
+	logger := slog.Default().With("box", snap.String("commonName"), "tag_prefix", cloudLogTagPrefix(path))
 	var cache *content.CacheFile
 	// A ranged or header-stripped body is never eligible for full-file publication.
-	if snap.Bool("cloud.cacheContent") && res.StatusCode == 200 && r.Header.Get("Range") == "" && r.URL.Query().Get("skip_header") == "" {
-		cache, _ = s.Content.BeginCache(snap, ruid)
-		if cache != nil {
+	skipCache := ""
+	switch {
+	case !snap.Bool("cloud.cacheContent"):
+		skipCache = "caching_disabled"
+	case res.StatusCode != 200:
+		skipCache = "upstream_status"
+	case r.Header.Get("Range") != "":
+		skipCache = "ranged_request"
+	case r.URL.Query().Get("skip_header") != "":
+		skipCache = "header_stripped_request"
+	}
+	logger.Info("Tonies audio cache policy", "cache_content", snap.Bool("cloud.cacheContent"), "cache_to_library", snap.Bool("cloud.cacheToLibrary"),
+		"content_root", snap.String("internal.contentdirfull"), "library_root", snap.String("internal.librarydirfull"))
+	if skipCache == "" {
+		cache, err = s.Content.BeginCache(snap, ruid)
+		if err != nil {
+			logger.Warn("Tonies audio cache failed", "stage", "initialize", "reason", cacheFailureReason(err))
+		} else {
 			defer cache.Close()
 		}
+	} else {
+		logger.Info("Tonies audio cache skipped", "reason", skipCache)
 	}
 	for _, key := range []string{"Content-Type", "Content-Length", "Content-Range", "ETag", "Last-Modified", "Cache-Control"} {
 		if value := res.Header.Get(key); value != "" {
@@ -60,16 +80,34 @@ func (s *Server) serveCloudContent(w http.ResponseWriter, r *http.Request, snap 
 	}
 	transferred, err := io.Copy(destination, res.Body)
 	if err != nil {
-		slog.Warn("Tonies audio download interrupted", "box", snap.String("commonName"), "tag_prefix", cloudLogTagPrefix(path), "status", res.StatusCode, "bytes", transferred)
+		logger.Warn("Tonies audio download interrupted", "status", res.StatusCode, "bytes", transferred, "reason", cacheFailureReason(err))
 		return
 	}
-	slog.Info("Tonies audio download completed", "box", snap.String("commonName"), "tag_prefix", cloudLogTagPrefix(path), "status", res.StatusCode, "bytes", transferred)
-	if cache != nil && cache.Commit(r.Context(), res.ContentLength) == nil {
-		// Publish before changing the pointer so a failed transfer preserves the
-		// existing source mapping and usable cache. Unknown metadata stays intact.
-		_ = s.Content.UpdateContext(r.Context(), snap, ruid, func(m content.Metadata) error { m.Set("source", ""); return nil })
-		if snap.Bool("cloud.cacheToLibrary") {
-			_ = s.Content.CacheToLibrary(r.Context(), snap, ruid)
+	logger.Info("Tonies audio download completed", "status", res.StatusCode, "bytes", transferred)
+	if cache == nil {
+		return
+	}
+	// The complete response may already have reached a client that closes its
+	// connection. Finish publishing the validated file independently of that
+	// disconnect, but bound finalization and never detach an incomplete transfer.
+	publishCtx, cancel := context.WithTimeout(context.WithoutCancel(r.Context()), 30*time.Second)
+	defer cancel()
+	if err := cache.Commit(publishCtx, res.ContentLength); err != nil {
+		logger.Warn("Tonies audio cache failed", "stage", "publish", "reason", cacheFailureReason(err), "bytes", transferred)
+		return
+	}
+	logger.Info("Tonies audio cache published", "bytes", transferred)
+	// Publish before changing the pointer so a failed transfer preserves the
+	// existing source mapping and usable cache. Unknown metadata stays intact.
+	if err := s.Content.UpdateContext(publishCtx, snap, ruid, func(m content.Metadata) error { m.Set("source", ""); return nil }); err != nil {
+		logger.Warn("Tonies audio cache failed", "stage", "metadata_update", "reason", cacheFailureReason(err))
+		return
+	}
+	if snap.Bool("cloud.cacheToLibrary") {
+		if err := s.Content.CacheToLibrary(publishCtx, snap, ruid); err != nil {
+			logger.Warn("Tonies audio library cache failed", "reason", cacheFailureReason(err), "content_cache_published", true)
+			return
 		}
+		logger.Info("Tonies audio library cache published", "bytes", transferred)
 	}
 }
