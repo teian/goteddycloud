@@ -8,4 +8,5 @@
 /.env
 __pycache__/
 *.py[cod]
+/scripts/browser/node_modules/
 /internal/cc3200cli/loader/rbtl3100s.dll

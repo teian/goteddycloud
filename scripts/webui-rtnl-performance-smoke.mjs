@@ -109,7 +109,9 @@ try {
     }));
     console.log(JSON.stringify({ routeToPaintMs: Math.round(elapsed), cpuSlowdown: 4, ...metrics }));
     if (!process.env.RTNL_PERF_BASELINE) {
-        assert(elapsed < 1000, 'console route blocked for a second');
+        const budget = Number(process.env.RTNL_ROUTE_BUDGET_MS || 1000);
+        assert(Number.isFinite(budget) && budget > 0 && budget <= 10000, 'invalid console latency budget');
+        assert(elapsed < budget, `console route exceeded ${budget} ms budget`);
         assert(metrics.characters <= 65536, 'unbounded console text');
         assert(metrics.elements <= 2, 'per-token DOM expansion returned');
         assert((await page.locator('.rtnl-log-container').innerText()).includes('Nur-im-Backend'), 'frontend ignored server-supplied function definition');
@@ -145,7 +147,10 @@ try {
         console.log('PASS: full buffer with 4× CPU slowdown, backend-only mapping, bounded display, history, complete exports, raw fallback and retry');
     }
 } catch (error) {
-    if (page) console.error('Fixture page:', page.url(), (await page.locator('body').innerText()).slice(0, 1500));
+    if (page) {
+        await page.screenshot({ path: resolve('.cache/rtnl-performance-failure.png'), fullPage: true }).catch(() => {});
+        console.error('Fixture page:', page.url(), (await page.locator('body').innerText()).slice(0, 1500));
+    }
     throw error;
 } finally {
     if (browser) await browser.close();

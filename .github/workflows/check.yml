@@ -1,77 +1,193 @@
-name: Go compatibility checks
+name: GoTeddyCloud checks
+
 on:
   push:
   pull_request:
   workflow_call:
+
 permissions:
   contents: read
+
+concurrency:
+  group: checks-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  GOFLAGS: '-buildvcs=false'
+
 jobs:
   go:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+    name: Server — unit tests and static checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      - name: Check out GoTeddyCloud source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install Go 1.26.8
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: '1.26.8'
-      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      - name: Install Node.js 24 for gateway protocol tests
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
-      - run: scripts/build-cc3200-wasm.sh
-      - run: node --test scripts/cc3200-protocol.test.mjs
-      - run: go test -buildvcs=false ./...
-      - run: go vet -buildvcs=false ./...
-      - name: Staticcheck
-        env:
-          GOFLAGS: '-buildvcs=false'
-        run: go run honnef.co/go/tools/cmd/staticcheck@v0.8.1 ./...
-      - run: go mod tidy -diff
-      - run: go test -buildvcs=false -race ./...
-      - name: Bounded parser and path fuzz smoke
+      - name: Install FFmpeg for audio tests
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Verify CI logging retains command failures
+        run: node --test scripts/ci-run.test.mjs
+      - name: Validate the GitHub Actions workflow
+        run: bash scripts/ci-run.sh workflow-lint go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 .github/workflows/check.yml
+      - name: Build the CC3200 browser flashing module
+        run: bash scripts/ci-run.sh wasm-build scripts/build-cc3200-wasm.sh
+      - name: Test the CC3200 gateway protocol
+        run: bash scripts/ci-run.sh gateway-protocol node --test scripts/cc3200-protocol.test.mjs
+      - name: Test server APIs, storage, protocols and audio codecs
+        run: bash scripts/ci-run.sh go-tests go test ./...
+      - name: Check Go diagnostics with vet
+        run: bash scripts/ci-run.sh go-vet go vet ./...
+      - name: Check Go code with pinned Staticcheck
+        run: bash scripts/ci-run.sh staticcheck go run honnef.co/go/tools/cmd/staticcheck@v0.8.1 ./...
+      - name: Verify Go dependency files are tidy
+        run: bash scripts/ci-run.sh dependency-lock go mod tidy -diff
+      - name: Retain server check logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: server-check-logs
+          path: .cache/ci-checks/
+          if-no-files-found: ignore
+
+  race:
+    name: Server — race detection and parser fuzzing
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Check out GoTeddyCloud source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install Go 1.26.8
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.26.8'
+      - name: Install FFmpeg for concurrent audio tests
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Build the CC3200 browser flashing module
+        run: bash scripts/ci-run.sh wasm-build scripts/build-cc3200-wasm.sh
+      - name: Detect data races across all Go packages
+        run: bash scripts/ci-run.sh go-race go test -race ./...
+      - name: Fuzz network, firmware, audio and path parsers (3 seconds each)
         env:
           GOMAXPROCS: '2'
         run: |
-          go test -buildvcs=false ./internal/mqtt -run '^$' -fuzz FuzzPacket -fuzztime 3s
-          go test -buildvcs=false ./internal/firmware -run '^$' -fuzz FuzzFirmwareParse -fuzztime 3s
-          go test -buildvcs=false ./internal/cc3200 -run '^$' -fuzz FuzzInspect -fuzztime 3s
-          go test -buildvcs=false ./internal/taf -run '^$' -fuzz FuzzReadHeader -fuzztime 3s
-          go test -buildvcs=false ./internal/taf -run '^$' -fuzz FuzzOpusFrames -fuzztime 3s
-          go test -buildvcs=false ./internal/storage -run '^$' -fuzz FuzzConfinedRead -fuzztime 3s
-      - run: python3 scripts/build-release.py ci-${{ github.sha }}
-      - run: python3 scripts/native-smoke.py --binary dist/goteddycloud-ci-${{ github.sha }}-linux-amd64/goteddycloud
-      - run: python3 scripts/migration-rehearsal.py --binary dist/goteddycloud-ci-${{ github.sha }}-linux-amd64/goteddycloud
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+          bash scripts/ci-run.sh fuzz-mqtt go test ./internal/mqtt -run '^$' -fuzz FuzzPacket -fuzztime 3s
+          bash scripts/ci-run.sh fuzz-firmware go test ./internal/firmware -run '^$' -fuzz FuzzFirmwareParse -fuzztime 3s
+          bash scripts/ci-run.sh fuzz-cc3200 go test ./internal/cc3200 -run '^$' -fuzz FuzzInspect -fuzztime 3s
+          bash scripts/ci-run.sh fuzz-taf go test ./internal/taf -run '^$' -fuzz FuzzReadHeader -fuzztime 3s
+          bash scripts/ci-run.sh fuzz-opus go test ./internal/taf -run '^$' -fuzz FuzzOpusFrames -fuzztime 3s
+          bash scripts/ci-run.sh fuzz-paths go test ./internal/storage -run '^$' -fuzz FuzzConfinedRead -fuzztime 3s
+      - name: Retain race and fuzz logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: race-and-fuzz-logs
+          path: .cache/ci-checks/
+          if-no-files-found: ignore
+
+  webui:
+    name: Web UI — build, unit tests and browser checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      PLAYWRIGHT_MODULE: scripts/browser/node_modules/playwright/index.mjs
+      # Structural rendering limits are checked independently. Allow scheduling
+      # jitter on shared runners while still rejecting multi-second stalls.
+      RTNL_ROUTE_BUDGET_MS: '2000'
+    steps:
+      - name: Check out GoTeddyCloud source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install Go 1.26.8 for the real browser-test backend
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.26.8'
+      - name: Install Node.js 24 and restore npm downloads
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: scripts/browser/package-lock.json
+      - name: Install FFmpeg for browser audio fixtures
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Build the CC3200 browser flashing module
+        run: bash scripts/ci-run.sh wasm-build scripts/build-cc3200-wasm.sh
+      - name: Fetch the pinned WebUI and build production assets
+        run: bash scripts/ci-run.sh webui-build scripts/frontend.sh build
+      - name: Test WebUI components and the backend mapping client
+        run: bash scripts/ci-run.sh webui-unit scripts/frontend.sh test
+      - name: Check WebUI translation keys
+        run: bash scripts/ci-run.sh webui-translations npm --prefix .cache/goteddycloud-web run check:translations
+      - name: Install locked Playwright tooling and Chromium
+        run: |
+          bash scripts/ci-run.sh browser-dependencies npm ci --prefix scripts/browser --ignore-scripts --no-audit --no-fund
+          bash scripts/ci-run.sh chromium-install scripts/browser/node_modules/.bin/playwright install --with-deps chromium
+      - name: Build the Go backend for browser acceptance checks
+        run: |
+          mkdir -p bin
+          bash scripts/ci-run.sh browser-backend go build -o bin/goteddycloud ./cmd/goteddycloud
+      - name: Test WebUI login, roles, assets and browser tools
+        run: bash scripts/ci-run.sh webui-acceptance node scripts/webui-smoke.mjs
+      - name: Test Tonie assignment with an isolated box library
+        run: bash scripts/ci-run.sh webui-assignment node scripts/webui-assignment-smoke.mjs
+      - name: Test real TLS RTNL, live updates and snapshots
+        run: bash scripts/ci-run.sh webui-live node scripts/webui-live-smoke.mjs
+      - name: Test RTNL responsiveness, backend mappings and raw fallback
+        run: bash scripts/ci-run.sh webui-rtnl-performance node scripts/webui-rtnl-performance-smoke.mjs
+      - name: Retain browser logs and screenshots
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: webui-browser-diagnostics
+          path: |
+            .cache/ci-checks/
+            .cache/webui*.png
+            .cache/rtnl-performance-failure.png
+          if-no-files-found: ignore
+
+  native:
+    name: Native releases — cross-build, startup and migration
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Check out GoTeddyCloud source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install Go 1.26.8
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.26.8'
+      - name: Install FFmpeg for native audio smoke checks
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Build the CC3200 browser flashing module
+        run: bash scripts/ci-run.sh wasm-build scripts/build-cc3200-wasm.sh
+      - name: Cross-build Linux, Windows and macOS release archives
+        run: bash scripts/ci-run.sh release-build python3 scripts/build-release.py ci-${{ github.sha }}
+      - name: Verify native startup, settings, TLS, restart and shutdown
+        run: bash scripts/ci-run.sh native-startup python3 scripts/native-smoke.py --binary dist/goteddycloud-ci-${{ github.sha }}-linux-amd64/goteddycloud
+      - name: Verify migration validation, persistence and rollback
+        run: bash scripts/ci-run.sh native-migration python3 scripts/migration-rehearsal.py --binary dist/goteddycloud-ci-${{ github.sha }}-linux-amd64/goteddycloud
+      - name: Upload native archives and checksums
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: backend-builds
           path: |
             dist/*.tar.gz
             dist/*.zip
             dist/SHA256SUMS
-  oracle:
-    runs-on: ubuntu-latest
-    timeout-minutes: 35
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      - name: Retain native build and migration logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          go-version: '1.26.8'
-      - run: sudo apt-get update && sudo apt-get install -y build-essential ffmpeg
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: '24'
-      - run: scripts/oracle-suite.sh
-      - run: python3 scripts/cli-smoke.py
-      - run: python3 scripts/mqtt-differential.py
-      - run: python3 scripts/port-differential.py
-      - run: python3 scripts/live-differential.py
-      - run: python3 scripts/cloud-differential.py
-      - run: python3 scripts/security-differential.py
-      - run: python3 scripts/diagnostics-smoke.py
-      - run: python3 scripts/custom-api-tests.py
-      - run: scripts/frontend.sh build
-      - run: scripts/frontend.sh test
-      - run: python3 -m venv .cache/develop-test-venv && .cache/develop-test-venv/bin/pip install pytest==9.1.1
-      - run: .cache/develop-test-venv/bin/python scripts/develop-differential.py
-      - run: .cache/develop-test-venv/bin/python scripts/develop-differential.py --stage .cache/develop-hardening --hardening-only
-      - run: python3 scripts/develop-inventory.py && python3 scripts/reference-inventory.py --check
+          name: native-build-logs
+          path: .cache/ci-checks/
+          if-no-files-found: ignore

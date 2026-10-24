@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Build the integrated frontend first. Playwright is an optional local QA tool.
+// Build the integrated frontend first; use the locked scripts/browser tooling.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { spawn, execFileSync } from 'node:child_process';
@@ -19,7 +19,7 @@ let browser;
 try {
     let address;
     for (let i = 0; i < 100; i++) {
-        address = logs.match(/http:(127\.0\.0\.1:\d+)/)?.[1];
+        address = logs.match(/HTTP: (127\.0\.0\.1:\d+)/)?.[1];
         if (address) break;
         if (server.exitCode !== null) throw new Error(logs);
         await new Promise(resolve => setTimeout(resolve, 100));

@@ -18,7 +18,7 @@ TARGETS = [('linux', 'amd64'), ('linux', 'arm'), ('linux', 'arm64'),
            ('windows', 'amd64'), ('windows', 'arm64'),
            ('darwin', 'amd64'), ('darwin', 'arm64')]
 PROGRAMS = ('goteddycloud', 'cc3200tool')
-NOTICES = ['LICENSE', 'NOTICE', 'README.md', 'docs/licenses.md', 'docs/storage.md',
+NOTICES = ['LICENSE', 'NOTICE', 'README.md', 'docs/ci.md', 'docs/licenses.md', 'docs/storage.md',
            'docs/storage-verification.md', 'docs/s3-providers.md', 'docs/cc3200-flashing.md',
            'docs/cc3200-tool.md', 'docs/reverse-proxy.md', 'docs/management-tls.md',
            'docs/user-areas.md', 'docs/migration.md', 'docs/verification.md', 'docs/packaging.md',

@@ -185,24 +185,22 @@ box identity policy is name-based. Optional web login protects management APIs
 with cookie or bearer sessions; it is disabled by default. See the
 [development port](docs/develop-port.md) for login setup and changes. See [TLS policy](docs/tls-compatibility.md).
 
-Build the isolated C oracle and generate private synthetic data:
+CI validates the Go implementation in four independent jobs: server unit/static
+checks, race/fuzz checks, WebUI browser checks and native release/migration checks.
+The C-reference job and its runtime are no longer part of regular CI. See
+[CI jobs, diagnostics and local commands](docs/ci.md).
+
+Run the server checks and migration rehearsal locally:
 
 ```sh
-scripts/reference.sh build
-go run -buildvcs=false ./cmd/fixturegen
-scripts/reference.sh run
-```
-
-The oracle uses loopback 18080/18443/18444 with cloud/MQTT disabled. Generated
-keys/audio stay under ignored `.cache/`; fixture generation rejects existing
-folders. Scripts leave `../teddycloud` unchanged. Run only one writer per fixture
-copy and never point these tests at production deployment data.
-
-```sh
-go run -buildvcs=false ./cmd/compatcheck -cases testdata/device-offline.json
-go run -buildvcs=false ./cmd/compatcheck -cases testdata/auth-events.json
+go test -buildvcs=false ./...
+go vet -buildvcs=false ./...
 python3 scripts/migration-rehearsal.py --binary bin/goteddycloud
 ```
+
+Browser and migration checks generate private synthetic data under ignored
+`.cache/` paths. Historical C-reference scripts remain available for optional
+manual investigations; no C checkout is needed to run the regular checks.
 
 See [compatibility/support report](docs/compatibility-report.md),
 [compatibility inventory](docs/compatibility.md), [feasibility](docs/feasibility.md),

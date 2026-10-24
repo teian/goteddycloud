@@ -1,5 +1,9 @@
 # Implementation verification
 
+Current CI validates GoTeddyCloud directly; the C-reference job/runtime has been
+retired. See [CI jobs and diagnostics](ci.md) for the current checks. The dated
+milestone records below preserve historical reference comparisons.
+
 Initial implementation run, 2026-10-09. This is partial milestone 1 work;
 no replacement parity, physical-device support or production readiness is claimed.
 

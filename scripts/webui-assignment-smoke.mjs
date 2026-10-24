@@ -13,6 +13,7 @@ const id = '001122334455';
 const ruid = '11000000500304e0';
 let server, browser;
 let logs = '';
+const searches = [];
 try {
     execFileSync('go', ['build', '-o', binary, './cmd/goteddycloud']);
     execFileSync('go', ['run', './cmd/fixturegen', '-output', fixture]);
@@ -33,7 +34,7 @@ try {
     server.stderr.on('data', data => { logs += data; });
     let http;
     for (let i = 0; i < 100; i++) {
-        http = logs.match(/http:(127\.0\.0\.1:\d+)/)?.[1];
+        http = logs.match(/HTTP: (127\.0\.0\.1:\d+)/)?.[1];
         if (http) break;
         if (server.exitCode !== null) throw new Error(logs);
         await new Promise(resolve => setTimeout(resolve, 100));
@@ -67,6 +68,9 @@ try {
     await page.route('**/api/cloud/status', route => route.fulfill({ json: { enabled: true, available: false } }));
     const errors = [];
     const requests = [];
+    page.on('response', async response => {
+        if (response.url().includes('/api/toniesJsonSearch?')) searches.push({ url: response.url(), status: response.status(), data: await response.json().catch(() => null) });
+    });
     page.on('pageerror', error => errors.push(String(error)));
     page.on('request', request => { if (request.url().includes('/api/fileIndexV2')) requests.push(request.url()); });
     await page.goto(url + '/web/tonies');
@@ -77,8 +81,15 @@ try {
     await chooser.getByText('matched.taf', { exact: true }).filter({ visible: true }).first().waitFor();
     assert(requests.some(request => new URL(request).searchParams.get('overlay') === id));
     await chooser.getByRole('tab', { name: 'tonies.json' }).click();
-    await chooser.getByPlaceholder('Search for a model').fill('ASSIGN_TEST');
-    await page.getByText('[ASSIGN_TEST] Synthetic Assignment - Matching episode', { exact: true }).click();
+    const searchModel = async model => {
+        const responseReady = page.waitForResponse(response => new URL(response.url()).pathname.endsWith('/api/toniesJsonSearch') && new URL(response.url()).searchParams.get('searchModel') === model);
+        await chooser.getByPlaceholder('Search for a model').fill(model);
+        const response = await responseReady;
+        assert.equal(response.status(), 200);
+        assert((await response.json()).some(row => row.model === model), 'model missing from search response: ' + model);
+        await page.locator('.ant-dropdown').filter({ visible: true }).getByText(model, { exact: false }).click();
+    };
+    await searchModel('ASSIGN_TEST');
     await chooser.getByRole('button', { name: 'OK', exact: true }).click();
     await page.getByRole('button', { name: /Save$/ }).click();
     await card.getByText('Synthetic Assignment', { exact: true }).waitFor();
@@ -92,8 +103,7 @@ try {
     await card.locator('[aria-label="edit"]').click();
     await page.locator('[aria-label="folder-open"]').click();
     await chooser.getByRole('tab', { name: 'tonies.json' }).click();
-    await chooser.getByPlaceholder('Search for a model').fill('META_ONLY');
-    await page.getByText('[META_ONLY] Metadata without audio - No local audio', { exact: true }).click();
+    await searchModel('META_ONLY');
     await chooser.getByRole('button', { name: 'OK', exact: true }).click();
     await page.getByRole('button', { name: /Save$/ }).click();
     await card.getByText('Metadata without audio', { exact: true }).waitFor();
@@ -118,6 +128,7 @@ try {
     console.log('PASS cloud download remains clickable with a failed global status probe, uses the selected box, reports HTTP 401 and preserves the web session');
 } catch (error) {
     console.error(logs);
+    console.error('Model search responses:', JSON.stringify(searches));
     if (browser) for (const context of browser.contexts()) for (const page of context.pages()) {
         await page.screenshot({ path: resolve('.cache/webui-assignment-failure.png'), fullPage: true }).catch(() => {});
     }
