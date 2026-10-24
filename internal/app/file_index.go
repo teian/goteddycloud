@@ -170,6 +170,8 @@ func (s *Server) fileIndexAPI(w http.ResponseWriter, r *http.Request) bool {
 	}
 	// Stable sorting is provided by the UI. Keep native directory order as C does.
 	budget := indexLimit
+	var linkedModels map[string]string
+	linkedModelsLoaded := false
 	for _, entry := range entries {
 		if r.Context().Err() != nil {
 			return true
@@ -236,6 +238,13 @@ func (s *Server) fileIndexAPI(w http.ResponseWriter, r *http.Request) bool {
 			item = s.Catalog.ByAudio(header.GetAudioId(), header.Sha1Hash)
 			if item == nil {
 				item = s.Catalog.ByModel(metadata.String("tonie_model"))
+			}
+			if item == nil && q.Get("special") == "library" {
+				if !linkedModelsLoaded {
+					linkedModels, _ = s.linkedLibraryModels(r.Context(), snap)
+					linkedModelsLoaded = true
+				}
+				item = s.Catalog.ByModel(linkedModels[filepath.Clean(name)])
 			}
 		} else if info.IsDir() {
 			sub, err := root.Open(name)
