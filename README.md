@@ -97,6 +97,13 @@ upgrading, let the box sync again, then reload the Tonies page. A tag UID alone
 does not identify its title; special audio ID 1 requires a local audio header/hash
 or a manually assigned model. Existing model assignments are preserved.
 
+With cloud content caching enabled, authenticated claims and RTNL tag
+presentations also backfill missing original audio when the box plays from its
+SD card. RTNL backfills reuse tag credentials saved from an earlier device
+request; a UID alone is insufficient to download audio. With library caching
+enabled, existing UID caches are moved to the library on the next presentation,
+including after an earlier library publication failure, without another download.
+
 The UI reads `/api/cloud/status`, which reports disabled or unavailable cloud
 access as HTTP 200 status data. The local `/api/time` clock remains independent.
 Raw `/reverse/v1/time` requests still proxy the upstream Tonie cloud and need a

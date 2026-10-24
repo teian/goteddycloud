@@ -6,18 +6,23 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/binary"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
 	"time"
 
+	"google.golang.org/protobuf/proto"
+	"goteddycloud/internal/boxstate"
 	"goteddycloud/internal/certificates"
 	"goteddycloud/internal/config"
 	"goteddycloud/internal/content"
+	"goteddycloud/internal/protocol"
 	serverruntime "goteddycloud/internal/runtime"
 )
 
@@ -261,5 +266,148 @@ func TestOriginalCacheRechecksDisabledBoxBeforeFetching(t *testing.T) {
 	}
 	if _, downloads := mock.counts(); downloads != 0 {
 		t.Fatal("disabled box fetched audio")
+	}
+}
+
+func TestOriginalCacheRTNLPresentationWithoutClaim(t *testing.T) {
+	s := fixtureApp(t)
+	const id, ruid = "001122334455", "97763c1a500304e0"
+	if err := s.Settings.Set("", "cloud.enabled", "true"); err != nil {
+		t.Fatal(err)
+	}
+	snap := s.Settings.Snapshot(id)
+	if err := s.Content.Update(snap, ruid, func(m content.Metadata) error {
+		m.Set("cloud_auth", strings.Repeat("AB", 32))
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+	data := syntheticTAF(t)
+	mock := &originalCacheCloud{data: data, started: make(chan struct{}), release: make(chan struct{})}
+	close(mock.release)
+	s.Cloud = mock
+	uid, _ := content.UIDFromRUID(ruid)
+	payload := make([]byte, 8)
+	binary.BigEndian.PutUint32(payload, uint32(uid))
+	binary.BigEndian.PutUint32(payload[4:], uint32(uid>>32))
+	wire, err := proto.Marshal(&protocol.TonieRtnlRPC{Log2: &protocol.TonieRtnlLog2{
+		Uptime: proto.Uint64(1), Sequence: proto.Uint32(1), Field3: proto.Uint32(0),
+		FunctionGroup: proto.Uint32(boxstate.RTNL2_FUGR_TAG),
+		Function:      proto.Uint32(boxstate.RTNL2_FUNC_TAG_VALID_CC3200), Field6: payload,
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Boxes.Ingest(id, wire); err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case <-mock.started:
+	case <-time.After(3 * time.Second):
+		t.Fatal("presenting a tag without a claim did not start the download")
+	}
+	// Ingest queues synchronously; wait for the worker's publication.
+	s.originalCache.wg.Wait()
+	m, err := s.Content.Metadata(snap, ruid)
+	if err != nil || m.String("source") != "lib://by/audioID/123456.taf" {
+		t.Fatal("RTNL presentation did not populate library", m, err)
+	}
+	if claims, downloads := mock.counts(); claims != 0 || downloads != 1 {
+		t.Fatal("unexpected cloud requests", claims, downloads)
+	}
+}
+
+func TestOriginalCacheMigratesExistingUIDWithoutDownload(t *testing.T) {
+	for _, library := range []bool{false, true} {
+		t.Run(strconv.FormatBool(library), func(t *testing.T) {
+			s := fixtureApp(t)
+			const id, ruid = "001122334455", "97763c1a500304e0"
+			if err := s.Settings.Set("", "cloud.enabled", "true"); err != nil {
+				t.Fatal(err)
+			}
+			if err := s.Settings.Set("", "cloud.cacheToLibrary", strconv.FormatBool(library)); err != nil {
+				t.Fatal(err)
+			}
+			snap := s.Settings.Snapshot(id)
+			if err := s.Content.Update(snap, ruid, func(m content.Metadata) error {
+				m.Set("cloud_auth", strings.Repeat("AB", 32))
+				m.Set("custom_field", "preserved")
+				return nil
+			}); err != nil {
+				t.Fatal(err)
+			}
+			data := syntheticTAF(t)
+			cache, err := s.Content.BeginCache(snap, ruid)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer cache.Close()
+			if _, err := cache.Write(data); err != nil {
+				t.Fatal(err)
+			}
+			if err := cache.Commit(context.Background(), int64(len(data))); err != nil {
+				t.Fatal(err)
+			}
+			mock := &contentCloud{data: data, length: int64(len(data))}
+			s.Cloud = mock
+			if !s.cacheOriginal(context.Background(), id, ruid, "") {
+				t.Fatal("existing local cache not completed")
+			}
+			m, err := s.Content.Metadata(snap, ruid)
+			want := ""
+			if library {
+				want = "lib://by/audioID/123456.taf"
+			}
+			if err != nil || m.String("source") != want || m.String("custom_field") != "preserved" {
+				t.Fatal("existing cache was not migrated correctly", m, err)
+			}
+			file, _, err := s.Content.Open(snap, snap, ruid)
+			if err != nil {
+				t.Fatal(err)
+			}
+			stored, err := io.ReadAll(file)
+			file.Close()
+			if err != nil || !bytes.Equal(stored, data) || mock.calls.Load() != 0 {
+				t.Fatal("migration changed audio or downloaded again", err, mock.calls.Load())
+			}
+		})
+	}
+}
+
+func TestOriginalCacheRetriesFailedLibraryPublicationWithoutDownloadingAgain(t *testing.T) {
+	s := fixtureApp(t)
+	const id, ruid = "001122334455", "97763c1a500304e0"
+	if err := s.Settings.Set("", "cloud.enabled", "true"); err != nil {
+		t.Fatal(err)
+	}
+	snap := s.Settings.Snapshot(id)
+	if err := s.Content.Update(snap, ruid, func(m content.Metadata) error {
+		m.Set("cloud_auth", strings.Repeat("AB", 32))
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+	libraryPath := filepath.Join(snap.String("internal.librarydirfull"), "by/audioID/123456.taf")
+	if err := os.MkdirAll(filepath.Dir(libraryPath), 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(libraryPath, syntheticTAF(t, 2), 0600); err != nil {
+		t.Fatal(err)
+	}
+	data := syntheticTAF(t)
+	mock := &contentCloud{data: data, length: int64(len(data))}
+	s.Cloud = mock
+	if s.cacheOriginal(context.Background(), id, ruid, "") {
+		t.Fatal("failed library publication was reported as success")
+	}
+	if err := os.Remove(libraryPath); err != nil {
+		t.Fatal(err)
+	}
+	if !s.cacheOriginal(context.Background(), id, ruid, "") {
+		t.Fatal("library publication did not recover")
+	}
+	stored, err := os.ReadFile(libraryPath)
+	if err != nil || !bytes.Equal(stored, data) || mock.calls.Load() != 1 {
+		t.Fatal("retry lost audio or downloaded it again", err, mock.calls.Load())
 	}
 }

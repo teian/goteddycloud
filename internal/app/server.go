@@ -156,7 +156,13 @@ func New(settings *config.Store) (*Server, error) {
 		return entry.String("title"), server.registerImage(context.Background(), entry.String("pic"), false, false)
 	}
 	server.Boxes.TagPresented = func(id string, uid uint64) {
-		server.tagPresented(context.Background(), settings.Snapshot(id), id, content.RUID(uid))
+		snap, ruid := settings.Snapshot(id), content.RUID(uid)
+		server.tagPresented(context.Background(), snap, id, ruid)
+		// A box playing from its SD card may only report the tag over RTNL,
+		// without making another claim or content request.
+		if metadata, err := server.Content.Metadata(snap, ruid); err == nil {
+			server.scheduleOriginalCache(id, ruid, metadata, "")
+		}
 	}
 	snap := settings.Snapshot("")
 	if err := cat.RecoverRename(snap.String("internal.contentdirfull"), snap.Uint("tonie_json.custom_backup_keep"), time.Now(), func(from, to string) error { return server.Content.RenameModels(context.Background(), snap, from, to) }); err != nil {

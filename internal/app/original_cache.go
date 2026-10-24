@@ -35,8 +35,8 @@ func originalCacheEligible(snap config.Snapshot, ruid string, m content.Metadata
 		m.String("source") == "" && hasCloudAuth(m)
 }
 
-// Claims from authenticated boxes can arrive even when the box plays its own
-// cached audio. Backfill missing original audio independently of claim status.
+// Authenticated claims and RTNL presentations can arrive even when the box plays
+// its own cached audio. Backfill missing original audio independently of claims.
 func (s *Server) scheduleOriginalCache(id, ruid string, m content.Metadata, userAgent string) {
 	ruid = strings.ToLower(ruid)
 	snap := s.Settings.Snapshot(id)
@@ -134,6 +134,11 @@ func (s *Server) cacheOriginal(ctx context.Context, id, ruid, userAgent string) 
 		}
 	}
 	snap := s.Settings.Snapshot(id)
+	unlock, err := s.Content.DownloadLock(ctx, snap, ruid)
+	if err != nil {
+		return false
+	}
+	defer unlock()
 	m, err := s.Content.MetadataContext(ctx, snap, ruid)
 	if err != nil {
 		return false
@@ -142,13 +147,22 @@ func (s *Server) cacheOriginal(ctx context.Context, id, ruid, userAgent string) 
 	if !originalCacheEligible(snap, ruid, m) {
 		return true
 	}
+	logger := slog.Default().With("box", id, "tag_prefix", ruid[:8])
+	defer s.tagUpdated(id, ruid)
 	if file, _, err := s.Content.OpenContext(ctx, snap, s.Settings.Snapshot(""), ruid); err == nil {
 		file.Close()
+		// An earlier transfer or a disabled library setting may have left a
+		// valid UID cache. Finish publication without downloading it again.
+		if snap.Bool("cloud.cacheToLibrary") {
+			if err := s.Content.CacheToLibrary(ctx, snap, ruid); err != nil {
+				logger.Warn("Tonies original library cache failed", "reason", cacheFailureReason(err))
+				return false
+			}
+			logger.Info("Tonies original library cache published")
+		}
 		return true
 	}
-	logger := slog.Default().With("box", id, "tag_prefix", ruid[:8])
 	logger.Info("Tonies original cache started")
-	defer s.tagUpdated(id, ruid)
 	ctx = context.WithValue(ctx, backgroundCloudCacheKey{}, true)
 	r, err := http.NewRequestWithContext(ctx, http.MethodGet, "/v2/content/"+ruid, nil)
 	if err != nil {
@@ -159,9 +173,16 @@ func (s *Server) cacheOriginal(ctx context.Context, id, ruid, userAgent string) 
 		r.Header.Set("User-Agent", userAgent)
 	}
 	w := &cacheDiscardWriter{header: make(http.Header)}
-	s.serveCloudContent(w, r, snap, ruid, m, false)
+	s.serveCloudContentLocked(w, r, snap, ruid, m, false)
 	if file, _, err := s.Content.OpenContext(ctx, snap, s.Settings.Snapshot(""), ruid); err == nil {
 		file.Close()
+		if snap.Bool("cloud.cacheToLibrary") {
+			published, err := s.Content.MetadataContext(ctx, snap, ruid)
+			if err != nil || published.String("source") == "" {
+				logger.Warn("Tonies original cache incomplete", "status", w.status, "bytes", w.bytes, "reason", "library_not_published")
+				return false
+			}
+		}
 		logger.Info("Tonies original cache completed", "status", w.status, "bytes", w.bytes)
 		return true
 	}

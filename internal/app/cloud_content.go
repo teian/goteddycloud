@@ -19,6 +19,11 @@ func (s *Server) serveCloudContent(w http.ResponseWriter, r *http.Request, snap 
 		return
 	}
 	defer unlock()
+	s.serveCloudContentLocked(w, r, snap, ruid, metadata, refresh)
+}
+
+// The caller holds DownloadLock through transfer and library publication.
+func (s *Server) serveCloudContentLocked(w http.ResponseWriter, r *http.Request, snap config.Snapshot, ruid string, metadata content.Metadata, refresh bool) {
 	// A preceding miss may have completed while this request waited.
 	if !refresh {
 		if file, _, err := s.Content.OpenContext(r.Context(), snap, s.Settings.Snapshot(""), ruid); err == nil {
