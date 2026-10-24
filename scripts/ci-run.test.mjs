@@ -24,3 +24,9 @@ test('CI logger rejects a path outside its log directory', () => {
     const result = spawnSync('bash', [runner, '../escape', 'true'], { encoding: 'utf8' });
     assert.equal(result.status, 2);
 });
+test('CI package setup refuses a developer/deployment host', () => {
+    const setup = fileURLToPath(new URL('./ci-install-ffmpeg.sh', import.meta.url));
+    const result = spawnSync('bash', [setup], { env: { ...process.env, GITHUB_ACTIONS: 'false' }, encoding: 'utf8' });
+    assert.equal(result.status, 2);
+    assert.match(result.stderr, /restricted to disposable GitHub Actions runners/);
+});

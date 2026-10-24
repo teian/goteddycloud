@@ -22,6 +22,12 @@ the WebUI revision are pinned. Playwright uses the tracked lock file in
 `scripts/browser/`; no pre-existing developer checkout or browser installation
 is required. Each browser test generates its own disposable Go deployment.
 
+Package setup reuses available FFmpeg tools, omits optional packages and uses
+the official signed Ubuntu repositories over HTTPS. Network/lock waits have
+bounded timeouts and retries, and the install step has its own five-minute
+budget. The same APT configuration applies to Playwright's system dependencies.
+The setup script refuses to run on a developer/deployment host.
+
 Check output is streamed and saved through `scripts/ci-run.sh`. The wrapper
 preserves a failing command's exit code; its own tests cover this behavior.
 Logs are uploaded even after failure, and browser diagnostics include screenshots.

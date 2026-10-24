@@ -36,7 +36,8 @@ jobs:
         with:
           node-version: '24'
       - name: Install FFmpeg for audio tests
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+        timeout-minutes: 5
+        run: bash scripts/ci-run.sh ffmpeg-install scripts/ci-install-ffmpeg.sh
       - name: Verify CI logging retains command failures
         run: node --test scripts/ci-run.test.mjs
       - name: Validate the GitHub Actions workflow
@@ -73,7 +74,8 @@ jobs:
         with:
           go-version: '1.26.8'
       - name: Install FFmpeg for concurrent audio tests
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+        timeout-minutes: 5
+        run: bash scripts/ci-run.sh ffmpeg-install scripts/ci-install-ffmpeg.sh
       - name: Build the CC3200 browser flashing module
         run: bash scripts/ci-run.sh wasm-build scripts/build-cc3200-wasm.sh
       - name: Detect data races across all Go packages
@@ -119,7 +121,8 @@ jobs:
           cache: npm
           cache-dependency-path: scripts/browser/package-lock.json
       - name: Install FFmpeg for browser audio fixtures
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+        timeout-minutes: 5
+        run: bash scripts/ci-run.sh ffmpeg-install scripts/ci-install-ffmpeg.sh
       - name: Build the CC3200 browser flashing module
         run: bash scripts/ci-run.sh wasm-build scripts/build-cc3200-wasm.sh
       - name: Fetch the pinned WebUI and build production assets
@@ -129,6 +132,7 @@ jobs:
       - name: Check WebUI translation keys
         run: bash scripts/ci-run.sh webui-translations npm --prefix .cache/goteddycloud-web run check:translations
       - name: Install locked Playwright tooling and Chromium
+        timeout-minutes: 8
         run: |
           bash scripts/ci-run.sh browser-dependencies npm ci --prefix scripts/browser --ignore-scripts --no-audit --no-fund
           bash scripts/ci-run.sh chromium-install scripts/browser/node_modules/.bin/playwright install --with-deps chromium
@@ -167,7 +171,8 @@ jobs:
         with:
           go-version: '1.26.8'
       - name: Install FFmpeg for native audio smoke checks
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+        timeout-minutes: 5
+        run: bash scripts/ci-run.sh ffmpeg-install scripts/ci-install-ffmpeg.sh
       - name: Build the CC3200 browser flashing module
         run: bash scripts/ci-run.sh wasm-build scripts/build-cc3200-wasm.sh
       - name: Cross-build Linux, Windows and macOS release archives
