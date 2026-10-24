@@ -143,11 +143,17 @@ func New(settings *config.Store) (*Server, error) {
 	server.MetadataHTTP = metadataClient(func() bool { return settings.Bool("", "core.allowPrivateFetch") })
 	server.metadataUpdate = make(chan struct{}, 1)
 	server.Boxes.ContentInfo = func(id string, uid uint64, audioID uint32) (string, string) {
-		entry := cat.ByAudio(audioID, nil)
-		if entry == nil || audioID == 1 {
-			metadata, err := server.Content.Metadata(settings.Snapshot(id), content.RUID(uid))
+		entry := server.boxAudioModel(audioID)
+		if uid != 0 && uid != ^uint64(0) {
+			snap, ruid := settings.Snapshot(id), content.RUID(uid)
+			metadata, err := server.Content.Metadata(snap, ruid)
 			if err == nil {
-				entry = cat.ByModel(metadata.String("tonie_model"))
+				// Playback from the SD card may report an audio ID only over
+				// RTNL. Persist it and notify tag cards just like freshness data.
+				server.rememberBoxAudio(context.Background(), snap, ruid, metadata, audioID)
+				if entry == nil {
+					entry = cat.ByModel(metadata.String("tonie_model"))
+				}
 			}
 		}
 		if entry == nil {

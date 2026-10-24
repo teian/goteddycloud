@@ -3,7 +3,9 @@ package app
 
 import (
 	"bytes"
+	"context"
 	"encoding/binary"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -12,6 +14,7 @@ import (
 	"google.golang.org/protobuf/proto"
 
 	"goteddycloud/internal/boxstate"
+	"goteddycloud/internal/content"
 	"goteddycloud/internal/protocol"
 )
 
@@ -94,5 +97,147 @@ func TestDevelopCSVTextEscaping(t *testing.T) {
 func TestDevelopRTNLEscaping(t *testing.T) {
 	if got := rtnlText([]byte{'a', '"', '\n', '\r', '\\', 0, 255, '9'}); got != "a\"\"\\n\\r...9" {
 		t.Fatal(got)
+	}
+}
+
+func ingestRecognitionRTNL(t *testing.T, s *Server, box string, group, function uint32, payload []byte) {
+	t.Helper()
+	wire, err := proto.Marshal(&protocol.TonieRtnlRPC{Log2: &protocol.TonieRtnlLog2{
+		Uptime: proto.Uint64(1), Sequence: proto.Uint32(1), Field3: proto.Uint32(0),
+		FunctionGroup: proto.Uint32(group), Function: proto.Uint32(function), Field6: payload,
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Boxes.Ingest(box, wire); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func presentRecognitionRTNL(t *testing.T, s *Server, box, ruid string) {
+	t.Helper()
+	uid, err := content.UIDFromRUID(ruid)
+	if err != nil {
+		t.Fatal(err)
+	}
+	payload := make([]byte, 8)
+	binary.BigEndian.PutUint32(payload, uint32(uid))
+	binary.BigEndian.PutUint32(payload[4:], uint32(uid>>32))
+	ingestRecognitionRTNL(t, s, box, boxstate.RTNL2_FUGR_TAG, boxstate.RTNL2_FUNC_TAG_VALID_CC3200, payload)
+}
+
+func TestRTNLAudioRecognizesAndPersistsTagWithoutFreshnessOrDownload(t *testing.T) {
+	for _, event := range []struct{ group, function uint32 }{
+		{boxstate.RTNL2_FUGR_AUDIO_A, boxstate.RTNL2_FUNC_AUDIO_ID_CC3200},
+		{boxstate.RTNL2_FUGR_AUDIO_A, boxstate.RTNL2_FUNC_AUDIO_ID_ESP32},
+		{boxstate.RTNL2_FUGR_AUDIO_B, boxstate.RTNL2_FUNC_AUDIO_ID},
+	} {
+		for _, audioID := range []uint32{0x60000011, 0x10000011} {
+			t.Run(fmt.Sprintf("%d/%d/%x", event.group, event.function, audioID), func(t *testing.T) {
+				s := fixtureApp(t)
+				if err := s.Catalog.ReplaceOfficial([]byte(recognitionCatalog)); err != nil {
+					t.Fatal(err)
+				}
+				const id, ruid = "001122334455", "11000000500304e0"
+				if err := s.Settings.Set(id, "core.contentdir", "rtnl-recognition"); err != nil {
+					t.Fatal(err)
+				}
+				snap := s.Settings.Snapshot(id)
+				if err := os.MkdirAll(snap.String("internal.contentdirfull"), 0700); err != nil {
+					t.Fatal(err)
+				}
+				presentRecognitionRTNL(t, s, id, ruid)
+				stream, unsubscribe, ok := s.Events.Subscribe()
+				if !ok {
+					t.Fatal("subscribe")
+				}
+				defer unsubscribe()
+				payload := make([]byte, 4)
+				binary.LittleEndian.PutUint32(payload, audioID)
+				ingestRecognitionRTNL(t, s, id, event.group, event.function, payload)
+				// Recognition must already be durable before any browser/API read.
+				m, err := s.Content.Metadata(snap, ruid)
+				if err != nil || m.String("tonie_model") != "AUTO_TEST" || boxAudioID(m) != audioID {
+					t.Fatal("RTNL recognition was not persisted", m.String("tonie_model"), boxAudioID(m), err)
+				}
+				updated := false
+				for len(stream) > 0 {
+					event := <-stream
+					updated = updated || event.Name == "tag-updated" && event.Box == id
+				}
+				if !updated {
+					t.Fatal("recognized tag did not notify the UI")
+				}
+				info, err := s.tagInfo(context.Background(), snap, id, ruid)
+				if err != nil || info["exists"] != false || info["tonieInfo"].(map[string]any)["model"] != "AUTO_TEST" {
+					t.Fatal("recognized tag not visible without local audio", info, err)
+				}
+				global, err := s.Content.Metadata(s.Settings.Snapshot(""), ruid)
+				if err != nil || global.String("tonie_model") != "" || boxAudioID(global) != 0 {
+					t.Fatal("RTNL recognition leaked into global content", err)
+				}
+			})
+		}
+	}
+}
+
+func TestRTNLRetainsUnknownAudioForLaterCatalogAndPreservesManualModels(t *testing.T) {
+	for _, manual := range []string{"", "MANUAL_MODEL"} {
+		t.Run(manual, func(t *testing.T) {
+			s := fixtureApp(t)
+			const id, ruid = "001122334455", "11000000500304e0"
+			snap := s.Settings.Snapshot(id)
+			if err := s.Content.Update(snap, ruid, func(m content.Metadata) error {
+				m.Set("tonie_model", manual)
+				return nil
+			}); err != nil {
+				t.Fatal(err)
+			}
+			presentRecognitionRTNL(t, s, id, ruid)
+			payload := make([]byte, 4)
+			binary.LittleEndian.PutUint32(payload, 0x60000011)
+			ingestRecognitionRTNL(t, s, id, boxstate.RTNL2_FUGR_AUDIO_A, boxstate.RTNL2_FUNC_AUDIO_ID_CC3200, payload)
+			m, err := s.Content.Metadata(snap, ruid)
+			if err != nil || boxAudioID(m) != 0x60000011 || m.String("tonie_model") != manual {
+				t.Fatal("RTNL lost unknown ID or changed a manual model", m, err)
+			}
+			if err := s.Catalog.ReplaceOfficial([]byte(recognitionCatalog)); err != nil {
+				t.Fatal(err)
+			}
+			info, err := s.tagInfo(context.Background(), snap, id, ruid)
+			want := manual
+			if want == "" {
+				want = "AUTO_TEST"
+			}
+			if err != nil || info["tonieInfo"].(map[string]any)["model"] != want {
+				t.Fatal("late RTNL recognition failed", info, err)
+			}
+		})
+	}
+}
+
+func TestRTNLAudioWithoutTagAndTagChangeDoNotAssignPreviousContent(t *testing.T) {
+	s := fixtureApp(t)
+	if err := s.Catalog.ReplaceOfficial([]byte(recognitionCatalog)); err != nil {
+		t.Fatal(err)
+	}
+	const id, first, second = "001122334455", "11000000500304e0", "22000000500304e0"
+	snap := s.Settings.Snapshot(id)
+	payload := make([]byte, 4)
+	binary.LittleEndian.PutUint32(payload, 0x60000011)
+	ingestRecognitionRTNL(t, s, id, boxstate.RTNL2_FUGR_AUDIO_A, boxstate.RTNL2_FUNC_AUDIO_ID_CC3200, payload)
+	root, _, err := s.Content.ManagedRoot(snap, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := root.Stat("00000000/00000000.json"); !os.IsNotExist(err) {
+		t.Fatal("audio without a tag created metadata", err)
+	}
+	presentRecognitionRTNL(t, s, id, first)
+	ingestRecognitionRTNL(t, s, id, boxstate.RTNL2_FUGR_AUDIO_A, boxstate.RTNL2_FUNC_AUDIO_ID_CC3200, payload)
+	presentRecognitionRTNL(t, s, id, second)
+	m, err := s.Content.Metadata(snap, second)
+	if err != nil || m.String("tonie_model") != "" || boxAudioID(m) != 0 {
+		t.Fatal("new tag inherited the previous audio", m, err)
 	}
 }

@@ -90,12 +90,13 @@ The warning's
 `error` field distinguishes a rejected HTTP response from transfer or catalog errors.
 
 Tonie titles and pictures are matched against this catalog using the audio ID
-reported by the box's freshness check, even when its audio is already on the
-box's SD card and has never been downloaded to goTeddyCloud. Reported IDs are
-retained so a later catalog update can resolve previously unknown tags. After
-upgrading, let the box sync again, then reload the Tonies page. A tag UID alone
-does not identify its title; special audio ID 1 requires a local audio header/hash
-or a manually assigned model. Existing model assignments are preserved.
+reported by the box's freshness check or RTNL playback reports, even when its
+audio is already on the box's SD card and has never been downloaded to
+goTeddyCloud. Reported IDs are retained so a later catalog update can resolve
+previously unknown tags. After upgrading, present the figure again or let the
+box sync, then reload the Tonies page. A tag UID alone does not identify its
+title; special audio ID 1 requires a local audio header/hash or a manually
+assigned model. Existing model assignments are preserved.
 
 With cloud content caching enabled, authenticated claims and RTNL tag
 presentations also backfill missing original audio when the box plays from its
