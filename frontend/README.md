@@ -43,6 +43,18 @@ updates are batched every 100 ms; snapshots still export the complete buffer.
 `node scripts/webui-rtnl-performance-smoke.mjs` checks a full recording in Chromium
 with 4× CPU slowdown, history navigation and complete diagnostic exports.
 
+The backend owns RTNL definitions in `internal/boxstate/rtnl_mapping.go` and
+serves them through authenticated `GET /api/rtnl/mapping`. The schema includes
+Log2 IDs, minimum payload sizes, named fields with byte formats/offsets, Log3
+codes, event/phase labels and partial/inferred annotations. Its content hash is
+the mapping revision and HTTP ETag. All authenticated roles can read this global
+protocol information; the box listener does not expose the management endpoint.
+The frontend interprets this schema with generic byte operations, without a
+firmware mapping copy. It loads once per recorder session and refreshes after
+backend reconnection. Mapping failures retain raw recording and offer retry;
+JSON/TXT exports identify the registry revision. The performance smoke also
+introduces a new server mapping at runtime to verify this contract.
+
 **Settings → RTNL log** offers decoded, raw and combined views, a box filter,
 pause/resume and JSON/TXT snapshot downloads. Recording continues across routes
 within the current authenticated page session, retaining at most 2,000 entries

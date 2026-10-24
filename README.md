@@ -126,6 +126,14 @@ update marks and local transfer completion. Empty or rejected freshness requests
 and the running server version are included. An update mark alone does not mean
 the box downloaded the audio. Credentials and remote source URLs are omitted.
 
+RTNL mappings are maintained in the backend and exposed through authenticated
+`GET /api/rtnl/mapping`. The WebUI loads function/code labels and payload layouts
+from this registry, with no local firmware dictionary. Exports include its
+revision; failed mapping requests leave raw recording available. Definitions
+can be extended on the backend using the existing byte formats without a WebUI
+release. Download-progress counters remain unlabelled values until their units
+are established.
+
 The UI reads `/api/cloud/status`, which reports disabled or unavailable cloud
 access as HTTP 200 status data. The local `/api/time` clock remains independent.
 Raw `/reverse/v1/time` requests still proxy the upstream Tonie cloud and need a

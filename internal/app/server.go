@@ -692,6 +692,21 @@ func (s *Server) Management(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) serveManagement(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path == "/api/rtnl/mapping" {
+		if r.Method != http.MethodGet {
+			response(w, http.StatusMethodNotAllowed, "", nil)
+			return
+		}
+		data, etag := boxstate.RTNLMappingJSON()
+		w.Header().Set("Cache-Control", "private, no-cache")
+		w.Header().Set("ETag", etag)
+		if r.Header.Get("If-None-Match") == etag {
+			w.WriteHeader(http.StatusNotModified)
+			return
+		}
+		response(w, http.StatusOK, "application/json; charset=utf-8", []byte(data))
+		return
+	}
 	if r.Method == http.MethodGet && r.URL.Path == "/api/cloud/status" {
 		s.cloudStatus(w, r)
 		return

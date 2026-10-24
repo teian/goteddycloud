@@ -35,7 +35,15 @@ try {
     const events = Array.from({ length: 2000 }, (_, i) => raw(i));
     events.push({ type: 'audio-sync', box: '6CC374F2CBD8', data: { phase: 'freshness-response', status: 200, requested: 1, serverVersion: 'performance-fixture', markedRuids: ['be3cea0e500304e0'], tags: [{ ruid: 'be3cea0e500304e0', source: 'lib://by/audioID/1748955785.taf', boxAudioId: 1634291675, localAudioId: 1748955785, localState: 'ready', marked: true }] } });
     let sent = false;
+    let mappingRequests = 0;
+    let failMapping = false;
     proxy = createServer((req, res) => {
+        if (req.url === '/api/rtnl/mapping' && failMapping) {
+            mappingRequests++;
+            res.writeHead(503, { 'Content-Type': 'application/json' });
+            res.end('{}');
+            return;
+        }
         if (req.url === '/api/sse') {
             res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache' });
             streams.add(res);
@@ -45,6 +53,25 @@ try {
             return;
         }
         const upstream = request('http://' + address + req.url, { method: req.method, headers: req.headers }, response => {
+            if (req.url === '/api/rtnl/mapping') {
+                mappingRequests++;
+                const chunks = [];
+                response.on('data', chunk => chunks.push(chunk));
+                response.on('end', () => {
+                    const mapping = JSON.parse(Buffer.concat(chunks));
+                    assert.equal(mapping.schemaVersion, 1);
+                    assert.equal(mapping.log2['6-8498'].interpretation, 'partial');
+                    // Introduce an otherwise unknown function entirely through
+                    // the backend response; the frontend binary is unchanged.
+                    mapping.log2['24-8427'] = { label: { en: 'Backend-only RTNL label', de: 'Nur-im-Backend' }, minBytes: 0, fields: [], rawValues: true };
+                    mapping.revision = 'performance-fixture-revision';
+                    const headers = { ...response.headers };
+                    delete headers['content-length']; delete headers.etag;
+                    res.writeHead(200, headers);
+                    res.end(JSON.stringify(mapping));
+                });
+                return;
+            }
             res.writeHead(response.statusCode, response.headers);
             response.pipe(res);
         });
@@ -85,6 +112,7 @@ try {
         assert(elapsed < 1000, 'console route blocked for a second');
         assert(metrics.characters <= 65536, 'unbounded console text');
         assert(metrics.elements <= 2, 'per-token DOM expansion returned');
+        assert((await page.locator('.rtnl-log-container').innerText()).includes('Nur-im-Backend'), 'frontend ignored server-supplied function definition');
         await page.getByRole('button', { name: 'Ältere Einträge', exact: true }).click();
         assert(!(await page.locator('.rtnl-log-container').innerText()).includes('performance-fixture'));
         await page.getByRole('button', { name: 'Neueste Einträge', exact: true }).click();
@@ -94,10 +122,27 @@ try {
         const snapshot = JSON.parse(await readFile(await (await ready).path(), 'utf8'));
         assert.equal(snapshot.entries.length, 2000);
         assert.equal(snapshot.droppedEntries, 1);
+        assert.equal(snapshot.mappingRevision, 'performance-fixture-revision');
+        assert.equal(snapshot.mappingSchemaVersion, 1);
+        assert.equal(mappingRequests, 1, 'mapping was fetched again during console navigation or export');
         assert(snapshot.entries.some(entry => entry.raw.type === 'audio-sync' && entry.fields.tags[0].localAudioId === 1748955785));
         assert(snapshot.entries.some(entry => entry.raw.data.sequence === 1));
+        failMapping = true;
+        sent = false;
+        await page.reload();
+        await page.getByText('RTNL-Definitionen konnten nicht geladen werden.', { exact: false }).waitFor();
+        await page.locator('.rtnl-log-container').getByText(/Unbekannte Funktion 24-8427/).first().waitFor();
+        const rawReady = page.waitForEvent('download');
+        await page.getByRole('button', { name: 'Snapshot (JSON)', exact: true }).click();
+        const rawSnapshot = JSON.parse(await readFile(await (await rawReady).path(), 'utf8'));
+        assert.equal(rawSnapshot.mappingRevision, null);
+        assert.equal(rawSnapshot.entries.length, 2000, 'mapping failure lost raw recording');
+        failMapping = false;
+        await page.getByRole('button', { name: 'Aktualisieren', exact: true }).click();
+        await page.locator('.rtnl-log-container').getByText(/Nur-im-Backend/).first().waitFor();
+        assert.equal(mappingRequests, 3, 'unexpected registry polling');
         assert.deepEqual(errors, []);
-        console.log('PASS: full buffer with 4× CPU slowdown, bounded display, history navigation and complete diagnostic export');
+        console.log('PASS: full buffer with 4× CPU slowdown, backend-only mapping, bounded display, history, complete exports, raw fallback and retry');
     }
 } catch (error) {
     if (page) console.error('Fixture page:', page.url(), (await page.locator('body').innerText()).slice(0, 1500));

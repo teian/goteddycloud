@@ -132,6 +132,8 @@ try {
     const snapshot = await snapshotReady;
     await snapshot.saveAs(resolve('.cache/webui-rtnl-snapshot.json'));
     const exported = JSON.parse(await readFile(resolve('.cache/webui-rtnl-snapshot.json'), 'utf8'));
+    assert.equal(exported.mappingSchemaVersion, 1);
+    assert(/^sha256:[a-f0-9]{64}$/.test(exported.mappingRevision));
     assert(exported.entries.some(entry => entry.raw.type === 'rtnl-raw-log2' && entry.box === id));
     assert.deepEqual(errors, []);
     console.log('PASS: real TLS RTNL → SSE → new unknown cards, blue border, switching tags, live metadata, notifications, snapshots and heartbeat');
