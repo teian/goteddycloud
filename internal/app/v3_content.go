@@ -119,7 +119,7 @@ func (r chapterReader) ReadAt(data []byte, offset int64) (int, error) {
 	n, err := r.payload.ReadAt(data[count:], offset-r.prefix.Size())
 	return count + n, err
 }
-func (s *Server) v3Chapter(w http.ResponseWriter, r *http.Request, snap config.Snapshot) {
+func (s *Server) v3Chapter(w http.ResponseWriter, r *http.Request, id string, snap config.Snapshot) {
 	if !strings.HasPrefix(r.URL.Path, "/v3/chapter/teddycloud_") {
 		if enabled(snap, "enableV3Chapter") && s.cloudResponse(w, r, snap, r.URL.Path, cloudHeaders(r.Header), nil) {
 			return
@@ -137,9 +137,11 @@ func (s *Server) v3Chapter(w http.ResponseWriter, r *http.Request, snap config.S
 		response(w, 404, "", nil)
 		return
 	}
+	noCloud := false
 	if err := s.Content.UpdateContext(r.Context(), snap, ruid, func(m content.Metadata) error {
 		m.Set("hide", false)
 		updateTagAuth(m, r, snap, ruid, true)
+		noCloud = m.Bool("nocloud")
 		return nil
 	}); err != nil {
 		response(w, 500, "", nil)
@@ -181,5 +183,7 @@ func (s *Server) v3Chapter(w http.ResponseWriter, r *http.Request, snap config.S
 		reader = chapterReader{prefix: io.NewSectionReader(file, taf.BlockSize, 512), payload: payload}
 		size += 512
 	}
-	serveRangeFile(w, r, reader, 0, size, "application/octet-stream")
+	if serveRangeFile(w, r, reader, 0, size, "application/octet-stream") && noCloud && runtime.RequestPeer(r.Context()).Box {
+		s.recordLocalContentDownload(r.Context(), snap, id, ruid, localContentFingerprint(header), chapter, len(header.TrackPageNums))
+	}
 }

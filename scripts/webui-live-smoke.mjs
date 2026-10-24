@@ -28,8 +28,8 @@ const sockets = new Set();
 try {
     let http, box;
     for (let i = 0; i < 100; i++) {
-        http = logs.match(/http:(127\.0\.0\.1:\d+)/)?.[1];
-        box = logs.match(/box:(127\.0\.0\.1:\d+)/)?.[1];
+        http = logs.match(/HTTP: (127\.0\.0\.1:\d+)/)?.[1];
+        box = logs.match(/Box API: (127\.0\.0\.1:\d+)/)?.[1];
         if (http && box) break;
         if (server.exitCode !== null) throw new Error(logs);
         await pause(100);
@@ -124,10 +124,17 @@ try {
     await page.locator('.rtnl-log-container').waitFor();
     await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
     await present(second);
+    await page.getByText('Raw', { exact: true }).click();
     await page.getByText(/Raw2 \|/).first().waitFor();
     assert.equal(streams, beforeRtnl, 'RTNL opened a second SSE connection');
+    const snapshotReady = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'Snapshot (JSON)', exact: true }).click();
+    const snapshot = await snapshotReady;
+    await snapshot.saveAs(resolve('.cache/webui-rtnl-snapshot.json'));
+    const exported = JSON.parse(await readFile(resolve('.cache/webui-rtnl-snapshot.json'), 'utf8'));
+    assert(exported.entries.some(entry => entry.raw.type === 'rtnl-raw-log2' && entry.box === id));
     assert.deepEqual(errors, []);
-    console.log('PASS: real TLS RTNL → SSE → new unknown cards, blue border, switching tags, live metadata, notifications and heartbeat');
+    console.log('PASS: real TLS RTNL → SSE → new unknown cards, blue border, switching tags, live metadata, notifications, snapshots and heartbeat');
 } catch (error) {
     if (page) {
         await page.screenshot({ path: resolve('.cache/webui-live-failure.png'), fullPage: true }).catch(() => {});

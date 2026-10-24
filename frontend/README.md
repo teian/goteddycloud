@@ -31,6 +31,14 @@ The stream uses the normal bearer/cookie handling and reverse-proxy prefix,
 reconnects after transient failures, and restores last-tag state on reconnection.
 Area access and revocation are enforced by the backend.
 
+**Settings → RTNL log** offers decoded, raw and combined views, a box filter,
+pause/resume and JSON/TXT snapshot downloads. Recording continues across routes
+within the current authenticated page session, retaining at most 2,000 entries
+and 2 MiB; signing out or switching users clears it. JSON snapshots retain the
+complete raw event alongside decoded fields, receive times and box IDs. Unknown
+functions remain explicitly unknown; inferred formats are labelled. Snapshots
+are downloaded locally and are not uploaded to another service.
+
 Audio assignment uses the selected Toniebox's library, including the custom model
 editor and previous/next episode controls. The file chooser also offers a
 `tonies.json` tab: choosing a model sets its metadata and picks matching library

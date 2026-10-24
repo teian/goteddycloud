@@ -109,6 +109,15 @@ request; a UID alone is insufficient to download audio. With library caching
 enabled, existing UID caches are moved to the library on the next presentation,
 including after an earlier library publication failure, without another download.
 
+For local tags with cloud access disabled, synchronization also compares the
+selected audio's ID and payload hash with the last completed download for each
+box. Replacing audio with the same or a lower ID therefore triggers an update.
+Browser previews and partial transfers do not acknowledge a box download; V3
+content is acknowledged after all chapters have transferred. Existing local
+tags receive one initial refresh per box after upgrading. On a Toniebox 1,
+remove the tag, hold one ear for about three seconds, wait for green and present
+the tag again after saving new content.
+
 The UI reads `/api/cloud/status`, which reports disabled or unavailable cloud
 access as HTTP 200 status data. The local `/api/time` clock remains independent.
 Raw `/reverse/v1/time` requests still proxy the upstream Tonie cloud and need a

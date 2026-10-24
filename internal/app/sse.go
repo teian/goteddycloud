@@ -29,7 +29,7 @@ func (s *Server) sse(w http.ResponseWriter, r *http.Request) {
 				return nil
 			}
 		}
-		data, _ := json.Marshal(map[string]any{"type": event.Name, "data": event.Data})
+		data, _ := json.Marshal(map[string]any{"type": event.Name, "data": event.Data, "box": event.Box})
 		_ = control.SetWriteDeadline(time.Now().Add(10 * time.Second))
 		if _, err := fmt.Fprintf(w, "event: %s\ndata: %s\n\n", event.Name, data); err != nil {
 			return err

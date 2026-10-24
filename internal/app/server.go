@@ -276,7 +276,7 @@ func (s *Server) Device(w http.ResponseWriter, r *http.Request) {
 	case get && strings.HasPrefix(path, "/v3/content-meta/"):
 		s.v3ContentMeta(w, r, id, snap)
 	case get && strings.HasPrefix(path, "/v3/chapter/"):
-		s.v3Chapter(w, r, snap)
+		s.v3Chapter(w, r, id, snap)
 	case post && strings.HasPrefix(path, "/v3/freshness-check"):
 		s.v3Freshness(w, r, id, snap)
 	case post && strings.HasPrefix(path, "/v3/setup-status"):
@@ -446,21 +446,23 @@ func (s *Server) serveStoredContent(w http.ResponseWriter, r *http.Request, id s
 		return
 	}
 	file.Close()
-	s.serveStoredLocal(w, r, snap, ruid)
+	if fingerprint := s.serveStoredLocal(w, r, snap, ruid); fingerprint != "" && runtime.RequestPeer(r.Context()).Box && metadata.Bool("nocloud") {
+		s.recordLocalContentDownload(r.Context(), snap, id, ruid, fingerprint, 0, 1)
+	}
 }
-func (s *Server) serveStoredLocal(w http.ResponseWriter, r *http.Request, snap config.Snapshot, ruid string) {
+func (s *Server) serveStoredLocal(w http.ResponseWriter, r *http.Request, snap config.Snapshot, ruid string) string {
 	_ = s.Content.EnsurePlaylist(r.Context(), snap, s.Settings.Snapshot(""), ruid)
-	file, _, err := s.Content.OpenContext(r.Context(), snap, s.Settings.Snapshot(""), ruid)
+	file, header, err := s.Content.OpenContext(r.Context(), snap, s.Settings.Snapshot(""), ruid)
 	if err != nil {
 		response(w, 404, "", nil)
-		return
+		return ""
 	}
 	defer file.Close()
 	s.markLibraryListened(r.Context(), snap, ruid)
 	info, err := file.Stat()
 	if err != nil {
 		http.Error(w, "content unavailable", 500)
-		return
+		return ""
 	}
 	offset := int64(0)
 	size := info.Size()
@@ -468,9 +470,12 @@ func (s *Server) serveStoredLocal(w http.ResponseWriter, r *http.Request, snap c
 		offset = taf.BlockSize
 		size -= offset
 	}
-	serveRangeFile(w, r, file, offset, size, "application/octet-stream")
+	if serveRangeFile(w, r, file, offset, size, "application/octet-stream") && offset == 0 {
+		return localContentFingerprint(header)
+	}
+	return ""
 }
-func serveRangeFile(w http.ResponseWriter, r *http.Request, file io.ReaderAt, offset, size int64, kind string) {
+func serveRangeFile(w http.ResponseWriter, r *http.Request, file io.ReaderAt, offset, size int64, kind string) bool {
 	start, end := int64(0), size-1
 	if raw, ok := strings.CutPrefix(r.Header.Get("Range"), "bytes="); ok {
 		first, last, _ := strings.Cut(raw, "-")
@@ -486,7 +491,7 @@ func serveRangeFile(w http.ResponseWriter, r *http.Request, file io.ReaderAt, of
 	if start >= size || end < start {
 		w.Header().Set("Content-Range", fmt.Sprintf("bytes */%d", size))
 		response(w, 416, "", nil)
-		return
+		return false
 	}
 	status := 200
 	if start > 0 {
@@ -496,7 +501,8 @@ func serveRangeFile(w http.ResponseWriter, r *http.Request, file io.ReaderAt, of
 	w.Header().Set("Content-Type", kind)
 	w.Header().Set("Content-Length", strconv.FormatInt(end-start+1, 10))
 	w.WriteHeader(status)
-	_, _ = io.Copy(w, io.NewSectionReader(file, offset+start, end-start+1))
+	written, err := io.Copy(w, io.NewSectionReader(file, offset+start, end-start+1))
+	return err == nil && start == 0 && end == size-1 && written == size
 }
 func body(r *http.Request, limit int64) ([]byte, error) {
 	data, err := io.ReadAll(io.LimitReader(r.Body, limit+1))
@@ -592,7 +598,7 @@ func (s *Server) localFreshnessContext(ctx context.Context, id string, snap conf
 					updated = true
 				}
 			}
-			marked = marked || updated
+			marked = marked || updated || localContentPending(metadata, id, header)
 		} else {
 			// A box can already have the audio on its SD card, so no content
 			// download (and hence no local TAF header) is needed for recognition.
