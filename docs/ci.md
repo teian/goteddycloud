@@ -11,9 +11,13 @@ Four independent jobs report results even if another area fails:
 | Job | Checks |
 | --- | --- |
 | Server — unit tests and static checks | Go APIs, storage, protocols and codecs; CC3200 gateway protocol; workflow lint, vet, pinned Staticcheck and dependency lock files |
-| Server — race detection and parser fuzzing | All Go packages under the race detector; six bounded parser/path fuzz runs |
+| Server — race detection | All Go packages under the race detector |
 | Web UI — build, unit tests and browser checks | Pinned WebUI production build, components, translations, login/roles/tools, assignment, real TLS RTNL, snapshots, backend mapping and console responsiveness |
 | Native releases — cross-build, startup and migration | Linux/Windows/macOS archives and checksums; native startup, persistence, TLS, restart, shutdown and migration rollback |
+
+CI does not run fuzzing campaigns. Fuzz targets remain available for manual
+local use; their existing seed cases run as ordinary regression tests with
+`go test ./...`.
 
 Jobs have separate time budgets. New pushes cancel outdated push/PR check runs;
 release callers retain their checks. The runner OS is pinned to Ubuntu 24.04.

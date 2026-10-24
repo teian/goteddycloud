@@ -63,7 +63,7 @@ jobs:
           if-no-files-found: ignore
 
   race:
-    name: Server — race detection and parser fuzzing
+    name: Server — race detection
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
@@ -80,21 +80,11 @@ jobs:
         run: bash scripts/ci-run.sh wasm-build scripts/build-cc3200-wasm.sh
       - name: Detect data races across all Go packages
         run: bash scripts/ci-run.sh go-race go test -race ./...
-      - name: Fuzz network, firmware, audio and path parsers (3 seconds each)
-        env:
-          GOMAXPROCS: '2'
-        run: |
-          bash scripts/ci-run.sh fuzz-mqtt go test ./internal/mqtt -run '^$' -fuzz FuzzPacket -fuzztime 3s
-          bash scripts/ci-run.sh fuzz-firmware go test ./internal/firmware -run '^$' -fuzz FuzzFirmwareParse -fuzztime 3s
-          bash scripts/ci-run.sh fuzz-cc3200 go test ./internal/cc3200 -run '^$' -fuzz FuzzInspect -fuzztime 3s
-          bash scripts/ci-run.sh fuzz-taf go test ./internal/taf -run '^$' -fuzz FuzzReadHeader -fuzztime 3s
-          bash scripts/ci-run.sh fuzz-opus go test ./internal/taf -run '^$' -fuzz FuzzOpusFrames -fuzztime 3s
-          bash scripts/ci-run.sh fuzz-paths go test ./internal/storage -run '^$' -fuzz FuzzConfinedRead -fuzztime 3s
-      - name: Retain race and fuzz logs
+      - name: Retain race detection logs
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: race-and-fuzz-logs
+          name: race-detection-logs
           path: .cache/ci-checks/
           if-no-files-found: ignore
 

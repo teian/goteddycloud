@@ -186,7 +186,7 @@ with cookie or bearer sessions; it is disabled by default. See the
 [development port](docs/develop-port.md) for login setup and changes. See [TLS policy](docs/tls-compatibility.md).
 
 CI validates the Go implementation in four independent jobs: server unit/static
-checks, race/fuzz checks, WebUI browser checks and native release/migration checks.
+checks, race detection, WebUI browser checks and native release/migration checks.
 The C-reference job and its runtime are no longer part of regular CI. See
 [CI jobs, diagnostics and local commands](docs/ci.md).
 
