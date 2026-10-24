@@ -19,7 +19,7 @@ def ready(name):
     origin = 'http://127.0.0.1:' + bindings[0]['HostPort']
     for _ in range(50):
         try:
-            with urllib.request.urlopen(origin + '/v1/time', timeout=1) as response:
+            with urllib.request.urlopen(origin + '/api/time', timeout=1) as response:
                 assert response.read().isdigit()
                 return origin
         except OSError:
@@ -42,7 +42,9 @@ def main():
             assert response.status == 200
         docker('exec', name, 'mkdir', '-p', '/data/data/content/default/00000001')
         subprocess.run(['docker', 'exec', '-i', name, 'sh', '-c', 'cat > /data/data/content/default/00000001/00000001'], input=args.taf.read_bytes(), check=True)
-        with urllib.request.urlopen(origin + '/v1/content/0000000100000001', timeout=3) as response:
+        # The management listener deliberately does not expose box /v1 routes.
+        # Device requests use the dedicated TLS listener.
+        with urllib.request.urlopen(origin + '/content/download/00000001/00000001', timeout=3) as response:
             assert response.read() == args.taf.read_bytes(), 'codec-free stored delivery mismatch'
         docker('stop', '-t', '5', name)
         assert docker('wait', name, text=True).strip() == '0', 'container required forced termination'
