@@ -328,6 +328,10 @@ func (s *Server) Device(w http.ResponseWriter, r *http.Request) {
 		}
 		_, _, hasOverride := override(m)
 		if peer.Box {
+			s.publishAudioSync(id, map[string]any{"phase": "claim", "route": "/v1/claim",
+				"ruid": ruid, "source": audioSyncSource(m.String("source")), "nocloud": m.Bool("nocloud")})
+		}
+		if peer.Box {
 			defer s.scheduleOriginalCache(id, ruid, m, r.UserAgent())
 		}
 		if enabled(snap, "enableV1Claim") && (!m.Bool("nocloud") || hasOverride) {
@@ -409,7 +413,7 @@ func (s *Server) serveStoredContent(w http.ResponseWriter, r *http.Request, id s
 		return
 	}
 	_ = s.Content.EnsurePlaylist(r.Context(), snap, s.Settings.Snapshot(""), ruid)
-	file, _, err := s.Content.OpenContext(r.Context(), snap, s.Settings.Snapshot(""), ruid)
+	file, header, err := s.Content.OpenContext(r.Context(), snap, s.Settings.Snapshot(""), ruid)
 	canForward := snap.Bool("cloud.enabled") && snap.Bool("cloud.enableV2Content")
 	marked := false
 	if canForward && !metadata.Bool("nocloud") {
@@ -442,12 +446,23 @@ func (s *Server) serveStoredContent(w http.ResponseWriter, r *http.Request, id s
 			reason = "content_forwarding_disabled"
 		}
 		slog.Warn("Tonies audio unavailable", "box", id, "route", cloudLogRoute(r.URL.Path), "tag_prefix", cloudLogTagPrefix(r.URL.Path), "status", 404, "reason", reason)
+		if runtime.RequestPeer(r.Context()).Box {
+			s.publishAudioSync(id, map[string]any{"phase": "content-unavailable", "route": cloudLogRoute(r.URL.Path),
+				"ruid": ruid, "source": audioSyncSource(metadata.String("source")), "nocloud": metadata.Bool("nocloud"),
+				"status": 404, "localState": audioSyncLocalState(err)})
+		}
 		response(w, 404, "", nil)
 		return
 	}
 	file.Close()
-	if fingerprint := s.serveStoredLocal(w, r, snap, ruid); fingerprint != "" && runtime.RequestPeer(r.Context()).Box && metadata.Bool("nocloud") {
-		s.recordLocalContentDownload(r.Context(), snap, id, ruid, fingerprint, 0, 1)
+	fingerprint := s.serveStoredLocal(w, r, snap, ruid)
+	if runtime.RequestPeer(r.Context()).Box {
+		s.publishAudioSync(id, map[string]any{"phase": "local-content-transfer", "route": cloudLogRoute(r.URL.Path),
+			"ruid": ruid, "source": audioSyncSource(metadata.String("source")), "localAudioId": header.GetAudioId(),
+			"nocloud": metadata.Bool("nocloud"), "fullDownload": fingerprint != ""})
+		if fingerprint != "" && metadata.Bool("nocloud") {
+			s.recordLocalContentDownload(r.Context(), snap, id, ruid, fingerprint, 0, 1)
+		}
 	}
 }
 func (s *Server) serveStoredLocal(w http.ResponseWriter, r *http.Request, snap config.Snapshot, ruid string) string {
@@ -515,20 +530,28 @@ func body(r *http.Request, limit int64) ([]byte, error) {
 	return data, nil
 }
 func (s *Server) freshnessCheck(w http.ResponseWriter, r *http.Request, id string, snap config.Snapshot) {
+	ctx, trace := newAudioSyncTrace(r.Context())
+	r = r.WithContext(ctx)
+	status := http.StatusOK
+	var reply *protocol.TonieFreshnessCheckResponse
+	defer func() { s.traceFreshness(id, "/v1/freshness-check", trace, status, reply) }()
 	data, err := body(r, 4095)
 	if err != nil {
+		status = http.StatusRequestEntityTooLarge
 		response(w, 413, "", nil)
 		return
 	}
 	request := new(protocol.TonieFreshnessCheckRequest)
 	if err := proto.Unmarshal(data, request); err != nil {
+		status = http.StatusBadRequest
 		response(w, 400, "", nil)
 		return
 	}
-	reply := s.localFreshnessContext(r.Context(), id, snap, request)
+	reply = s.localFreshnessContext(r.Context(), id, snap, request)
 	cloudReply := s.cloudFreshness(r, snap, request, reply)
 	data, err = proto.Marshal(reply)
 	if err != nil {
+		status = http.StatusInternalServerError
 		http.Error(w, "freshness encoding failed", 500)
 		return
 	}
@@ -571,7 +594,13 @@ func (s *Server) localFreshnessContext(ctx context.Context, id string, snap conf
 	for _, info := range request.TonieInfos {
 		ruid := content.RUID(info.GetUid())
 		metadata, err := s.Content.Metadata(snap, ruid)
+		decision := audioSyncDecision{RUID: ruid, Source: audioSyncSource(metadata.String("source")),
+			NoCloud: metadata.Bool("nocloud"), BoxAudioID: info.GetAudioId(), LocalState: "metadata-unavailable", Reasons: []string{}}
+		trace, _ := ctx.Value(audioSyncTraceKey{}).(*audioSyncTrace)
 		if err != nil {
+			if trace != nil {
+				trace.decisions = append(trace.decisions, decision)
+			}
 			continue
 		}
 		marked := metadata.Bool("live") || strings.HasPrefix(metadata.String("source"), "http://") || strings.HasPrefix(metadata.String("source"), "https://")
@@ -585,6 +614,10 @@ func (s *Server) localFreshnessContext(ctx context.Context, id string, snap conf
 			marked = true
 		}
 		file, header, err := s.Content.OpenContext(ctx, snap, s.Settings.Snapshot(""), ruid)
+		decision.LocalState = audioSyncLocalState(err)
+		if marked {
+			decision.Reasons = append(decision.Reasons, "live-stream-or-flex")
+		}
 		if err == nil {
 			file.Close()
 			boxID, boxCustom := normalizedAudioID(info.GetAudioId())
@@ -598,7 +631,15 @@ func (s *Server) localFreshnessContext(ctx context.Context, id string, snap conf
 					updated = true
 				}
 			}
-			marked = marked || updated || localContentPending(metadata, id, header)
+			decision.LocalAudioID = proto.Uint32(header.GetAudioId())
+			decision.Pending = localContentPending(metadata, id, header)
+			if updated {
+				decision.Reasons = append(decision.Reasons, "audio-id")
+			}
+			if decision.Pending {
+				decision.Reasons = append(decision.Reasons, "unacknowledged-local-content")
+			}
+			marked = marked || updated || decision.Pending
 		} else {
 			// A box can already have the audio on its SD card, so no content
 			// download (and hence no local TAF header) is needed for recognition.
@@ -606,6 +647,10 @@ func (s *Server) localFreshnessContext(ctx context.Context, id string, snap conf
 		}
 		if marked {
 			reply.TonieMarked = append(reply.TonieMarked, info.GetUid())
+		}
+		decision.Marked = marked
+		if trace != nil {
+			trace.decisions = append(trace.decisions, decision)
 		}
 	}
 	return reply

@@ -118,6 +118,14 @@ tags receive one initial refresh per box after upgrading. On a Toniebox 1,
 remove the tag, hold one ear for about three seconds, wait for green and present
 the tag again after saving new content.
 
+To diagnose a box that continues playing old SD content, keep the UI open during
+synchronization and export a JSON snapshot from **Settings → RTNL log**. In addition
+to device logs, it records server `audio-sync` events with the selected source,
+the actual file header and reported box audio IDs, file availability, final
+update marks and local transfer completion. Empty or rejected freshness requests
+and the running server version are included. An update mark alone does not mean
+the box downloaded the audio. Credentials and remote source URLs are omitted.
+
 The UI reads `/api/cloud/status`, which reports disabled or unavailable cloud
 access as HTTP 200 status data. The local `/api/time` clock remains independent.
 Raw `/reverse/v1/time` requests still proxy the upstream Tonie cloud and need a

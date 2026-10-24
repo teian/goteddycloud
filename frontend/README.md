@@ -31,6 +31,18 @@ The stream uses the normal bearer/cookie handling and reverse-proxy prefix,
 reconnects after transient failures, and restores last-tag state on reconnection.
 Area access and revocation are enforced by the backend.
 
+The recording includes server `audio-sync` events for claims, freshness decisions
+and local transfers. Decisions show the selected source, actual file and box
+audio IDs, missing/invalid files, pending local content and final response marks.
+Empty/rejected freshness requests and the running server version are included.
+A response mark is distinct from a completed download. Remote URLs and credentials
+are omitted. Diagnostic frames are bounded for large box libraries.
+The console renders at most 100 entries / 64 KiB at once without syntax
+highlighting. Older/newer/latest controls navigate the recording. Incoming
+updates are batched every 100 ms; snapshots still export the complete buffer.
+`node scripts/webui-rtnl-performance-smoke.mjs` checks a full recording in Chromium
+with 4× CPU slowdown, history navigation and complete diagnostic exports.
+
 **Settings → RTNL log** offers decoded, raw and combined views, a box filter,
 pause/resume and JSON/TXT snapshot downloads. Recording continues across routes
 within the current authenticated page session, retaining at most 2,000 entries

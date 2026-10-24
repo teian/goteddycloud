@@ -183,7 +183,12 @@ func (s *Server) v3Chapter(w http.ResponseWriter, r *http.Request, id string, sn
 		reader = chapterReader{prefix: io.NewSectionReader(file, taf.BlockSize, 512), payload: payload}
 		size += 512
 	}
-	if serveRangeFile(w, r, reader, 0, size, "application/octet-stream") && noCloud && runtime.RequestPeer(r.Context()).Box {
-		s.recordLocalContentDownload(r.Context(), snap, id, ruid, localContentFingerprint(header), chapter, len(header.TrackPageNums))
+	complete := serveRangeFile(w, r, reader, 0, size, "application/octet-stream")
+	if runtime.RequestPeer(r.Context()).Box {
+		s.publishAudioSync(id, map[string]any{"phase": "local-chapter-transfer", "route": "/v3/chapter", "ruid": ruid,
+			"localAudioId": header.GetAudioId(), "nocloud": noCloud, "chapter": chapter, "fullDownload": complete})
+		if complete && noCloud {
+			s.recordLocalContentDownload(r.Context(), snap, id, ruid, localContentFingerprint(header), chapter, len(header.TrackPageNums))
+		}
 	}
 }

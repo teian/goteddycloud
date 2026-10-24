@@ -70,17 +70,24 @@ func parseV3Freshness(data []byte) (*protocol.TonieFreshnessCheckRequest, error)
 	return request, err
 }
 func (s *Server) v3Freshness(w http.ResponseWriter, r *http.Request, id string, snap config.Snapshot) {
+	ctx, trace := newAudioSyncTrace(r.Context())
+	r = r.WithContext(ctx)
+	status := http.StatusOK
+	var reply *protocol.TonieFreshnessCheckResponse
+	defer func() { s.traceFreshness(id, "/v3/freshness-check", trace, status, reply) }()
 	data, err := body(r, 4095)
 	if err != nil {
+		status = http.StatusRequestEntityTooLarge
 		response(w, 413, "", nil)
 		return
 	}
 	request, err := parseV3Freshness(data)
 	if err != nil {
+		status = http.StatusBadRequest
 		response(w, 400, "", nil)
 		return
 	}
-	reply := s.localFreshnessContext(r.Context(), id, snap, request)
+	reply = s.localFreshnessContext(r.Context(), id, snap, request)
 	if enabled(snap, "enableV3FreshnessCheck") {
 		cloudContent := map[string]uint32{}
 		allowed := map[uint64]bool{}
