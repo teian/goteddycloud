@@ -99,6 +99,8 @@ title; special audio ID 1 requires a local audio header/hash or a manually
 assigned model. Existing model assignments are preserved.
 Library listings also use a linked tag's assigned model when a file's audio
 edition is missing from the catalog. Conflicting tag assignments remain unresolved.
+The alternative-content badge requires a recognized audio model that differs
+from the figure's assigned model.
 
 With cloud content caching enabled, authenticated claims and RTNL tag
 presentations also backfill missing original audio when the box plays from its

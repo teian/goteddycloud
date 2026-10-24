@@ -248,7 +248,9 @@ func (s *Server) tagInfo(ctx context.Context, snap config.Snapshot, id, uid stri
 			info["downloadTriggerUrl"] = download
 		}
 	}
-	if exists && sourceModel != m.String("tonie_model") && (s.Catalog.ByModel(sourceModel) != nil || s.Catalog.ByModel(m.String("tonie_model")) != nil) {
+	// An unknown audio edition is not evidence of different content. Only a
+	// recognized source model can establish an alternative to the assigned figure.
+	if exists && sourceModel != "" && !strings.EqualFold(sourceModel, m.String("tonie_model")) {
 		info["sourceInfo"] = s.tonieDescription(ctx, s.Catalog.ByModel(sourceModel), sourceModel)
 	}
 	return info, nil

@@ -3,6 +3,7 @@ package app
 
 import (
 	"bytes"
+	"context"
 	"encoding/hex"
 	"encoding/json"
 	"os"
@@ -170,5 +171,72 @@ func TestLibraryCatalogAndFileMetadataTakePrecedenceOverTagLinks(t *testing.T) {
 	}
 	if got := listedLibraryModel(t, s, "V2", ""); got != "EXACT" {
 		t.Fatal("linked model replaced the exact catalog match", got)
+	}
+}
+
+func TestTagAlternativeContentRequiresRecognizedDifferentModel(t *testing.T) {
+	for _, test := range []struct {
+		name, tagModel, audioModel string
+		alternative                bool
+	}{
+		{"unknown audio edition", "11001763", "", false},
+		{"same model", "11001763", "11001763", false},
+		{"different model", "11001763", "OTHER", true},
+		{"same model ignoring case", "other", "OTHER", false},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			s := fixtureApp(t)
+			name := libraryModelFile(t, s)
+			snap := s.Settings.Snapshot("")
+			const ruid = "11000000500304e0"
+			if err := s.Content.Update(snap, ruid, func(m content.Metadata) error {
+				m.Set("source", "lib://"+name)
+				m.Set("tonie_model", test.tagModel)
+				return nil
+			}); err != nil {
+				t.Fatal(err)
+			}
+			if test.audioModel != "" {
+				data, err := os.ReadFile(filepath.Join(snap.String("internal.librarydirfull"), name))
+				if err != nil {
+					t.Fatal(err)
+				}
+				header, err := taf.ReadHeader(bytes.NewReader(data))
+				if err != nil {
+					t.Fatal(err)
+				}
+				var entries []map[string]any
+				if err := json.Unmarshal([]byte(libraryModelCatalog), &entries); err != nil {
+					t.Fatal(err)
+				}
+				for _, entry := range entries {
+					if entry["model"] == test.audioModel {
+						entry["audio_id"] = []uint32{header.GetAudioId()}
+						entry["hash"] = []string{hex.EncodeToString(header.Sha1Hash)}
+					}
+				}
+				catalog, err := json.Marshal(entries)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if err := s.Catalog.ReplaceOfficial(catalog); err != nil {
+					t.Fatal(err)
+				}
+			}
+			info, err := s.tagInfo(context.Background(), snap, "", ruid)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, alternative := info["sourceInfo"]; alternative != test.alternative {
+				t.Fatal("wrong alternative-content indication", info)
+			}
+			if test.alternative && info["sourceInfo"].(map[string]any)["model"] != test.audioModel {
+				t.Fatal("alternative content lost its recognized model", info)
+			}
+			metadata, err := s.Content.Metadata(snap, ruid)
+			if err != nil || metadata.String("tonie_model") != test.tagModel {
+				t.Fatal("content recognition changed the assigned figure", metadata, err)
+			}
+		})
 	}
 }
