@@ -25,6 +25,9 @@ English and German labels are included; other languages fall back to English.
 The authenticated app shares an SSE stream for tag discovery and metadata
 updates. Presenting a tag immediately marks its card with a blue border; unknown
 tags are added without reloading the page or waiting for an audio download.
+When the library selector groups several boxes sharing a content directory,
+placements from every box in that group mark their matching card. Box libraries
+with other content directories remain isolated.
 Tag notifications appear in the existing notification UI. Lists retain their
 filters during background refreshes, and box cards update their last played tag.
 The stream uses the normal bearer/cookie handling and reverse-proxy prefix,

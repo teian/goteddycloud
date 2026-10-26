@@ -2,7 +2,7 @@
 // Run after scripts/frontend.sh build; uses only generated local identities.
 import assert from 'node:assert/strict';
 import { spawn, execFileSync } from 'node:child_process';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, rm } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import tls from 'node:tls';
@@ -36,7 +36,9 @@ try {
     }
     assert(http && box, logs);
     url = 'http://' + http;
-    const id = '001122334455';
+    // Both fixture boxes share a library. The selector represents it with the first
+    // box, while RTNL arrives from the second (the regression case).
+    const id = 'AABBCCDDEEFF';
     const credentials = {
         cert: await readFile(join(fixture, 'certs/client', id, 'teddy-cert.pem')),
         key: await readFile(join(fixture, 'certs/client', id, 'teddy-key.pem')),
@@ -135,8 +137,27 @@ try {
     assert.equal(exported.mappingSchemaVersion, 1);
     assert(/^sha256:[a-f0-9]{64}$/.test(exported.mappingRevision));
     assert(exported.entries.some(entry => entry.raw.type === 'rtnl-raw-log2' && entry.box === id));
+    // Moving the emitting box to another library must stop marking cards in the
+    // original library, even when the same RUID exists in both.
+    await mkdir(join(fixture, 'data/content/separate-live-library'), { recursive: true });
+    const move = await fetch(url + '/api/settings/set/core.contentdir?overlay=' + id, {
+        method: 'POST', body: 'separate-live-library',
+    });
+    assert.equal(move.status, 200);
+    const isolatedReady = page.waitForResponse(response => response.url().endsWith('/api/sse') && response.status() === 200);
+    await page.goto(url + '/web/tonies');
+    await isolatedReady;
+    await page.waitForSelector('[data-ruid="' + first + '"]');
+    await present(first);
+    await pause(500);
+    assert.equal(await page.locator('[data-ruid][data-presented="true"]').count(), 0,
+        'a tag from another library highlighted a card in the selected library');
+    // Switching the actual selector to that library restores its snapshot.
+    await page.locator('#contentDirectorySelect').click();
+    await page.getByTitle('Synthetic Box Two', { exact: true }).click();
+    await page.waitForSelector('[data-ruid="' + first + '"][data-presented="true"]');
     assert.deepEqual(errors, []);
-    console.log('PASS: real TLS RTNL → SSE → new unknown cards, blue border, switching tags, live metadata, notifications, snapshots and heartbeat');
+    console.log('PASS: real TLS RTNL → SSE → new unknown cards, blue border, switching tags, live metadata, notifications, snapshots, heartbeat and shared/isolated libraries');
 } catch (error) {
     if (page) {
         await page.screenshot({ path: resolve('.cache/webui-live-failure.png'), fullPage: true }).catch(() => {});
