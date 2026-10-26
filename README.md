@@ -52,6 +52,19 @@ docker build --target ffmpeg -t goteddycloud:local .
 GOTEDDYCLOUD_IMAGE=goteddycloud:local docker compose up -d
 ```
 
+To build locally and publish the development image, first log in to GHCR with a
+token that has `write:packages`, then run:
+
+```sh
+docker login ghcr.io --username teian
+./publish-dev-image.sh
+```
+
+The script builds the local sources with FFmpeg and the pinned frontend, checks
+container startup and bundled Web UI delivery, and pushes only
+`ghcr.io/teian/goteddycloud:dev` for the host architecture. The frontend revision
+in `frontend/upstream-revision` must already be pushed to its GitHub repository.
+
 A complete custom frontend in `/data/data/www/web` (or the configured
 `core.wwwdir`'s `web` subdirectory) overrides the bundled UI. Its `index.html` and
 assets are served together. Remove that custom build to resume using the image's
