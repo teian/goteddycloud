@@ -38,8 +38,8 @@ jobs:
       - name: Install FFmpeg for audio tests
         timeout-minutes: 5
         run: bash scripts/ci-run.sh ffmpeg-install scripts/ci-install-ffmpeg.sh
-      - name: Verify CI logging retains command failures
-        run: node --test scripts/ci-run.test.mjs
+      - name: Verify CI logging and image publication failure guards
+        run: node --test scripts/ci-run.test.mjs scripts/publish-dev-image.test.mjs
       - name: Validate the GitHub Actions workflow
         run: bash scripts/ci-run.sh workflow-lint go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 .github/workflows/check.yml
       - name: Build the CC3200 browser flashing module

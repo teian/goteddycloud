@@ -52,18 +52,32 @@ docker build --target ffmpeg -t goteddycloud:local .
 GOTEDDYCLOUD_IMAGE=goteddycloud:local docker compose up -d
 ```
 
-To build locally and publish the development image, first log in to GHCR with a
-token that has `write:packages`, then run:
+To build locally and publish the development image, install Docker with Buildx,
+Skopeo, Git and Python 3, then log in to GHCR with a token that has
+`write:packages` and run:
 
 ```sh
 docker login ghcr.io --username teian
 ./publish-dev-image.sh
 ```
 
-The script builds the local sources with FFmpeg and the pinned frontend, checks
-container startup and bundled Web UI delivery, and pushes only
-`ghcr.io/teian/goteddycloud:dev` for the host architecture. The frontend revision
-in `frontend/upstream-revision` must already be pushed to its GitHub repository.
+The script uses the release CI's Dockerfile, FFmpeg target, OCI export and
+platforms (`linux/amd64`, `linux/arm/v7`, `linux/arm64`). It imports the release
+`buildcache` and development `dev-buildcache` from GHCR, retaining unchanged
+compressed layers instead of regenerating the WebUI and dependencies. It writes
+only the development cache; the release cache stays under CI's control.
+
+Before publishing `ghcr.io/teian/goteddycloud:dev`, it checks all architectures,
+runs startup/FFmpeg/WebUI checks on the Docker host's architecture, and verifies
+that a server version change replaces only the server layer. Skopeo publishes
+the inspected OCI archive with all architectures and attestations, preserving
+its layer digests. Clients download only missing layers; a changed frontend,
+catalog or dependency still requires its respective layer.
+
+A persistent `goteddycloud-publish` Buildx builder is created automatically.
+It needs ARM emulation or native workers for the three platforms. Set
+`PUBLISH_BUILDER` to use an existing builder. The frontend revision in
+`frontend/upstream-revision` must already be pushed to its GitHub repository.
 
 A complete custom frontend in `/data/data/www/web` (or the configured
 `core.wwwdir`'s `web` subdirectory) overrides the bundled UI. Its `index.html` and
