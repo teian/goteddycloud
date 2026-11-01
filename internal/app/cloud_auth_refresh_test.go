@@ -65,6 +65,9 @@ func TestBrowserCloudRejectionIsDistinctFromWebAuthentication(t *testing.T) {
 	if reply.Code != 401 || reply.Header().Get("X-TeddyCloud-Error-Origin") != "tonies-cloud" {
 		t.Fatal("cloud rejection confused with web login", reply.Code, reply.Header())
 	}
+	if s.Settings.Snapshot("").Bool("internal.security_mit.incident") || perform(s, "GET", "/api/time", nil, false).Body.String() == securityLockMessage {
+		t.Fatal("cloud rejection triggered deployment security lock")
+	}
 	if len(mock.requests) != 1 || mock.requests[0].Path != "/v2/content/"+ruid || mock.requests[0].Header.Get("Authorization") != "BD "+strings.Repeat("AB", 32) {
 		t.Fatal("selected box download was not forwarded correctly")
 	}

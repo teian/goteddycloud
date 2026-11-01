@@ -4,6 +4,7 @@ package app
 import (
 	"crypto/sha1"
 	"encoding/hex"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"strings"
@@ -53,17 +54,48 @@ func (s *Server) securityCheck(w http.ResponseWriter, r *http.Request) bool {
 	if !snap.Bool("security_mit.hardLock") && snap.Bool("security_mit.httpsOnly") && !https {
 		return false
 	}
-	incident := snap.Bool("security_mit.hardLock") && !snap.Bool("internal.config_changed")
-	for _, key := range []string{"BlacklistDomain", "Crawler", "RobotsTxt"} {
-		field := map[string]string{"BlacklistDomain": "blacklisted_domain_access", "Crawler": "crawler_access", "RobotsTxt": "robots_txt_access"}[key]
-		incident = incident || snap.Bool("security_mit.on"+key) && snap.Uint("internal.security_mit."+field) > 0
+	locked := snap.Bool("security_mit.lockAccess")
+	incident := false
+	for i, trigger := range []struct {
+		setting string
+		field   string
+	}{
+		{"security_mit.hardLock", "hard_lock"},
+		{"security_mit.onBlacklistDomain", "blacklisted_domain_access"},
+		{"security_mit.onCrawler", "crawler_access"},
+		{"security_mit.onRobotsTxt", "robots_txt_access"},
+	} {
+		active := snap.Bool(trigger.setting)
+		if i == 0 {
+			active = active && !snap.Bool("internal.config_changed")
+		} else {
+			active = active && snap.Uint("internal.security_mit."+trigger.field) > 0
+		}
+		if active {
+			incident = true
+			s.reportSecurityIncident(uint32(1)<<i, trigger.field, trigger.setting, locked)
+		}
 	}
 	if incident {
 		_ = s.Settings.SetRuntime("", map[string]string{"internal.security_mit.incident": "true"})
-		if snap.Bool("security_mit.lockAccess") {
+		if locked {
 			response(w, 200, "text/plain", []byte(securityLockMessage))
 			return true
 		}
 	}
 	return false
+}
+
+// Report each cause once per action for this server's lifetime. A warning that
+// later becomes a lock must still be reported, without flooding logs on retries.
+func (s *Server) reportSecurityIncident(bit uint32, reason, setting string, locked bool) {
+	reported, action := &s.securityWarnings, "warning"
+	if locked {
+		reported, action = &s.securityLocks, "locked"
+	}
+	if reported.Or(bit)&bit != 0 {
+		return
+	}
+	// Request paths, headers and query strings can contain private credentials.
+	slog.Warn("TeddyCloud security mitigation triggered", "reason", reason, "trigger_setting", setting, "action", action)
 }

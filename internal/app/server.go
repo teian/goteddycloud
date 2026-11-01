@@ -51,6 +51,8 @@ type Server struct {
 	cloudRequests     atomic.Uint64
 	cloudBlocked      atomic.Uint64
 	cloudFailed       atomic.Uint64
+	securityWarnings  atomic.Uint32
+	securityLocks     atomic.Uint32
 	imagesMu          sync.Mutex
 	images            map[string]*imageEntry
 	imageSlots        chan struct{}

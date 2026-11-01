@@ -171,6 +171,21 @@ valid identity for cloud access, or disable `cloud.enabled` in Settings for offl
 operation. Web HTTPS certificates serve a separate purpose. See
 [upstream cloud access and legacy hostname verification](docs/upstream-cloud.md).
 
+If you see “TeddyCloud has been locked to mitigate security risks”, look for
+`TeddyCloud security mitigation triggered` in the server logs. Its `reason` and
+`trigger_setting` identify crawler detection, a blacklisted hostname, access to
+`/robots.txt`, or `security_mit.hardLock`. Each cause is logged once per action
+(warning or lock) until restart. Older builds did not log these causes.
+Upstream `401 Unauthorized` responses do not trigger this lock; a present tag
+password only confirms that credentials were sent, not that Tonies accepted them.
+
+For a detected access incident, stop the triggering requests and restart with
+`docker compose restart goteddycloud` to clear the transient incident. A persistent
+`security_mit.hardLock=true` must be changed to `false` in `/data/config/config.ini`
+while the container is stopped. If an intentional monitor fetches `/robots.txt`, change
+its health check to `/api/time`; fetching robots.txt again will trigger another
+incident. These steps do not resolve upstream tag authentication failures.
+
 The box API and RTNL require [explicitly imported box client certificates](docs/box-certificate-auth.md). Unknown certificates are rejected during TLS, including certificates which copy a known box name or issuer. Existing deployments must import the actual box identities before upgrading to this policy.
 
 ## Native build and usage
